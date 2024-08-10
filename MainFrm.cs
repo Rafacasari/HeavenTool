@@ -11,6 +11,7 @@ using HeavenTool.Forms;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using HeavenTool.DataTable;
 
 namespace HeavenTool
 {
@@ -58,6 +59,16 @@ namespace HeavenTool
             KnownHashValueManager.Load();
 
             DrawingControl.SetDoubleBuffered(mainDataGridView);
+
+            mainDataGridView.RowTemplate = new IndexRow();
+            mainDataGridView.Rows.CollectionChanged += Rows_CollectionChanged;
+        }
+
+        private void Rows_CollectionChanged(object sender, System.ComponentModel.CollectionChangeEventArgs e)
+        {
+            if (e.Action == System.ComponentModel.CollectionChangeAction.Add && e.Element is IndexRow indexRow)
+                indexRow.OriginalIndex = indexRow.Index;
+            
         }
 
         private void ReloadInfo()
@@ -203,6 +214,7 @@ namespace HeavenTool
         bool ignoreNextChangeEvent = false;
         private void mainDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
+           
             if (ignoreNextChangeEvent)
             {
                 ignoreNextChangeEvent = false;
@@ -211,10 +223,12 @@ namespace HeavenTool
 
             if (LoadedFile == null) return;
 
-            var field = LoadedFile.Fields[e.ColumnIndex];
-            var oldFieldValue = LoadedFile.Entries[e.RowIndex].Fields[field.HashedName];
+            if (!(mainDataGridView.Rows[e.RowIndex] is IndexRow indexRow)) return;
 
-            var newValue = mainDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+            var field = LoadedFile.Fields[e.ColumnIndex];
+            var oldFieldValue = LoadedFile.Entries[indexRow.OriginalIndex].Fields[field.HashedName];
+
+            var newValue = indexRow.Cells[e.ColumnIndex].Value;
 
             object formattedValue = null;
             bool invalidValue = false;
@@ -309,21 +323,18 @@ namespace HeavenTool
                 else
                     MessageBox.Show(specificError, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 ignoreNextChangeEvent = true;
-                mainDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = oldFieldValue;
+                indexRow.Cells[e.ColumnIndex].Value = oldFieldValue;
 
             }
             else
             {
                 // Assign the formatted value to the loaded bcsv file
-                LoadedFile.Entries[e.RowIndex].Fields[field.HashedName] = formattedValue;
+                LoadedFile.Entries[indexRow.OriginalIndex].Fields[field.HashedName] = formattedValue;
             }
         }
 
         private void mainDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex >= LoadedFile.Entries.Count)
-                return;
-
             try
             {
                 var field = LoadedFile.Fields[e.ColumnIndex];
@@ -455,11 +466,11 @@ namespace HeavenTool
 
         private void duplicateRowToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (DataGridViewRow selectedRow in mainDataGridView.SelectedRows)
+            foreach (IndexRow selectedRow in mainDataGridView.SelectedRows)
             {
-                if (selectedRow.Index >= LoadedFile.Entries.Count) continue;
+                if (selectedRow.OriginalIndex >= LoadedFile.Entries.Count) continue;
 
-                var selectedEntry = LoadedFile.Entries[selectedRow.Index];
+                var selectedEntry = LoadedFile.Entries[selectedRow.OriginalIndex];
 
                 var newEntry = new DataEntry()
                 {
@@ -501,20 +512,6 @@ namespace HeavenTool
             }
 
             ReloadInfo();
-            //var entriesToRemove = LoadedFile.Entries.Where(x =>
-            //{
-            //    var index = LoadedFile.Entries.IndexOf(x);
-
-            //    return selectedRows.Any(y => y.Index == index);
-            //});
-            //MessageBox.Show(entriesToRemove.Count().ToString());
-            //// Remove rows
-            //foreach (DataGridViewRow selectedRow in mainDataGridView.SelectedRows)
-            //    mainDataGridView.Rows.Remove(selectedRow);
-
-            //// Remove from file
-            //foreach(var element in entriesToRemove)
-            //    LoadedFile.Entries.Remove(element);
         }
 
         private string lastSelectedHash = null;
@@ -818,6 +815,6 @@ namespace HeavenTool
                     Process.Start(outputDirectory);
                 }
             }
-        }
+        }     
     }
 }

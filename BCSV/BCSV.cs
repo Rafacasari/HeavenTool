@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Windows.Forms;
 
 namespace HeavenTool.BCSV
 {
@@ -58,6 +59,7 @@ namespace HeavenTool.BCSV
                 for (int fieldId = 0; fieldId < Fields.Length; fieldId++)
                 {
                     var currentField = Fields[fieldId];
+                    //MessageBox.Show($"Field: {currentField.GetTranslatedNameOrHash()} | Offset: {currentField.Offset}");
                     currentField.Size = EntrySize - currentField.Offset;
 
                     if (fieldId < Fields.Length - 1)
@@ -181,20 +183,20 @@ namespace HeavenTool.BCSV
 
             using (var writer = new BinaryWriter(fileStream)) {
 
-                writer.Write(Entries.Count); //4
-                writer.Write(EntrySize);//8
-                writer.Write((ushort) Fields.Length); // 12
+                writer.Write(Entries.Count); 
+                writer.Write(EntrySize);    
+                writer.Write((ushort) Fields.Length); 
 
-                writer.Write(version); // 12
-                writer.Write(Encoding.UTF8.GetBytes(fileType)); // 18
-                writer.Write(unk1); // 22
-                writer.Write(unk2); // 26
-                writer.Write(unk3); //30
+                writer.Write(version); 
+                writer.Write(Encoding.UTF8.GetBytes(fileType));
+                writer.Write(unk1); 
+                writer.Write(unk2); 
+                writer.Write(unk3); 
 
                 foreach (var field in Fields) 
                 {
                     writer.Write(field.Hash);
-                    writer.Write(field.Offset);  
+                    writer.Write(field.Offset);
                 }
 
                 foreach (var entry in Entries) {
@@ -238,10 +240,17 @@ namespace HeavenTool.BCSV
                             case DataType.String:
                                 {
                                     string stringValue = entryValue.ToString();
-                                    //var byteBuffer = new byte[field.Size];
 
+                                    // Make sure our array will override any previous data
+                                    var byteBuffer = new byte[field.Size];
+
+                                    // Get bytes from our own string
                                     var bytes = Encoding.UTF8.GetBytes(stringValue);
-                                    writer.Write(bytes);
+
+                                    // Copy to the buffer
+                                    Array.Copy(bytes, byteBuffer, bytes.Length);
+
+                                    writer.Write(byteBuffer);
                                 }
                                 break;
                         }

@@ -63,8 +63,8 @@
     <Compile Include="BCSV\DataType.cs" />
     <Compile Include="BCSV\Field.cs" />
     <Compile Include="BinaryFileReader.cs" />
+    <Compile Include="DataTable\IndexRow.cs" />
     <Compile Include="DrawingControl.cs" />
-    <Compile Include="FileTypes\Yaz0.cs" />
     <Compile Include="Forms\BruteForce.cs">
       <SubType>Form</SubType>
     </Compile>
