@@ -106,6 +106,13 @@ namespace HeavenTool.BCSV
                             break;
                     }
 
+                    var translation = currentField.GetTranslatedNameOrNull();
+                    if (translation != null)
+                    {
+                        if (translation.EndsWith(" u8") && currentField.Size > 1)
+                            type = DataType.MultipleU8;
+                    }
+
                     currentField.DataType = type;
                 }
 
@@ -133,6 +140,12 @@ namespace HeavenTool.BCSV
                         // Read values based on Header type
                         switch (currentField.DataType)
                         {
+                            case DataType.MultipleU8:
+                                {
+                                   value = reader.ReadBytes((int) currentField.Size);
+                                }
+                                break;
+
                             case DataType.S8:
                                 value = reader.ReadSByte();
                                 break;
@@ -211,6 +224,10 @@ namespace HeavenTool.BCSV
                         var entryValue = entry.Fields[field.HashedName];
                         switch (field.DataType)
                         {
+                            case DataType.MultipleU8:
+                                writer.Write((byte[]) entryValue);
+                                break;
+
                             case DataType.S8:
                                 writer.Write((sbyte)entryValue);
                                 break;
@@ -239,18 +256,11 @@ namespace HeavenTool.BCSV
 
                             case DataType.String:
                                 {
-                                    string stringValue = entryValue.ToString();
+                                    string stringValue = entryValue.ToString().Trim();
 
-                                    // Make sure our array will override any previous data
-                                    var byteBuffer = new byte[field.Size];
-
-                                    // Get bytes from our own string
                                     var bytes = Encoding.UTF8.GetBytes(stringValue);
-
-                                    // Copy to the buffer
-                                    Array.Copy(bytes, byteBuffer, bytes.Length);
-
-                                    writer.Write(byteBuffer);
+                                    Array.Resize(ref bytes, (int) field.Size);
+                                    writer.Write(bytes);
                                 }
                                 break;
                         }

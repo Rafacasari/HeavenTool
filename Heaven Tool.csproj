@@ -77,6 +77,12 @@
     <Compile Include="Forms\DirectorySearch.Designer.cs">
       <DependentUpon>DirectorySearch.cs</DependentUpon>
     </Compile>
+    <Compile Include="HeavenMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HeavenMain.Designer.cs">
+      <DependentUpon>HeavenMain.cs</DependentUpon>
+    </Compile>
     <Compile Include="KnownHashValueManager.cs" />
     <Compile Include="MainFrm.cs">
       <SubType>Form</SubType>
@@ -91,6 +97,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\DirectorySearch.resx">
       <DependentUpon>DirectorySearch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HeavenMain.resx">
+      <DependentUpon>HeavenMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFrm.resx">
       <DependentUpon>MainFrm.cs</DependentUpon>

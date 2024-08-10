@@ -279,6 +279,25 @@ namespace HeavenTool
                         break;
                     }
 
+                case DataType.MultipleU8:
+                    {
+                        var failedToReadBytes = false;
+                        var bytes = newValue.ToString().Split(' ').Select(x =>
+                        {
+                            if (byte.TryParse(x, out var value))
+                                return value;
+                            else failedToReadBytes = true;
+
+                            return (byte)0;
+                        }).ToArray();
+                      
+                        if (!failedToReadBytes)
+                            formattedValue = bytes;
+                        else invalidValue = true;
+
+                        break;
+                    }
+
                 case DataType.U8:
                     {
                         if (byte.TryParse(newValue.ToString(), out var value))
@@ -349,6 +368,23 @@ namespace HeavenTool
                         e.Value = fieldValue.ToString();
                         
                         break;
+
+                    case DataType.MultipleU8:
+                        {
+                            if (fieldValue is byte[] bytesValue)
+                            {
+                                if (bytesValue.Length == 0)
+                                    e.Value = "";
+                                else
+                                {
+                                    e.Value = string.Join(" ", bytesValue);
+                                }
+                            }
+                            else
+                                e.Value = fieldValue != null ? fieldValue.ToString() : "";
+
+                            break;
+                        }
 
                     case DataType.HashedCsc32:
                         {

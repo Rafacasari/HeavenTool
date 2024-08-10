@@ -9,6 +9,7 @@
         UInt32,
         Float32,
         HashedCsc32,
-        String
+        String,
+        MultipleU8
     }
 }
