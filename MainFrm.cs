@@ -51,7 +51,7 @@ namespace HeavenTool
         public MainFrm()
         {
             InitializeComponent();
-            originalName = Text;
+            
 
             ReloadInfo();
 
@@ -62,6 +62,10 @@ namespace HeavenTool
 
             mainDataGridView.RowTemplate = new IndexRow();
             mainDataGridView.Rows.CollectionChanged += Rows_CollectionChanged;
+
+            versionNumberLabel.Text = ProductVersion;
+            Text = $"ACNH Heaven Tool | v{ProductVersion} | BCSV Editor";
+            originalName = Text;
         }
 
         private void Rows_CollectionChanged(object sender, System.ComponentModel.CollectionChangeEventArgs e)
@@ -175,6 +179,7 @@ namespace HeavenTool
                 }
 
                 mainDataGridView.Columns[columnId].ToolTipText = toolTip;
+                //mainDataGridView.Columns[columnId].ValueType = fieldHeader.GetValueType();
             }
 
             if (LoadedFile.Entries != null)
@@ -257,7 +262,6 @@ namespace HeavenTool
                         }
                         else
                         {
-
                             byte[] bytes = Encoding.UTF8.GetBytes(newValue.ToString());
                             uint hash = Crc32Algorithm.Compute(bytes);
 
@@ -290,7 +294,7 @@ namespace HeavenTool
 
                             return (byte)0;
                         }).ToArray();
-                      
+
                         if (!failedToReadBytes)
                             formattedValue = bytes;
                         else invalidValue = true;
@@ -331,6 +335,14 @@ namespace HeavenTool
                         else invalidValue = true;
                         break;
                     }
+
+                case DataType.Int32:
+                    {
+                        if (int.TryParse(newValue.ToString(), out var value))
+                            formattedValue = value;
+                        else invalidValue = true;
+                    }
+                    break;
             }
 
             // value is null or invalid, rollback to previous value and message an error
@@ -349,6 +361,9 @@ namespace HeavenTool
             {
                 // Assign the formatted value to the loaded bcsv file
                 LoadedFile.Entries[indexRow.OriginalIndex].Fields[field.HashedName] = formattedValue;
+
+                // We have to set this again otherwise types will mismatch eventually (cause the field is read as a string while un-edited values are numbers)
+                indexRow.Cells[e.ColumnIndex].Value = formattedValue;
             }
         }
 
@@ -357,38 +372,33 @@ namespace HeavenTool
             try
             {
                 var field = LoadedFile.Fields[e.ColumnIndex];
-                var fieldValue = e.Value;
-
-                e.FormattingApplied = true;
+                var originalValue = e.Value;
+                //e.FormattingApplied = true;
 
                 switch (field.DataType)
                 {
-                    default:
                     case DataType.String:
-                        e.Value = fieldValue.ToString();
-                        
+                        e.Value = originalValue.ToString();
                         break;
 
                     case DataType.MultipleU8:
                         {
-                            if (fieldValue is byte[] bytesValue)
+                            if (originalValue is byte[] bytesValue)
                             {
                                 if (bytesValue.Length == 0)
                                     e.Value = "";
                                 else
-                                {
                                     e.Value = string.Join(" ", bytesValue);
-                                }
                             }
                             else
-                                e.Value = fieldValue != null ? fieldValue.ToString() : "";
+                                e.Value = originalValue != null ? originalValue.ToString() : "";
 
                             break;
                         }
 
                     case DataType.HashedCsc32:
                         {
-                            if (fieldValue is uint hashValue)
+                            if (originalValue is uint hashValue)
                             {
                                 if (hashValue == 0)
                                     e.Value = "";
@@ -401,12 +411,15 @@ namespace HeavenTool
                                 }
                             }
                             else
-                                e.Value = fieldValue != null ? fieldValue.ToString() : "";
+                                e.Value = originalValue != null ? originalValue.ToString() : "";
 
                             break;
                         }
 
                 }
+
+                if (e.Value != originalValue)
+                    e.FormattingApplied = true;
             }
             catch (Exception ex)
             {
@@ -445,7 +458,7 @@ namespace HeavenTool
 
                 LoadedFile.Entries.Add(newEntry);
 
-                mainDataGridView.Rows.Add(newEntry.Fields.Values.ToArray());
+               mainDataGridView.Rows.Add(newEntry.Fields.Values.ToArray());
             }
             else
             {
@@ -523,6 +536,7 @@ namespace HeavenTool
                 var newEntryRow = mainDataGridView.Rows.Add(newEntry.Fields.Values.ToArray());
                 mainDataGridView.Rows[newEntryRow].Selected = true;
                 mainDataGridView.FirstDisplayedScrollingRowIndex = newEntryRow;
+
 
             }
 
@@ -802,16 +816,14 @@ namespace HeavenTool
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                var test1 = LoadedFile.Fields.First(x => x.HashedName == lastSelectedHash);
-                
-                var test =new List<string>();
+                var exportedValues =new List<string>();
                 foreach (var row in LoadedFile.Entries)
                 {
                     var cell = row.Fields[lastSelectedHash];
-                    test.Add(cell.ToString());
+                    exportedValues.Add(cell.ToString());
                 }
 
-                File.WriteAllLines(saveFileDialog.FileName, test);
+                File.WriteAllLines(saveFileDialog.FileName, exportedValues);
             }
         }
 
@@ -851,6 +863,15 @@ namespace HeavenTool
                     Process.Start(outputDirectory);
                 }
             }
-        }     
+        }
+
+        private void mainDataGridView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        {
+            //var value1 = e.CellValue1.ToString();
+            //var value2 = e.CellValue2.ToString();
+
+            //e.SortResult = value1.CompareTo(value2);
+            //e.Handled = true;
+        }
     }
 }

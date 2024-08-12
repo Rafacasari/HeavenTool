@@ -141,9 +141,7 @@ namespace HeavenTool.BCSV
                         switch (currentField.DataType)
                         {
                             case DataType.MultipleU8:
-                                {
-                                   value = reader.ReadBytes((int) currentField.Size);
-                                }
+                                value = reader.ReadBytes((int) currentField.Size);
                                 break;
 
                             case DataType.S8:

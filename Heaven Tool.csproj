@@ -39,6 +39,15 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\leaf.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Crc32.NET, Version=1.0.0.0, Culture=neutral, PublicKeyToken=dc0b95cf99bf4e99, processorArchitecture=MSIL">
       <HintPath>..\ACNHModCompanion\packages\Crc32.NET.1.2.0\lib\net20\Crc32.NET.dll</HintPath>
@@ -65,6 +74,8 @@
     <Compile Include="BinaryFileReader.cs" />
     <Compile Include="DataTable\IndexRow.cs" />
     <Compile Include="DrawingControl.cs" />
+    <Compile Include="Export\ExportedLine.cs" />
+    <Compile Include="Export\ImportMode.cs" />
     <Compile Include="Forms\BruteForce.cs">
       <SubType>Form</SubType>
     </Compile>

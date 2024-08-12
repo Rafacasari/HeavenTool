@@ -57,6 +57,7 @@ namespace HeavenTool
             this.searchOnFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStripMenu = new System.Windows.Forms.StatusStrip();
             this.infoLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.versionNumberLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.mainDataGridView = new System.Windows.Forms.DataGridView();
             this.openBCSVFile = new System.Windows.Forms.OpenFileDialog();
             this.columnHeaderContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -256,7 +257,8 @@ namespace HeavenTool
             // statusStripMenu
             // 
             this.statusStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.infoLabel});
+            this.infoLabel,
+            this.versionNumberLabel});
             this.statusStripMenu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.statusStripMenu.Location = new System.Drawing.Point(0, 313);
             this.statusStripMenu.Name = "statusStripMenu";
@@ -270,6 +272,13 @@ namespace HeavenTool
             this.infoLabel.Name = "infoLabel";
             this.infoLabel.Size = new System.Drawing.Size(28, 17);
             this.infoLabel.Text = "Info";
+            // 
+            // versionNumberLabel
+            // 
+            this.versionNumberLabel.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.versionNumberLabel.Name = "versionNumberLabel";
+            this.versionNumberLabel.Size = new System.Drawing.Size(31, 17);
+            this.versionNumberLabel.Text = "1.0.0";
             // 
             // mainDataGridView
             // 
@@ -376,7 +385,7 @@ namespace HeavenTool
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.topMenuStrip;
             this.Name = "MainFrm";
-            this.Text = "ACNH Heaven Tool | BCSV Editor";
+            this.Text = "ACNH Heaven Tool | v1.0.0 | BCSV Editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainFrm_FormClosing);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainFrm_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.MainFrm_DragEnter);
@@ -423,6 +432,7 @@ namespace HeavenTool
         private ContextMenuStrip validHeaderContextMenu;
         private ToolStripMenuItem exportValuesAstxtFileToolStripMenuItem;
         private ToolStripMenuItem exportLabelFieldsToolStripMenuItem;
+        private ToolStripStatusLabel versionNumberLabel;
     }
 }
 
