@@ -6,9 +6,8 @@ namespace HeavenTool.DataTable
     {
         public int OriginalIndex;
 
-        public IndexRow()
+        public IndexRow(): base()
         {
         }
-   
     }
 }

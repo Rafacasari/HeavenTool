@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace HeavenTool
@@ -15,6 +8,15 @@ namespace HeavenTool
         public HeavenMain()
         {
             InitializeComponent();
+        }
+
+        // Forms
+        public static MainFrm bcsvEditor = new MainFrm();
+
+        private void bcsvEditorButton_Click(object sender, EventArgs e)
+        {
+            bcsvEditor.Show();
+            bcsvEditor.BringToFront();
         }
     }
 }

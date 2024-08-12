@@ -42,6 +42,7 @@ namespace HeavenTool
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.exportToCSVFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.unloadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newEntryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,7 +51,6 @@ namespace HeavenTool
             this.devToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.associatebcsvWithThisProgramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportValidHashesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportToCSVFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportLabelFieldsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bruteForceMissingHashesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -95,6 +95,7 @@ namespace HeavenTool
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
             this.toolStripSeparator2,
+            this.exportToCSVFileToolStripMenuItem,
             this.unloadFileToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
@@ -118,6 +119,7 @@ namespace HeavenTool
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
             this.saveToolStripMenuItem.Text = "&Save";
+            this.saveToolStripMenuItem.Visible = false;
             // 
             // saveAsToolStripMenuItem
             // 
@@ -134,6 +136,15 @@ namespace HeavenTool
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(189, 6);
+            // 
+            // exportToCSVFileToolStripMenuItem
+            // 
+            this.exportToCSVFileToolStripMenuItem.Image = global::HeavenTool.Properties.Resources.export_csv;
+            this.exportToCSVFileToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.exportToCSVFileToolStripMenuItem.Name = "exportToCSVFileToolStripMenuItem";
+            this.exportToCSVFileToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
+            this.exportToCSVFileToolStripMenuItem.Text = "Export as .CSV";
+            this.exportToCSVFileToolStripMenuItem.Click += new System.EventHandler(this.exportToCSVFileToolStripMenuItem_Click);
             // 
             // unloadFileToolStripMenuItem
             // 
@@ -190,7 +201,6 @@ namespace HeavenTool
             this.devToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.associatebcsvWithThisProgramToolStripMenuItem,
             this.exportValidHashesToolStripMenuItem,
-            this.exportToCSVFileToolStripMenuItem,
             this.exportLabelFieldsToolStripMenuItem});
             this.devToolStripMenuItem.Name = "devToolStripMenuItem";
             this.devToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
@@ -210,13 +220,6 @@ namespace HeavenTool
             this.exportValidHashesToolStripMenuItem.Text = "Export only used hashes of selected folder";
             this.exportValidHashesToolStripMenuItem.Visible = false;
             this.exportValidHashesToolStripMenuItem.Click += new System.EventHandler(this.exportValidHashesToolStripMenuItem_Click);
-            // 
-            // exportToCSVFileToolStripMenuItem
-            // 
-            this.exportToCSVFileToolStripMenuItem.Name = "exportToCSVFileToolStripMenuItem";
-            this.exportToCSVFileToolStripMenuItem.Size = new System.Drawing.Size(295, 22);
-            this.exportToCSVFileToolStripMenuItem.Text = "Export to .CSV file";
-            this.exportToCSVFileToolStripMenuItem.Click += new System.EventHandler(this.exportToCSVFileToolStripMenuItem_Click);
             // 
             // exportLabelFieldsToolStripMenuItem
             // 
@@ -428,11 +431,11 @@ namespace HeavenTool
         private ToolStripMenuItem stringToolStripMenuItem;
         private ToolStripMenuItem associatebcsvWithThisProgramToolStripMenuItem;
         private ToolStripMenuItem deleteRowsToolStripMenuItem;
-        private ToolStripMenuItem exportToCSVFileToolStripMenuItem;
         private ContextMenuStrip validHeaderContextMenu;
         private ToolStripMenuItem exportValuesAstxtFileToolStripMenuItem;
         private ToolStripMenuItem exportLabelFieldsToolStripMenuItem;
         private ToolStripStatusLabel versionNumberLabel;
+        private ToolStripMenuItem exportToCSVFileToolStripMenuItem;
     }
 }
 

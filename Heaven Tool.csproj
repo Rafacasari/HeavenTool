@@ -140,9 +140,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\open_file.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\leaf.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +171,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\remove.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\open_file.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export-csv.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

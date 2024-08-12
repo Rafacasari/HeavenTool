@@ -70,6 +70,7 @@ namespace HeavenTool
 
         private void Rows_CollectionChanged(object sender, System.ComponentModel.CollectionChangeEventArgs e)
         {
+            // We need this cause DataGrid changes the RowIndex when user use the OrderBy feature (bruh)
             if (e.Action == System.ComponentModel.CollectionChangeAction.Add && e.Element is IndexRow indexRow)
                 indexRow.OriginalIndex = indexRow.Index;
             
@@ -102,7 +103,7 @@ namespace HeavenTool
             statusStripMenu.Visible = true;
             editToolStripMenuItem.Enabled = true;
             saveAsToolStripMenuItem.Enabled = true;
-            // TODO: Maybe implement save
+            // TODO: Maybe implement save (beside save as) idk, isn't really a reccomended thing, is always good to have a backup
             saveToolStripMenuItem.Enabled = false;
             unloadFileToolStripMenuItem.Enabled = true;
         }
@@ -545,20 +546,20 @@ namespace HeavenTool
 
         private void deleteRowsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedRows = new DataGridViewRow[mainDataGridView.SelectedRows.Count];
-            mainDataGridView.SelectedRows.CopyTo(selectedRows, 0);
-
-            var text = selectedRows.Length > 1 ? $"these {selectedRows.Length} entries" : "this entry";
+            var count = mainDataGridView.SelectedRows.Count;
+            var text = count > 1 ? $"these {count} entries" : "this entry";
             var result = MessageBox.Show($"Do you really want to delete {text}?\nThis action can't be un-done!", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
-                var list = selectedRows.Select(x => x.Index).OrderByDescending(x => x);
-
-                foreach (var index in list)
+                var originalIndexes = new List<int>();
+                foreach (IndexRow item in mainDataGridView.SelectedRows)
                 {
-                    mainDataGridView.Rows.RemoveAt(index);
-                    LoadedFile.Entries.RemoveAt(index);
+                    originalIndexes.Add(item.OriginalIndex);
+                    mainDataGridView.Rows.Remove(item);
                 }
+
+                foreach (var index in originalIndexes.OrderByDescending(x => x))
+                    LoadedFile.Entries.RemoveAt(index);
             }
 
             ReloadInfo();
@@ -719,8 +720,6 @@ namespace HeavenTool
 
         private void exportValidHashesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-
             FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
 
             var result = folderBrowserDialog.ShowDialog();
@@ -768,7 +767,6 @@ namespace HeavenTool
 
                 Process.Start(dir);
             }
-
         }
 
         private void exportToCSVFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -863,15 +861,6 @@ namespace HeavenTool
                     Process.Start(outputDirectory);
                 }
             }
-        }
-
-        private void mainDataGridView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
-        {
-            //var value1 = e.CellValue1.ToString();
-            //var value2 = e.CellValue2.ToString();
-
-            //e.SortResult = value1.CompareTo(value2);
-            //e.Handled = true;
-        }
+        }  
     }
 }
