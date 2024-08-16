@@ -20,7 +20,7 @@ namespace HeavenTool
 
         public BinaryFileReader(Stream stream, bool leaveOpen = false) : base(stream, Encoding.ASCII, leaveOpen)
         {
-            this.Position = 0;
+            Position = 0;
         }
 
         public static byte[] TrimEnd(byte[] array)
@@ -38,11 +38,6 @@ namespace HeavenTool
             
             return encoding.GetString(bytes);
         }
-
-        //public string ReadString(int length, Encoding encoding)
-        //{
-        //    return encoding.GetString(ReadBytes(length));
-        //}
 
         public void SeekBegin(uint Offset) { BaseStream.Seek(Offset, SeekOrigin.Begin); }
         public void SeekBegin(long Offset) { BaseStream.Seek(Offset, SeekOrigin.Begin); }

@@ -33,7 +33,6 @@ namespace HeavenTool
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainFrm));
             this.topMenuStrip = new System.Windows.Forms.MenuStrip();
@@ -45,9 +44,11 @@ namespace HeavenTool
             this.exportToCSVFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.unloadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newEntryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.duplicateRowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteRowsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.compareRowsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.devToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.associatebcsvWithThisProgramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportValidHashesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,6 +68,9 @@ namespace HeavenTool
             this.stringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.validHeaderContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.exportValuesAstxtFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportSelectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importFromFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.topMenuStrip.SuspendLayout();
             this.statusStripMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainDataGridView)).BeginInit();
@@ -95,6 +99,9 @@ namespace HeavenTool
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
             this.toolStripSeparator2,
+            this.importFromFileToolStripMenuItem,
+            this.exportSelectionToolStripMenuItem,
+            this.toolStripSeparator1,
             this.exportToCSVFileToolStripMenuItem,
             this.unloadFileToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -158,13 +165,26 @@ namespace HeavenTool
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.searchToolStripMenuItem,
             this.newEntryToolStripMenuItem,
             this.duplicateRowToolStripMenuItem,
-            this.deleteRowsToolStripMenuItem});
+            this.deleteRowsToolStripMenuItem,
+            this.compareRowsToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.editToolStripMenuItem.Text = "Edit";
             this.editToolStripMenuItem.DropDownOpening += new System.EventHandler(this.editToolStripMenuItem_DropDownOpening);
+            // 
+            // searchToolStripMenuItem
+            // 
+            this.searchToolStripMenuItem.Image = global::HeavenTool.Properties.Resources.search;
+            this.searchToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.searchToolStripMenuItem.Name = "searchToolStripMenuItem";
+            this.searchToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
+            this.searchToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
+            this.searchToolStripMenuItem.Text = "Search";
+            this.searchToolStripMenuItem.ToolTipText = "Search for a line on this file";
+            this.searchToolStripMenuItem.Click += new System.EventHandler(this.searchToolStripMenuItem_Click);
             // 
             // newEntryToolStripMenuItem
             // 
@@ -174,6 +194,7 @@ namespace HeavenTool
             this.newEntryToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
             this.newEntryToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
             this.newEntryToolStripMenuItem.Text = "New Entry";
+            this.newEntryToolStripMenuItem.ToolTipText = "Add a new entry into this file";
             this.newEntryToolStripMenuItem.Click += new System.EventHandler(this.newEntryToolStripMenuItem_Click);
             // 
             // duplicateRowToolStripMenuItem
@@ -184,6 +205,7 @@ namespace HeavenTool
             this.duplicateRowToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
             this.duplicateRowToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
             this.duplicateRowToolStripMenuItem.Text = "Duplicate Row(s)";
+            this.duplicateRowToolStripMenuItem.ToolTipText = "Duplicate the selected row(s)";
             this.duplicateRowToolStripMenuItem.Click += new System.EventHandler(this.duplicateRowToolStripMenuItem_Click);
             // 
             // deleteRowsToolStripMenuItem
@@ -194,7 +216,19 @@ namespace HeavenTool
             this.deleteRowsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
             this.deleteRowsToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
             this.deleteRowsToolStripMenuItem.Text = "Delete Row(s)";
+            this.deleteRowsToolStripMenuItem.ToolTipText = "Delete the selected row(s)";
             this.deleteRowsToolStripMenuItem.Click += new System.EventHandler(this.deleteRowsToolStripMenuItem_Click);
+            // 
+            // compareRowsToolStripMenuItem
+            // 
+            this.compareRowsToolStripMenuItem.Enabled = false;
+            this.compareRowsToolStripMenuItem.Image = global::HeavenTool.Properties.Resources.compare;
+            this.compareRowsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.compareRowsToolStripMenuItem.Name = "compareRowsToolStripMenuItem";
+            this.compareRowsToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
+            this.compareRowsToolStripMenuItem.Text = "Compare Rows";
+            this.compareRowsToolStripMenuItem.ToolTipText = "Compare selected rows in a new window (read-only)";
+            this.compareRowsToolStripMenuItem.Click += new System.EventHandler(this.compareRowsToolStripMenuItem_Click);
             // 
             // devToolStripMenuItem
             // 
@@ -287,24 +321,19 @@ namespace HeavenTool
             // 
             this.mainDataGridView.AllowUserToAddRows = false;
             this.mainDataGridView.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.LightGray;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            this.mainDataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.LightGray;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            this.mainDataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle2;
             this.mainDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.mainDataGridView.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.mainDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            this.mainDataGridView.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+            this.mainDataGridView.ColumnHeadersHeight = 25;
             this.mainDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainDataGridView.EnableHeadersVisualStyles = false;
             this.mainDataGridView.Location = new System.Drawing.Point(0, 24);
             this.mainDataGridView.Name = "mainDataGridView";
+            this.mainDataGridView.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             this.mainDataGridView.RowHeadersWidth = 25;
             this.mainDataGridView.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.mainDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -314,11 +343,11 @@ namespace HeavenTool
             this.mainDataGridView.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.mainDataGridView_CellFormatting);
             this.mainDataGridView.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.mainDataGridView_CellValueChanged);
             this.mainDataGridView.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.mainDataGridView_ColumnHeaderMouseClick);
+            this.mainDataGridView.SelectionChanged += new System.EventHandler(this.mainDataGridView_SelectionChanged);
             // 
             // openBCSVFile
             // 
             this.openBCSVFile.DefaultExt = "*.bcsv";
-            this.openBCSVFile.FileName = "*.bcsv";
             this.openBCSVFile.Filter = "BCSV|*.bcsv";
             this.openBCSVFile.Title = "Select a BCSV file...";
             this.openBCSVFile.FileOk += new System.ComponentModel.CancelEventHandler(this.openBCSVFile_FileOk);
@@ -374,6 +403,31 @@ namespace HeavenTool
             this.exportValuesAstxtFileToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.exportValuesAstxtFileToolStripMenuItem.Text = "Export values as .txt file";
             this.exportValuesAstxtFileToolStripMenuItem.Click += new System.EventHandler(this.exportValuesAstxtFileToolStripMenuItem_Click);
+            // 
+            // exportSelectionToolStripMenuItem
+            // 
+            this.exportSelectionToolStripMenuItem.Image = global::HeavenTool.Properties.Resources.export;
+            this.exportSelectionToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.exportSelectionToolStripMenuItem.Name = "exportSelectionToolStripMenuItem";
+            this.exportSelectionToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
+            this.exportSelectionToolStripMenuItem.Text = "Export selection...";
+            this.exportSelectionToolStripMenuItem.ToolTipText = "Export the selected lines to a new BCSV file";
+            this.exportSelectionToolStripMenuItem.Click += new System.EventHandler(this.exportSelectionToolStripMenuItem_Click);
+            // 
+            // importFromFileToolStripMenuItem
+            // 
+            this.importFromFileToolStripMenuItem.Image = global::HeavenTool.Properties.Resources.import;
+            this.importFromFileToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.importFromFileToolStripMenuItem.Name = "importFromFileToolStripMenuItem";
+            this.importFromFileToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
+            this.importFromFileToolStripMenuItem.Text = "Import from file...";
+            this.importFromFileToolStripMenuItem.ToolTipText = "Import lines from a BCSV file (headers must match)";
+            this.importFromFileToolStripMenuItem.Click += new System.EventHandler(this.importFromFileToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(189, 6);
             // 
             // MainFrm
             // 
@@ -436,6 +490,11 @@ namespace HeavenTool
         private ToolStripMenuItem exportLabelFieldsToolStripMenuItem;
         private ToolStripStatusLabel versionNumberLabel;
         private ToolStripMenuItem exportToCSVFileToolStripMenuItem;
+        private ToolStripMenuItem compareRowsToolStripMenuItem;
+        private ToolStripMenuItem searchToolStripMenuItem;
+        private ToolStripMenuItem importFromFileToolStripMenuItem;
+        private ToolStripMenuItem exportSelectionToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator1;
     }
 }
 

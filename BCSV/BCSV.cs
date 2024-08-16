@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -9,17 +10,36 @@ namespace HeavenTool.BCSV
     public class BCSVFile: IDisposable
     {
         //private uint EntriesCount { get; set; }
-        uint EntrySize { get; set; }
-        ushort FieldCount { get; set; }
+        internal uint EntrySize { get; set; }
+
+        // TODO: remove this and use Fields.Lenght instead
+        private ushort FieldCount { get; set; }
 
         public Field[] Fields { get; set; }
         public List<DataEntry> Entries { get; set; }
 
-        private ushort version;
-        private string fileType;
-        private uint unk1;
-        private uint unk2;
-        private uint unk3;
+        internal ushort version;
+        internal string fileType;
+        internal uint unk1;
+        internal uint unk2;
+        internal uint unk3;
+
+        public BCSVFile(uint entrySize, Field[] fields, DataEntry[] entries, ushort version, string fileType, uint unk1, uint unk2, uint unk3)
+        {
+            EntrySize = entrySize;
+            FieldCount = Convert.ToUInt16(fields.Length);
+            Fields = fields;
+            Entries = entries.ToList();
+
+            this.version = version;
+            this.fileType = fileType;
+            this.unk1 = unk1;
+            this.unk2 = unk2;
+            this.unk3 = unk3;
+        }
+
+        public static BCSVFile CopyFileWithoutEntries(BCSVFile fileToCopy) => new BCSVFile(fileToCopy.EntrySize, fileToCopy.Fields, new DataEntry[0], fileToCopy.version, fileToCopy.fileType, fileToCopy.unk1, fileToCopy.unk2, fileToCopy.unk3);
+        
 
         public BCSVFile(string filePath)
         {
@@ -116,7 +136,6 @@ namespace HeavenTool.BCSV
                     currentField.DataType = type;
                 }
 
-               
                 //// Get Type for each field
                 Entries = new List<DataEntry>();
                 for (int i = 0; i < entryCount; i++)

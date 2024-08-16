@@ -12,15 +12,17 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugType>embedded</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
+    <ErrorReport>none</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -32,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>HeavenTool.Program</StartupObject>
@@ -52,8 +55,12 @@
     <Reference Include="Crc32.NET, Version=1.0.0.0, Culture=neutral, PublicKeyToken=dc0b95cf99bf4e99, processorArchitecture=MSIL">
       <HintPath>..\ACNHModCompanion\packages\Crc32.NET.1.2.0\lib\net20\Crc32.NET.dll</HintPath>
     </Reference>
+    <Reference Include="Scintilla.NET, Version=5.6.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Scintilla5.NET.5.6.1\lib\net462\Scintilla.NET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
@@ -76,6 +83,18 @@
     <Compile Include="DrawingControl.cs" />
     <Compile Include="Export\ExportedLine.cs" />
     <Compile Include="Export\ImportMode.cs" />
+    <Compile Include="Forms\BCSVCompareWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BCSVCompareWindow.Designer.cs">
+      <DependentUpon>BCSVCompareWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\BCSVSearchBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BCSVSearchBox.Designer.cs">
+      <DependentUpon>BCSVSearchBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\BruteForce.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,6 +106,12 @@
     </Compile>
     <Compile Include="Forms\DirectorySearch.Designer.cs">
       <DependentUpon>DirectorySearch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\EditorWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EditorWindow.Designer.cs">
+      <DependentUpon>EditorWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="HeavenMain.cs">
       <SubType>Form</SubType>
@@ -103,11 +128,20 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Forms\BCSVCompareWindow.resx">
+      <DependentUpon>BCSVCompareWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\BCSVSearchBox.resx">
+      <DependentUpon>BCSVSearchBox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\BruteForce.resx">
       <DependentUpon>BruteForce.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\DirectorySearch.resx">
       <DependentUpon>DirectorySearch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EditorWindow.resx">
+      <DependentUpon>EditorWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="HeavenMain.resx">
       <DependentUpon>HeavenMain.cs</DependentUpon>
@@ -178,5 +212,21 @@
   <ItemGroup>
     <None Include="Resources\export-csv.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\compare.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\import.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="packages\Scintilla5.NET.5.6.1\build\scintilla5.net.targets" Condition="Exists('packages\Scintilla5.NET.5.6.1\build\scintilla5.net.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Este projeto faz referência a pacotes do NuGet que não estão presentes neste computador. Use a Restauração de Pacotes do NuGet para baixá-los.  Para obter mais informações, consulte http://go.microsoft.com/fwlink/?LinkID=322105. O arquivo ausente é {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Scintilla5.NET.5.6.1\build\scintilla5.net.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Scintilla5.NET.5.6.1\build\scintilla5.net.targets'))" />
+  </Target>
 </Project>

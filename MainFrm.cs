@@ -51,7 +51,6 @@ namespace HeavenTool
         public MainFrm()
         {
             InitializeComponent();
-            
 
             ReloadInfo();
 
@@ -73,7 +72,7 @@ namespace HeavenTool
             // We need this cause DataGrid changes the RowIndex when user use the OrderBy feature (bruh)
             if (e.Action == System.ComponentModel.CollectionChangeAction.Add && e.Element is IndexRow indexRow)
                 indexRow.OriginalIndex = indexRow.Index;
-            
+
         }
 
         private void ReloadInfo()
@@ -85,6 +84,9 @@ namespace HeavenTool
                 saveAsToolStripMenuItem.Enabled = false;
                 saveToolStripMenuItem.Enabled = false;
                 unloadFileToolStripMenuItem.Enabled = false;
+                exportToCSVFileToolStripMenuItem.Enabled = false;
+                importFromFileToolStripMenuItem.Enabled = false;
+                exportSelectionToolStripMenuItem.Enabled = false;
                 return;
             }
 
@@ -106,6 +108,9 @@ namespace HeavenTool
             // TODO: Maybe implement save (beside save as) idk, isn't really a reccomended thing, is always good to have a backup
             saveToolStripMenuItem.Enabled = false;
             unloadFileToolStripMenuItem.Enabled = true;
+            exportToCSVFileToolStripMenuItem.Enabled = true;
+            importFromFileToolStripMenuItem.Enabled = true;
+            exportSelectionToolStripMenuItem.Enabled = true;
         }
 
         private void ClearDataGrid()
@@ -160,6 +165,10 @@ namespace HeavenTool
             Text = $"{originalName}: {Path.GetFileName(path)}";
 
             DrawingControl.SuspendDrawing(mainDataGridView);
+
+            searchCache = null;
+            lastSearchCell = null;
+
             foreach (var fieldHeader in LoadedFile.Fields)
             {
                 var columnId = mainDataGridView.Columns.Add(fieldHeader.Hash.ToString("x"), fieldHeader.GetTranslatedNameOrHash());
@@ -220,7 +229,7 @@ namespace HeavenTool
         bool ignoreNextChangeEvent = false;
         private void mainDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-           
+
             if (ignoreNextChangeEvent)
             {
                 ignoreNextChangeEvent = false;
@@ -354,9 +363,9 @@ namespace HeavenTool
                     MessageBox.Show("Your value is null or invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 else
                     MessageBox.Show(specificError, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
                 ignoreNextChangeEvent = true;
                 indexRow.Cells[e.ColumnIndex].Value = oldFieldValue;
-
             }
             else
             {
@@ -364,6 +373,7 @@ namespace HeavenTool
                 LoadedFile.Entries[indexRow.OriginalIndex].Fields[field.HashedName] = formattedValue;
 
                 // We have to set this again otherwise types will mismatch eventually (cause the field is read as a string while un-edited values are numbers)
+                ignoreNextChangeEvent = true;
                 indexRow.Cells[e.ColumnIndex].Value = formattedValue;
             }
         }
@@ -373,6 +383,7 @@ namespace HeavenTool
             try
             {
                 var field = LoadedFile.Fields[e.ColumnIndex];
+                var originalField = mainDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
                 var originalValue = e.Value;
                 //e.FormattingApplied = true;
 
@@ -408,7 +419,12 @@ namespace HeavenTool
                                     var containsKey = LoadedHashes.ContainsKey(hashValue);
                                     e.Value = containsKey ? LoadedHashes[hashValue] : hashValue.ToString("x");
                                     if (!containsKey)
+                                    {
+                                        originalField.ToolTipText = "Unknown Hash";
                                         e.CellStyle.BackColor = Color.LightCyan;
+                                    }
+                                    else originalField.ToolTipText = $"Hash: {hashValue:x}";
+
                                 }
                             }
                             else
@@ -459,7 +475,7 @@ namespace HeavenTool
 
                 LoadedFile.Entries.Add(newEntry);
 
-               mainDataGridView.Rows.Add(newEntry.Fields.Values.ToArray());
+                mainDataGridView.Rows.Add(newEntry.Fields.Values.ToArray());
             }
             else
             {
@@ -589,7 +605,7 @@ namespace HeavenTool
                     validHeaderContextMenu.Show(Cursor.Position);
                 }
 
-                lastSelectedColumn = e.ColumnIndex; 
+                lastSelectedColumn = e.ColumnIndex;
                 lastSelectedHash = field.HashedName;
             }
         }
@@ -670,53 +686,53 @@ namespace HeavenTool
 
         private void associatebcsvWithThisProgramToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
-            {
-                var extension = ".bcsv";
-                var keyName = "BCSV_Editor";
-                var fileDescription = "BCSV File";
-                var openWith = Application.ExecutablePath;
+            //try
+            //{
+            //    var extension = ".bcsv";
+            //    var keyName = "BCSV_Editor";
+            //    var fileDescription = "BCSV File";
+            //    var openWith = Application.ExecutablePath;
 
-                using (var BaseKey = Registry.ClassesRoot.CreateSubKey(extension))
-                {
-                    BaseKey.SetValue("", keyName);
+            //    using (var BaseKey = Registry.ClassesRoot.CreateSubKey(extension))
+            //    {
+            //        BaseKey.SetValue("", keyName);
 
-                    using (var OpenMethod = Registry.ClassesRoot.CreateSubKey(keyName))
-                    {
-                        OpenMethod.SetValue("", fileDescription);
-                        OpenMethod.CreateSubKey("DefaultIcon").SetValue("", $"\"{openWith}\",0");
+            //        using (var OpenMethod = Registry.ClassesRoot.CreateSubKey(keyName))
+            //        {
+            //            OpenMethod.SetValue("", fileDescription);
+            //            OpenMethod.CreateSubKey("DefaultIcon").SetValue("", $"\"{openWith}\",0");
 
-                        using (var Shell = OpenMethod.CreateSubKey("Shell"))
-                        {
-                            Shell.CreateSubKey("edit").CreateSubKey("command").SetValue("", $"\"{openWith}\" \"%1\"");
-                            Shell.CreateSubKey("open").CreateSubKey("command").SetValue("", $"\"{openWith}\" \"%1\"");
-                        }
-                    }
-                }
+            //            using (var Shell = OpenMethod.CreateSubKey("Shell"))
+            //            {
+            //                Shell.CreateSubKey("edit").CreateSubKey("command").SetValue("", $"\"{openWith}\" \"%1\"");
+            //                Shell.CreateSubKey("open").CreateSubKey("command").SetValue("", $"\"{openWith}\" \"%1\"");
+            //            }
+            //        }
+            //    }
 
-                // Delete the key instead of trying to change it
-                using (var CurrentUser = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\" + extension, true))
-                {
-                    CurrentUser.DeleteSubKey("UserChoice", false);
-                }
+            //    // Delete the key instead of trying to change it
+            //    using (var CurrentUser = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\" + extension, true))
+            //    {
+            //        CurrentUser.DeleteSubKey("UserChoice", false);
+            //    }
 
-                // Tell explorer the file association has been changed
-                SHChangeNotify(0x08000000, 0x0000, IntPtr.Zero, IntPtr.Zero);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                MessageBox.Show("You need to open the program as administrator.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            //    // Tell explorer the file association has been changed
+            //    SHChangeNotify(0x08000000, 0x0000, IntPtr.Zero, IntPtr.Zero);
+            //}
+            //catch (UnauthorizedAccessException)
+            //{
+            //    MessageBox.Show("You need to open the program as administrator.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
 
-            catch (Exception error)
-            {
-                MessageBox.Show(error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            //catch (Exception error)
+            //{
+            //    MessageBox.Show(error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
         }
 
 
-        [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
+        //[DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        //public static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
 
         private void exportValidHashesToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -814,11 +830,25 @@ namespace HeavenTool
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                var exportedValues =new List<string>();
+                var field = LoadedFile.Fields.Single(x => x.HashedName == lastSelectedHash);
+
+                var exportedValues = new List<string>();
                 foreach (var row in LoadedFile.Entries)
                 {
                     var cell = row.Fields[lastSelectedHash];
-                    exportedValues.Add(cell.ToString());
+                    if (field.DataType == DataType.HashedCsc32)
+                    {
+                        if (cell is uint hashValue)
+                        {
+                            var containsKey = LoadedHashes.ContainsKey(hashValue);
+                            if (containsKey)
+                                exportedValues.Add(LoadedHashes[hashValue]);
+                            else
+                                exportedValues.Add(hashValue.ToString("x"));
+                        }
+                        else exportedValues.Add(cell.ToString());
+                    }
+                    else exportedValues.Add(cell.ToString());
                 }
 
                 File.WriteAllLines(saveFileDialog.FileName, exportedValues);
@@ -861,6 +891,252 @@ namespace HeavenTool
                     Process.Start(outputDirectory);
                 }
             }
-        }  
+        }
+
+
+        private void compareRowsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var compareWindow = new BCSVCompareWindow();
+            compareWindow.compareDataGrid.Columns.Clear();
+
+            foreach (DataGridViewColumn column in mainDataGridView.Columns)
+            {
+                var columnId = compareWindow.compareDataGrid.Columns.Add(column.Name, column.HeaderText);
+                compareWindow.compareDataGrid.Columns[columnId].HeaderCell.Style = column.HeaderCell.Style;
+                
+            }
+        
+            compareWindow.compareDataGrid.Rows.Clear();
+            foreach (DataGridViewRow row in mainDataGridView.SelectedRows) {
+                var values = new List<object>();
+                foreach (DataGridViewCell entry in row.Cells)
+                    values.Add(entry.FormattedValue);
+
+                compareWindow.compareDataGrid.Rows.Add(values.ToArray());
+            }
+
+            compareWindow.ShowDialog();
+        }
+
+        private void mainDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (mainDataGridView.SelectedRows.Count > 1)
+            {
+                compareRowsToolStripMenuItem.Enabled = true;
+            }
+            else
+            {
+                compareRowsToolStripMenuItem.Enabled = false;
+            }
+        }
+
+        private BCSVSearchBox searchBox;
+        private void searchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (searchBox == null)
+            {
+                searchBox = new BCSVSearchBox(this)
+                {
+                    StartPosition = FormStartPosition.CenterParent
+                };
+            }
+
+            searchBox.Show();
+        }
+
+        private string lastSearch = "";
+        private bool lastCaseSensitive = false;
+        private SearchType lastSearchType = SearchType.Contains;
+        private int currentSearchIndex = -1;
+        private DataGridViewCell[] searchCache;
+        private DataGridViewCell lastSearchCell;
+
+        internal void ClearSearchCache(bool colorOnly = false)
+        {
+            if (searchCache != null && searchCache.Length > 0)
+            {
+                lastSearchCell = null;
+
+                foreach(var current in searchCache)
+                    current.Style.BackColor = Color.White;
+
+                if (!colorOnly)
+                    searchCache = null;
+                
+            }
+        }
+
+        internal void Search(string search, SearchType searchType, bool searchBackwards, bool caseSensitive)
+        {
+            if (lastSearch != search)
+            {
+                lastSearch = search;
+                ClearSearchCache();
+            }
+
+            if (lastSearchType != searchType)
+            {
+                lastSearchType = searchType;
+                ClearSearchCache();
+            }
+
+            if (lastCaseSensitive != caseSensitive)
+            {
+                lastCaseSensitive = caseSensitive;
+                ClearSearchCache();
+            }
+
+            if (searchCache == null || searchCache.Length == 0)
+            {
+                var rows = new DataGridViewRow[mainDataGridView.Rows.Count];
+                mainDataGridView.Rows.CopyTo(rows, 0);
+
+                var cells = rows.SelectMany(x => {
+                    var y = new DataGridViewCell[x.Cells.Count];
+                    x.Cells.CopyTo(y, 0);
+
+                    return y;
+                }).Where(cell =>
+                    {
+                        var formattedValue = cell.FormattedValue.ToString();
+
+                        if (!caseSensitive)
+                        {
+                            formattedValue = formattedValue.ToLower();
+                            search = search.ToLower();
+                        }
+
+                        return (searchType == SearchType.Contains && formattedValue.Contains(search)) || (searchType == SearchType.Exactly && formattedValue == search);
+                    });
+
+                searchCache = cells.ToArray();
+
+                if (searchCache.Length > 1 && searchBackwards)
+                    currentSearchIndex = searchCache.Length - 1;
+                else 
+                    currentSearchIndex = 0;
+
+                searchBox.UpdateMatchesFound(searchCache.Length, currentSearchIndex);
+
+                if (searchCache.Length == 0)
+                {
+                    MessageBox.Show("No matches found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
+                else
+                {
+                    foreach(var current in searchCache)
+                        current.Style.BackColor = Color.Yellow;
+                }
+
+            }
+
+
+            // If its out of bounds, return to start (in case o backwards return to the last one)
+            if (currentSearchIndex >= searchCache.Length || currentSearchIndex < 0)
+            {
+                currentSearchIndex = searchBackwards ? searchCache.Length - 1 : 0;
+            }
+
+            // Safe check, don't should occur but checking again doesn't hurt
+            if (searchCache.Length > 0 && currentSearchIndex < searchCache.Length && currentSearchIndex >= 0)
+            {
+                if (lastSearchCell != null)
+                    lastSearchCell.Style.BackColor = Color.Yellow;
+
+                searchBox.UpdateMatchesFound(searchCache.Length, currentSearchIndex);
+
+                var current = searchCache[currentSearchIndex];
+
+                mainDataGridView.FirstDisplayedScrollingColumnIndex = current.ColumnIndex;
+                mainDataGridView.FirstDisplayedScrollingRowIndex = current.RowIndex;
+
+                lastSearchCell = current;
+                lastSearchCell.Style.BackColor = Color.YellowGreen;
+
+                if (searchBackwards)
+                {
+                    if (currentSearchIndex == 0)
+                        currentSearchIndex = searchCache.Length - 1;
+                    else
+                        currentSearchIndex--;
+                }
+                else
+                {
+                    if (currentSearchIndex >= searchCache.Length)
+                        currentSearchIndex = 0;
+                    else
+                        currentSearchIndex++;
+                }
+
+            }
+        }
+
+        private void exportSelectionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (LoadedFile == null) return;
+
+            var newFile = BCSVFile.CopyFileWithoutEntries(LoadedFile);
+
+            var selectedRows = new IndexRow[mainDataGridView.SelectedRows.Count];
+            mainDataGridView.SelectedRows.CopyTo(selectedRows, 0);
+
+            newFile.Entries = LoadedFile.Entries.Where((_, index) => selectedRows.Any(y => y.OriginalIndex == index)).ToList();
+
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "BCSV (*.bcsv)|*.bcsv",
+                FilterIndex = 1,
+                RestoreDirectory = true,
+                OverwritePrompt = true
+            };
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                newFile.SaveAs(saveFileDialog.FileName);
+        }
+
+        private void importFromFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select a BCSV to import",
+                Filter = "BCSV|*.bcsv",
+                DefaultExt = "*.bcsv"
+            };
+
+            if (openFileDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                var file = openFileDialog.FileName;
+                var bcsvToCopy = new BCSVFile(file);
+
+                var haveDifferentField = LoadedFile.Fields.Length != bcsvToCopy.Fields.Length;
+                if (!haveDifferentField)
+                {
+                    foreach (var field in LoadedFile.Fields)
+                        if (!LoadedFile.Fields.Contains(field))
+                        {
+                            haveDifferentField = true;
+                            break;
+                        }
+                }
+
+                if (haveDifferentField)
+                {
+                    MessageBox.Show("The file you're trying to import have different field headers.", "Failed to import", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var lastEntry = -1;
+                foreach(var entry in bcsvToCopy.Entries)
+                {
+                    LoadedFile.Entries.Add(entry);
+                    lastEntry = mainDataGridView.Rows.Add(entry.Fields.Values.ToArray());
+                }
+
+                if (lastEntry != -1)
+                    mainDataGridView.FirstDisplayedScrollingRowIndex = lastEntry;
+
+            }
+        }
     }
 }
