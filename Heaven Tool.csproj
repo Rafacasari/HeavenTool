@@ -2,18 +2,40 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <AllowedReferenceRelatedFileExtensions>
+	-
+    </AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{6D35A83B-F96F-424C-9655-701D8080A698}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>HeavenTool</RootNamespace>
-    <AssemblyName>HeavenTool</AssemblyName>
+    <AssemblyName>Heaven Tool</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>C:\Users\Rafa\Desktop\HeavenTool\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <AutorunEnabled>true</AutorunEnabled>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -21,20 +43,24 @@
     <DebugType>embedded</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>none</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>HeavenTool.Program</StartupObject>
@@ -46,25 +72,56 @@
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <DelaySign>false</DelaySign>
   </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>D5C6BDDD2752B7C763D2D6E9790A2578096F6677</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>Heaven Tool_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup />
+  <PropertyGroup />
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="Crc32.NET, Version=1.0.0.0, Culture=neutral, PublicKeyToken=dc0b95cf99bf4e99, processorArchitecture=MSIL">
-      <HintPath>..\ACNHModCompanion\packages\Crc32.NET.1.2.0\lib\net20\Crc32.NET.dll</HintPath>
+      <HintPath>packages\Crc32.NET.1.2.0\lib\net20\Crc32.NET.dll</HintPath>
     </Reference>
     <Reference Include="Scintilla.NET, Version=5.6.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\Scintilla5.NET.5.6.1\lib\net462\Scintilla.NET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
-    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -74,19 +131,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BCSV\BCSV.cs" />
-    <Compile Include="BCSV\DataEntry.cs" />
-    <Compile Include="BCSV\DataType.cs" />
-    <Compile Include="BCSV\Field.cs" />
-    <Compile Include="BinaryFileReader.cs" />
+    <Compile Include="DataTable\DataGridViewDropDownComboBoxColumn.cs" />
+    <Compile Include="Forms\Components\DarkToolstripRenderer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Utility\FileTypes\BCSV\BinaryCSV.cs" />
+    <Compile Include="Utility\FileTypes\BCSV\BCSVEntry.cs" />
+    <Compile Include="Utility\FileTypes\BCSV\BcsvDataType.cs" />
+    <Compile Include="Utility\FileTypes\BCSV\Field.cs" />
+    <Compile Include="Utility\FileTypes\EventFlow\EventFlow.cs" />
+    <Compile Include="Utility\IO\BinaryFileReader.cs" />
     <Compile Include="DataTable\IndexRow.cs" />
-    <Compile Include="DrawingControl.cs" />
+    <Compile Include="Utility\DrawingControl.cs" />
     <Compile Include="Export\ExportedLine.cs" />
     <Compile Include="Export\ImportMode.cs" />
-    <Compile Include="Forms\BCSVCompareWindow.cs">
+    <Compile Include="Forms\BCSV\BCSVCompareWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\BCSVCompareWindow.Designer.cs">
+    <Compile Include="Forms\BCSV\BCSVCompareWindow.Designer.cs">
       <DependentUpon>BCSVCompareWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\BCSVSearchBox.cs">
@@ -94,12 +156,6 @@
     </Compile>
     <Compile Include="Forms\BCSVSearchBox.Designer.cs">
       <DependentUpon>BCSVSearchBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\BruteForce.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\BruteForce.Designer.cs">
-      <DependentUpon>BruteForce.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\DirectorySearch.cs">
       <SubType>Form</SubType>
@@ -113,29 +169,29 @@
     <Compile Include="Forms\EditorWindow.Designer.cs">
       <DependentUpon>EditorWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="HeavenMain.cs">
+    <Compile Include="Forms\HeavenMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="HeavenMain.Designer.cs">
+    <Compile Include="Forms\HeavenMain.Designer.cs">
       <DependentUpon>HeavenMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="KnownHashValueManager.cs" />
-    <Compile Include="MainFrm.cs">
+    <Compile Include="Utility\IO\ProgramAssociation.cs" />
+    <Compile Include="Utility\KnownHashValueManager.cs" />
+    <Compile Include="Forms\BCSVForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFrm.Designer.cs">
-      <DependentUpon>MainFrm.cs</DependentUpon>
+    <Compile Include="Forms\BCSVForm.Designer.cs">
+      <DependentUpon>BCSVForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Forms\BCSVCompareWindow.resx">
+    <Compile Include="Utility\ListUtilities.cs" />
+    <Compile Include="Utility\Murmur.cs" />
+    <EmbeddedResource Include="Forms\BCSV\BCSVCompareWindow.resx">
       <DependentUpon>BCSVCompareWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\BCSVSearchBox.resx">
       <DependentUpon>BCSVSearchBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\BruteForce.resx">
-      <DependentUpon>BruteForce.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\DirectorySearch.resx">
       <DependentUpon>DirectorySearch.cs</DependentUpon>
@@ -143,11 +199,11 @@
     <EmbeddedResource Include="Forms\EditorWindow.resx">
       <DependentUpon>EditorWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="HeavenMain.resx">
+    <EmbeddedResource Include="Forms\HeavenMain.resx">
       <DependentUpon>HeavenMain.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFrm.resx">
-      <DependentUpon>MainFrm.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\BCSVForm.resx">
+      <DependentUpon>BCSVForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -171,7 +227,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <EmbeddedResource Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\leaf.ico" />
@@ -181,9 +237,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\save_as.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\brute-force.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\paste.png" />
@@ -221,6 +274,21 @@
   <ItemGroup>
     <None Include="Resources\export.png" />
   </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 e x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Scintilla5.NET.5.6.1\build\scintilla5.net.targets" Condition="Exists('packages\Scintilla5.NET.5.6.1\build\scintilla5.net.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -229,4 +297,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\Scintilla5.NET.5.6.1\build\scintilla5.net.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Scintilla5.NET.5.6.1\build\scintilla5.net.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

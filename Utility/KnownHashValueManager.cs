@@ -1,4 +1,4 @@
-﻿using HeavenTool.BCSV;
+﻿using HeavenTool.Utility.FileTypes.BCSV;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,7 @@ namespace HeavenTool
 {
     public static class KnownHashValueManager
     {
-        public static Dictionary<string, DataType> KnownTypes = new Dictionary<string, DataType>();
+        public static Dictionary<string, BcsvDataType> KnownTypes = new Dictionary<string, BcsvDataType>();
         private static string FILE_PATH = Path.Combine(AppContext.BaseDirectory, "known-types.txt");
 
         public static void Load()
@@ -20,7 +20,7 @@ namespace HeavenTool
                 foreach (var line in lines)
                 {
                     var split = line.Split('=');
-                    KnownTypes.Add(split[0], (DataType) Enum.Parse(typeof(DataType), split[1]));
+                    KnownTypes.Add(split[0], (BcsvDataType) Enum.Parse(typeof(BcsvDataType), split[1]));
                 }
             }
         }
@@ -31,7 +31,7 @@ namespace HeavenTool
             }));
         }
 
-        public static void AddOrEdit(string key, DataType value) { 
+        public static void AddOrEdit(string key, BcsvDataType value) { 
             if (KnownTypes.ContainsKey(key))
                 KnownTypes[key] = value;
             else 

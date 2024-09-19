@@ -22,5 +22,17 @@ namespace HeavenTool.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string lastLoadedFilePath {
+            get {
+                return ((string)(this["lastLoadedFilePath"]));
+            }
+            set {
+                this["lastLoadedFilePath"] = value;
+            }
+        }
     }
 }

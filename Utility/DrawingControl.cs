@@ -4,8 +4,6 @@ using System.Windows.Forms;
 
 namespace HeavenTool
 {
-
-
     public static class DrawingControl
     {
         [DllImport("user32.dll")]

@@ -5,8 +5,8 @@ namespace HeavenTool.Forms
 {
     public partial class BCSVSearchBox : Form
     {
-        private MainFrm BCSVForm;
-        public BCSVSearchBox(MainFrm bcsvForm)
+        private BCSVForm BCSVForm;
+        public BCSVSearchBox(BCSVForm bcsvForm)
         {
             InitializeComponent();
 
@@ -25,7 +25,7 @@ namespace HeavenTool.Forms
 
         private void BCSVSearchBox_FormClosing(object sender, FormClosingEventArgs e)
         {
-            BCSVForm.ClearSearchCache(true);
+            BCSVForm.ClearSearchColors();
 
             // Remove original form ownership, so it can actually close without any issue
             Owner = null;

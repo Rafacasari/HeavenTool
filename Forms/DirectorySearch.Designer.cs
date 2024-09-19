@@ -37,11 +37,13 @@
             this.searchField = new System.Windows.Forms.TextBox();
             this.textLabel = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.hitsFound = new System.Windows.Forms.ListBox();
+            this.foundHits = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
             // 
             // directoryPath
             // 
+            this.directoryPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.directoryPath.Location = new System.Drawing.Point(12, 11);
             this.directoryPath.Name = "directoryPath";
             this.directoryPath.Size = new System.Drawing.Size(210, 20);
@@ -49,22 +51,32 @@
             // 
             // selectDirectoryButton
             // 
+            this.selectDirectoryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.selectDirectoryButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
+            this.selectDirectoryButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
+            this.selectDirectoryButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.selectDirectoryButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.selectDirectoryButton.Location = new System.Drawing.Point(228, 9);
             this.selectDirectoryButton.Name = "selectDirectoryButton";
             this.selectDirectoryButton.Size = new System.Drawing.Size(109, 23);
             this.selectDirectoryButton.TabIndex = 1;
             this.selectDirectoryButton.Text = "Select Directory";
-            this.selectDirectoryButton.UseVisualStyleBackColor = true;
+            this.selectDirectoryButton.UseVisualStyleBackColor = false;
             this.selectDirectoryButton.Click += new System.EventHandler(this.selectDirectoryButton_Click);
             // 
             // searchButton
             // 
+            this.searchButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
+            this.searchButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
+            this.searchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.searchButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.searchButton.Location = new System.Drawing.Point(228, 62);
             this.searchButton.Name = "searchButton";
             this.searchButton.Size = new System.Drawing.Size(109, 23);
             this.searchButton.TabIndex = 2;
             this.searchButton.Text = "Search";
-            this.searchButton.UseVisualStyleBackColor = true;
+            this.searchButton.UseVisualStyleBackColor = false;
             this.searchButton.Click += new System.EventHandler(this.searchButton_Click);
             // 
             // openFolderDialog
@@ -95,6 +107,8 @@
             // 
             // searchField
             // 
+            this.searchField.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.searchField.Location = new System.Drawing.Point(46, 37);
             this.searchField.Name = "searchField";
             this.searchField.Size = new System.Drawing.Size(291, 20);
@@ -118,20 +132,23 @@
             this.label1.TabIndex = 8;
             this.label1.Text = "Hits:";
             // 
-            // hitsFound
+            // foundHits
             // 
-            this.hitsFound.FormattingEnabled = true;
-            this.hitsFound.Location = new System.Drawing.Point(12, 104);
-            this.hitsFound.Name = "hitsFound";
-            this.hitsFound.Size = new System.Drawing.Size(325, 108);
-            this.hitsFound.TabIndex = 9;
+            this.foundHits.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.foundHits.Location = new System.Drawing.Point(12, 104);
+            this.foundHits.Name = "foundHits";
+            this.foundHits.Size = new System.Drawing.Size(325, 99);
+            this.foundHits.TabIndex = 10;
             // 
             // DirectorySearch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(349, 223);
-            this.Controls.Add(this.hitsFound);
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
+            this.ClientSize = new System.Drawing.Size(349, 215);
+            this.Controls.Add(this.foundHits);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textLabel);
             this.Controls.Add(this.searchField);
@@ -140,6 +157,7 @@
             this.Controls.Add(this.searchButton);
             this.Controls.Add(this.selectDirectoryButton);
             this.Controls.Add(this.directoryPath);
+            this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DirectorySearch";
@@ -161,6 +179,6 @@
         private System.Windows.Forms.TextBox searchField;
         private System.Windows.Forms.Label textLabel;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ListBox hitsFound;
+        private System.Windows.Forms.TreeView foundHits;
     }
 }

@@ -6,51 +6,131 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using HeavenTool.BCSV;
 using HeavenTool.Forms;
-using Microsoft.Win32;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
 using HeavenTool.DataTable;
+using HeavenTool.Utility;
+using HeavenTool.Utility.FileTypes.BCSV;
+using System.Globalization;
+using HeavenTool.Utility.IO;
 
 namespace HeavenTool
 {
-    public partial class MainFrm : Form
+    public partial class BCSVForm : Form
     {
-        public List<DataEntry> Entries = new List<DataEntry>();
-        public static Dictionary<uint, string> LoadedHashes = new Dictionary<uint, string>();
+        public List<BCSVEntry> Entries = new List<BCSVEntry>();
+        public static Dictionary<uint, string> CRCHashes = new Dictionary<uint, string>();
+        public static Dictionary<uint, string> MurmurHashes = new Dictionary<uint, string>();
+        public static Dictionary<uint, List<CRC32Value>> EnumHashes = new Dictionary<uint, List<CRC32Value>>();
+
+        public class CRC32Value
+        {
+            public CRC32Value(uint val) 
+            { 
+                Value = val;
+            }
+
+            public uint Value;
+
+            public override string ToString()
+            {
+                return CRCHashes.ContainsKey(Value) ? CRCHashes[Value] : Value.ToString("x");
+            }
+        }
 
         private void CalculateHashes()
         {
-            string dir = Path.Combine(AppContext.BaseDirectory, "Hashes");
-            Directory.CreateDirectory(dir);
+            string crcHashes = Path.Combine(AppContext.BaseDirectory, "hashes");
+            Directory.CreateDirectory(crcHashes);
 
-            foreach (var file in Directory.GetFiles(dir))
+            string murmurHashes = Path.Combine(AppContext.BaseDirectory, "murmur3-hashes");
+            Directory.CreateDirectory(murmurHashes);
+
+            foreach (var file in Directory.GetFiles(crcHashes))
             {
                 if (Path.GetExtension(file) != ".txt")
                     continue;
 
                 foreach (string hashStr in File.ReadAllLines(file))
-                    CheckHash(hashStr);
+                    ChechCrc32Hash(hashStr);
 
             }
 
+            foreach (var file in Directory.GetFiles(murmurHashes))
+            {
+                if (Path.GetExtension(file) != ".txt")
+                    continue;
+
+                foreach (string hashStr in File.ReadAllLines(file))
+                    CheckMurmurHash(hashStr);
+
+            }
+
+            LoadEnumHashes();
             ReloadInfo();
         }
 
-        private static void CheckHash(string hashStr)
+        private void LoadEnumHashes()
+        {
+            string enumFolder = Path.Combine(AppContext.BaseDirectory, "hashes/enum");
+            Directory.CreateDirectory(enumFolder);
+
+            foreach (var file in Directory.GetFiles(enumFolder, "*.txt", SearchOption.AllDirectories))
+            {
+                if (Path.GetExtension(file) != ".txt")
+                    continue;
+
+                var fileName = Path.GetFileNameWithoutExtension(file);
+                if (fileName.StartsWith("0x"))
+                    fileName = fileName.Substring(2);
+
+                bool parsedSuccessfully = uint.TryParse(fileName, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out uint enumHash);
+                if (parsedSuccessfully)
+                {
+                    if (!EnumHashes.ContainsKey(enumHash))
+                        EnumHashes.Add(enumHash, new List<CRC32Value>());
+
+                    var collection = EnumHashes[enumHash];
+                    foreach (string hashStr in File.ReadAllLines(file))
+                    {
+                        byte[] bytes = Encoding.UTF8.GetBytes(hashStr);
+                        uint hash = Crc32Algorithm.Compute(bytes);
+
+                        if (!collection.Any(x => x.Value == hash))
+                            collection.Add(new CRC32Value(hash));
+
+                        if (!CRCHashes.ContainsKey(hash))
+                            CRCHashes.Add(hash, hashStr);
+                    }
+                }
+            }
+        }
+
+        private static void ChechCrc32Hash(string hashStr)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(hashStr);
             uint hash = Crc32Algorithm.Compute(bytes);
 
-            if (!LoadedHashes.ContainsKey(hash))
-                LoadedHashes.Add(hash, hashStr);
+            if (!CRCHashes.ContainsKey(hash))
+                CRCHashes.Add(hash, hashStr);
+        }
+
+        private static void CheckMurmurHash(string hashStr)
+        {
+            ReadOnlySpan<byte> inputSpan = Encoding.UTF8.GetBytes(hashStr).AsSpan();
+
+            uint hash = Murmur.Hash32(ref inputSpan, 0);
+
+            if (!MurmurHashes.ContainsKey(hash))
+                MurmurHashes.Add(hash, hashStr);
         }
 
         private string originalName = "";
-        public MainFrm()
+        public BCSVForm()
         {
             InitializeComponent();
+            dragInfo.Dock = DockStyle.Fill;
+            dragInfo.AutoSize = false;
 
             ReloadInfo();
 
@@ -65,6 +145,9 @@ namespace HeavenTool
             versionNumberLabel.Text = ProductVersion;
             Text = $"ACNH Heaven Tool | v{ProductVersion} | BCSV Editor";
             originalName = Text;
+
+           
+            associatebcsvWithThisProgramToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
         }
 
         private void Rows_CollectionChanged(object sender, System.ComponentModel.CollectionChangeEventArgs e)
@@ -79,6 +162,7 @@ namespace HeavenTool
         {
             if (LoadedFile == null)
             {
+                dragInfo.Visible = true;
                 statusStripMenu.Visible = false;
                 editToolStripMenuItem.Enabled = false;
                 saveAsToolStripMenuItem.Enabled = false;
@@ -91,7 +175,7 @@ namespace HeavenTool
             }
 
             var infos = new List<string> {
-                $"Loaded Hashes: {LoadedHashes.Count}"
+                $"CRC32 Hashes: {CRCHashes.Count} | Murmur Hashes: {MurmurHashes.Count}"
             };
 
             if (mainDataGridView.Columns.Count > 0)
@@ -102,10 +186,10 @@ namespace HeavenTool
 
             infoLabel.Text = string.Join(" | ", infos);
 
+            dragInfo.Visible = false;
             statusStripMenu.Visible = true;
             editToolStripMenuItem.Enabled = true;
             saveAsToolStripMenuItem.Enabled = true;
-            // TODO: Maybe implement save (beside save as) idk, isn't really a reccomended thing, is always good to have a backup
             saveToolStripMenuItem.Enabled = false;
             unloadFileToolStripMenuItem.Enabled = true;
             exportToCSVFileToolStripMenuItem.Enabled = true;
@@ -129,7 +213,7 @@ namespace HeavenTool
             openBCSVFile.ShowDialog(this);
         }
 
-        private BCSVFile LoadedFile;
+        private BinaryCSV LoadedFile;
         private void openBCSVFile_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
         {
             var path = openBCSVFile.FileName;
@@ -156,23 +240,32 @@ namespace HeavenTool
 
         internal void LoadBCSVFile(string path)
         {
+            ClearSearchCache();
             ClearDataGrid();
 
-            LoadedFile = new BCSVFile(path);
+            LoadedFile = new BinaryCSV(path);
 
             if (LoadedFile == null) return;
 
             Text = $"{originalName}: {Path.GetFileName(path)}";
 
-            DrawingControl.SuspendDrawing(mainDataGridView);
-
-            searchCache = null;
-            lastSearchCell = null;
+            DrawingControl.SuspendDrawing(mainDataGridView);      
 
             foreach (var fieldHeader in LoadedFile.Fields)
             {
-                var columnId = mainDataGridView.Columns.Add(fieldHeader.Hash.ToString("x"), fieldHeader.GetTranslatedNameOrHash());
-                var toolTip = $"0x{fieldHeader.Hash:x} (Type: {fieldHeader.DataType} | Size: {fieldHeader.Size})";
+                var columnName = fieldHeader.GetTranslatedNameOrHash();
+                if (!fieldHeader.IsMissingHash())
+                {
+                    if (columnName.Contains("."))
+                        columnName = columnName.Split('.')[0];
+                    else if (columnName.Contains(" "))
+                        columnName = columnName.Split(' ')[0];
+                }
+
+                int columnId = mainDataGridView.Columns.Add(fieldHeader.Hash.ToString("x"), columnName);
+                
+
+                var toolTip = $"0x{fieldHeader.Hash:x}{(fieldHeader.IsMissingHash() ? "" : $"\nName: {fieldHeader.GetTranslatedNameOrNull()}")}\nType: {fieldHeader.DataType}\nSize: {fieldHeader.Size}";
 
                 if (fieldHeader.IsMissingHash())
                 {
@@ -196,7 +289,7 @@ namespace HeavenTool
             {
                 foreach (var entry in LoadedFile.Entries)
                 {
-                    var addedRowId = mainDataGridView.Rows.Add(entry.Fields.Values.ToArray());
+                    var addedRowId = mainDataGridView.Rows.Add(entry.Values.ToArray());
                     var addedRow = mainDataGridView.Rows[addedRowId];
                 }
             }
@@ -205,16 +298,35 @@ namespace HeavenTool
             ReloadInfo();
         }
 
-        BruteForce bruteForceWindow;
-        private void bruteForceMissingHashesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void mainDataGridView_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
-            if (bruteForceWindow == null)
-                bruteForceWindow = new BruteForce();
+            var hashedName = mainDataGridView.CurrentCell.OwningColumn.Name;
 
-            bruteForceWindow.Show();
-            bruteForceWindow.BringToFront();
+            bool parsedSuccessfully = uint.TryParse(hashedName, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out uint enumHash);
+
+            if (e.Control is TextBox txtControl) 
+            {
+                // We have info about this hash, show auto-complete
+                if (parsedSuccessfully && EnumHashes.ContainsKey(enumHash))
+                {
+                    var source = new AutoCompleteStringCollection();
+                    source.AddRange(EnumHashes[enumHash].Select(x => x.ToString()).ToArray());
+
+                    txtControl.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                    txtControl.AutoCompleteCustomSource = source;
+                    txtControl.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                    
+                }
+
+                // We don't have info about this hash, remove auto-complete
+                else
+                {
+                    txtControl.AutoCompleteMode = AutoCompleteMode.None;
+                }
+
+            }
+            
         }
-
 
         DirectorySearch directorySearchWindow;
         private void searchOnFilesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -241,7 +353,7 @@ namespace HeavenTool
             if (!(mainDataGridView.Rows[e.RowIndex] is IndexRow indexRow)) return;
 
             var field = LoadedFile.Fields[e.ColumnIndex];
-            var oldFieldValue = LoadedFile.Entries[indexRow.OriginalIndex].Fields[field.HashedName];
+            var oldFieldValue = LoadedFile.Entries[indexRow.OriginalIndex][field.HEX];
 
             var newValue = indexRow.Cells[e.ColumnIndex].Value;
 
@@ -251,10 +363,10 @@ namespace HeavenTool
 
             switch (field.DataType)
             {
-                case DataType.String:
+                case BcsvDataType.String:
                     {
                         var bytes = Encoding.UTF8.GetBytes(newValue.ToString());
-                        if (bytes.Length <= field.Size)
+                        if (bytes.Length <= field.Size) 
                             formattedValue = newValue.ToString();
                         else
                         {
@@ -264,7 +376,7 @@ namespace HeavenTool
                         break;
                     }
 
-                case DataType.HashedCsc32:
+                case BcsvDataType.HashedCsc32:
                     {
                         if (newValue == null || string.IsNullOrEmpty(newValue.ToString()))
                         {
@@ -275,7 +387,7 @@ namespace HeavenTool
                             byte[] bytes = Encoding.UTF8.GetBytes(newValue.ToString());
                             uint hash = Crc32Algorithm.Compute(bytes);
 
-                            if (!LoadedHashes.ContainsKey(hash))
+                            if (!CRCHashes.ContainsKey(hash))
                             {
                                 specificError = "This hash was not found on your hashlist. If you're sure that this value is correct, then put it on your /hashes/ folder and re-open the program.";
                                 invalidValue = true;
@@ -285,7 +397,29 @@ namespace HeavenTool
                         break;
                     }
 
-                case DataType.S8:
+                case BcsvDataType.Murmur3:
+                    {
+                        if (newValue == null || string.IsNullOrEmpty(newValue.ToString()))
+                        {
+                            formattedValue = (uint)0;
+                        }
+                        else
+                        {
+
+                            ReadOnlySpan<byte> inputSpan = Encoding.UTF8.GetBytes(newValue.ToString()).AsSpan();
+                            uint hash = Murmur.Hash32(ref inputSpan, 0);
+
+                            if (!MurmurHashes.ContainsKey(hash))
+                            {
+                                specificError = "This hash was not found on your hashlist. If you're sure that this value is correct, then put it on your /hashes/ folder and re-open the program.";
+                                invalidValue = true;
+                            }
+                            else formattedValue = hash;
+                        }
+                        break;
+                    }
+
+                case BcsvDataType.S8:
                     {
                         if (sbyte.TryParse(newValue.ToString(), out var value))
                             formattedValue = value;
@@ -293,7 +427,7 @@ namespace HeavenTool
                         break;
                     }
 
-                case DataType.MultipleU8:
+                case BcsvDataType.MultipleU8:
                     {
                         var failedToReadBytes = false;
                         var bytes = newValue.ToString().Split(' ').Select(x =>
@@ -312,7 +446,7 @@ namespace HeavenTool
                         break;
                     }
 
-                case DataType.U8:
+                case BcsvDataType.U8:
                     {
                         if (byte.TryParse(newValue.ToString(), out var value))
                             formattedValue = value;
@@ -320,7 +454,7 @@ namespace HeavenTool
                         break;
                     }
 
-                case DataType.UInt32:
+                case BcsvDataType.UInt32:
                     {
                         if (uint.TryParse(newValue.ToString(), out var value))
                             formattedValue = value;
@@ -329,7 +463,7 @@ namespace HeavenTool
                         break;
                     }
 
-                case DataType.UInt16:
+                case BcsvDataType.UInt16:
                     {
                         if (short.TryParse(newValue.ToString(), out var value))
                             formattedValue = value;
@@ -338,7 +472,7 @@ namespace HeavenTool
                         break;
                     }
 
-                case DataType.Float32:
+                case BcsvDataType.Float32:
                     {
                         if (float.TryParse(newValue.ToString(), out var value))
                             formattedValue = value;
@@ -346,7 +480,7 @@ namespace HeavenTool
                         break;
                     }
 
-                case DataType.Int32:
+                case BcsvDataType.Int32:
                     {
                         if (int.TryParse(newValue.ToString(), out var value))
                             formattedValue = value;
@@ -364,17 +498,25 @@ namespace HeavenTool
                 else
                     MessageBox.Show(specificError, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
-                ignoreNextChangeEvent = true;
-                indexRow.Cells[e.ColumnIndex].Value = oldFieldValue;
+               
+                if (indexRow.Cells[e.ColumnIndex].Value != oldFieldValue)
+                {
+                    ignoreNextChangeEvent = true;
+                    indexRow.Cells[e.ColumnIndex].Value = oldFieldValue;
+                }
+               
             }
             else
             {
                 // Assign the formatted value to the loaded bcsv file
-                LoadedFile.Entries[indexRow.OriginalIndex].Fields[field.HashedName] = formattedValue;
+                LoadedFile.Entries[indexRow.OriginalIndex][field.HEX] = formattedValue;
 
                 // We have to set this again otherwise types will mismatch eventually (cause the field is read as a string while un-edited values are numbers)
-                ignoreNextChangeEvent = true;
-                indexRow.Cells[e.ColumnIndex].Value = formattedValue;
+                if (indexRow.Cells[e.ColumnIndex].Value != formattedValue)
+                {
+                    ignoreNextChangeEvent = true;
+                    indexRow.Cells[e.ColumnIndex].Value = formattedValue;
+                }
             }
         }
 
@@ -389,11 +531,11 @@ namespace HeavenTool
 
                 switch (field.DataType)
                 {
-                    case DataType.String:
+                    case BcsvDataType.String:
                         e.Value = originalValue.ToString();
                         break;
 
-                    case DataType.MultipleU8:
+                    case BcsvDataType.MultipleU8:
                         {
                             if (originalValue is byte[] bytesValue)
                             {
@@ -408,7 +550,7 @@ namespace HeavenTool
                             break;
                         }
 
-                    case DataType.HashedCsc32:
+                    case BcsvDataType.HashedCsc32:
                         {
                             if (originalValue is uint hashValue)
                             {
@@ -416,8 +558,33 @@ namespace HeavenTool
                                     e.Value = "";
                                 else
                                 {
-                                    var containsKey = LoadedHashes.ContainsKey(hashValue);
-                                    e.Value = containsKey ? LoadedHashes[hashValue] : hashValue.ToString("x");
+                                    var containsKey = CRCHashes.ContainsKey(hashValue);
+                                    e.Value = containsKey ? CRCHashes[hashValue] : hashValue.ToString("x");
+                                    if (!containsKey)
+                                    {
+                                        originalField.ToolTipText = "Unknown Hash";
+                                        e.CellStyle.BackColor = Color.LightCyan;
+                                    }
+                                    else originalField.ToolTipText = $"Hash: {hashValue:x}";
+
+                                }
+                            }
+                            else
+                                e.Value = originalValue != null ? originalValue.ToString() : "";
+
+                            break;
+                        }
+
+                    case BcsvDataType.Murmur3:
+                        {
+                            if (originalValue is uint hashValue)
+                            {
+                                if (hashValue == 0)
+                                    e.Value = "";
+                                else
+                                {
+                                    var containsKey = MurmurHashes.ContainsKey(hashValue);
+                                    e.Value = containsKey ? MurmurHashes[hashValue] : hashValue.ToString("x");
                                     if (!containsKey)
                                     {
                                         originalField.ToolTipText = "Unknown Hash";
@@ -467,32 +634,25 @@ namespace HeavenTool
             if (LoadedFile.Entries.Count == 0)
             {
                 // There is no entry to copy, create using default values
-
-                var newEntry = new DataEntry()
-                {
-                    Fields = LoadedFile.Fields.ToDictionary(pair => pair.HashedName, value => value.GetFieldDefaultValue())
-                };
+                var newEntry = new BCSVEntry(LoadedFile.Fields.ToDictionary(pair => pair.HEX, value => value.GetFieldDefaultValue()));
 
                 LoadedFile.Entries.Add(newEntry);
 
-                mainDataGridView.Rows.Add(newEntry.Fields.Values.ToArray());
+                mainDataGridView.Rows.Add(newEntry.Values.ToArray());
             }
             else
             {
                 var lastEntry = LoadedFile.Entries.Last();
-                var newEntry = new DataEntry()
-                {
-                    Fields = new Dictionary<string, object>()
-                };
+                var newEntry = new BCSVEntry();
 
                 // Copy fields
-                foreach (var entryField in lastEntry.Fields)
-                    newEntry.Fields.Add(entryField.Key, entryField.Value);
+                foreach (var entryField in lastEntry)
+                    newEntry.Add(entryField.Key, entryField.Value);
 
                 // TODO: Check UniqueId and assign one?
                 LoadedFile.Entries.Add(newEntry);
 
-                var newEntryRow = mainDataGridView.Rows.Add(newEntry.Fields.Values.ToArray());
+                var newEntryRow = mainDataGridView.Rows.Add(newEntry.Values.ToArray());
                 mainDataGridView.Rows[newEntryRow].Selected = true;
                 mainDataGridView.FirstDisplayedScrollingRowIndex = newEntryRow;
             }
@@ -538,19 +698,16 @@ namespace HeavenTool
 
                 var selectedEntry = LoadedFile.Entries[selectedRow.OriginalIndex];
 
-                var newEntry = new DataEntry()
-                {
-                    Fields = new Dictionary<string, object>()
-                };
+                var newEntry = new BCSVEntry();
 
                 // Copy fields
-                foreach (var entryField in selectedEntry.Fields)
-                    newEntry.Fields.Add(entryField.Key, entryField.Value);
+                foreach (var entryField in selectedEntry)
+                    newEntry.Add(entryField.Key, entryField.Value);
 
                 // TODO: Check UniqueId and assign one?
                 LoadedFile.Entries.Add(newEntry);
 
-                var newEntryRow = mainDataGridView.Rows.Add(newEntry.Fields.Values.ToArray());
+                var newEntryRow = mainDataGridView.Rows.Add(newEntry.Values.ToArray());
                 mainDataGridView.Rows[newEntryRow].Selected = true;
                 mainDataGridView.FirstDisplayedScrollingRowIndex = newEntryRow;
 
@@ -583,30 +740,21 @@ namespace HeavenTool
 
         private string lastSelectedHash = null;
         private int lastSelectedColumn = -1;
+        private uint lastSelectedHashUint = 0;
         private void mainDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (LoadedFile == null || LoadedFile.Fields.Length <= e.ColumnIndex) return;
-
-            //var column = mainDataGridView.Columns[e.ColumnIndex];
 
             if (e.Button == MouseButtons.Right)
             {
                 var field = LoadedFile.Fields[e.ColumnIndex];
 
-                lastSelectedColumn = e.ColumnIndex;
-                lastSelectedHash = field.HashedName;
-
-                if (field.IsMissingHash() && field.Size == 4)
-                {
-                    columnHeaderContextMenu.Show(Cursor.Position);
-                }
-                else
-                {
-                    validHeaderContextMenu.Show(Cursor.Position);
-                }
+                viewAsToolStripMenuItem.Enabled = field.IsMissingHash() && field.Size <= 6;
+                validHeaderContextMenu.Show(Cursor.Position);  
 
                 lastSelectedColumn = e.ColumnIndex;
-                lastSelectedHash = field.HashedName;
+                lastSelectedHash = field.HEX;
+                lastSelectedHashUint = field.Hash;
             }
         }
 
@@ -614,7 +762,7 @@ namespace HeavenTool
         {
             if (lastSelectedHash == null) return;
 
-            KnownHashValueManager.AddOrEdit(lastSelectedHash, DataType.HashedCsc32);
+            KnownHashValueManager.AddOrEdit(lastSelectedHash, BcsvDataType.HashedCsc32);
 
             MessageBox.Show("Re-open your file to update values!");
         }
@@ -623,7 +771,7 @@ namespace HeavenTool
         {
             if (lastSelectedHash == null) return;
 
-            KnownHashValueManager.AddOrEdit(lastSelectedHash, DataType.Float32);
+            KnownHashValueManager.AddOrEdit(lastSelectedHash, BcsvDataType.Float32);
 
             MessageBox.Show("Re-open your file to update values!");
         }
@@ -632,7 +780,7 @@ namespace HeavenTool
         {
             if (lastSelectedHash == null) return;
 
-            KnownHashValueManager.AddOrEdit(lastSelectedHash, DataType.UInt32);
+            KnownHashValueManager.AddOrEdit(lastSelectedHash, BcsvDataType.UInt32);
 
             MessageBox.Show("Re-open your file to update values!");
         }
@@ -641,7 +789,24 @@ namespace HeavenTool
         {
             if (lastSelectedHash == null) return;
 
-            KnownHashValueManager.AddOrEdit(lastSelectedHash, DataType.String);
+            KnownHashValueManager.AddOrEdit(lastSelectedHash, BcsvDataType.String);
+
+            MessageBox.Show("Re-open your file to update values!");
+        }
+
+        private void murmurHashToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lastSelectedHash == null) return;
+            KnownHashValueManager.AddOrEdit(lastSelectedHash, BcsvDataType.Murmur3);
+
+            MessageBox.Show("Re-open your file to update values!");
+        }
+
+
+        private void int32ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lastSelectedHash == null) return;
+            KnownHashValueManager.AddOrEdit(lastSelectedHash, BcsvDataType.Int32);
 
             MessageBox.Show("Re-open your file to update values!");
         }
@@ -653,7 +818,6 @@ namespace HeavenTool
 
             else
                 e.Effect = DragDropEffects.None;
-
         }
 
         private void MainFrm_DragDrop(object sender, DragEventArgs e)
@@ -686,53 +850,24 @@ namespace HeavenTool
 
         private void associatebcsvWithThisProgramToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //try
-            //{
-            //    var extension = ".bcsv";
-            //    var keyName = "BCSV_Editor";
-            //    var fileDescription = "BCSV File";
-            //    var openWith = Application.ExecutablePath;
+            var exePath = Application.ExecutablePath;
+            var arguments = $"--{(associatebcsvWithThisProgramToolStripMenuItem.Checked ? "disassociate" : "associate")} bcsv";
 
-            //    using (var BaseKey = Registry.ClassesRoot.CreateSubKey(extension))
-            //    {
-            //        BaseKey.SetValue("", keyName);
 
-            //        using (var OpenMethod = Registry.ClassesRoot.CreateSubKey(keyName))
-            //        {
-            //            OpenMethod.SetValue("", fileDescription);
-            //            OpenMethod.CreateSubKey("DefaultIcon").SetValue("", $"\"{openWith}\",0");
+            var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = exePath,
+                Arguments = arguments,
+                Verb = "runas",
+                UseShellExecute = true
+            });
 
-            //            using (var Shell = OpenMethod.CreateSubKey("Shell"))
-            //            {
-            //                Shell.CreateSubKey("edit").CreateSubKey("command").SetValue("", $"\"{openWith}\" \"%1\"");
-            //                Shell.CreateSubKey("open").CreateSubKey("command").SetValue("", $"\"{openWith}\" \"%1\"");
-            //            }
-            //        }
-            //    }
-
-            //    // Delete the key instead of trying to change it
-            //    using (var CurrentUser = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\" + extension, true))
-            //    {
-            //        CurrentUser.DeleteSubKey("UserChoice", false);
-            //    }
-
-            //    // Tell explorer the file association has been changed
-            //    SHChangeNotify(0x08000000, 0x0000, IntPtr.Zero, IntPtr.Zero);
-            //}
-            //catch (UnauthorizedAccessException)
-            //{
-            //    MessageBox.Show("You need to open the program as administrator.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
-
-            //catch (Exception error)
-            //{
-            //    MessageBox.Show(error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
+            process.WaitForExit();
+            associatebcsvWithThisProgramToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
         }
 
 
-        //[DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        //public static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
+     
 
         private void exportValidHashesToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -754,23 +889,23 @@ namespace HeavenTool
                     if (Path.GetExtension(file) != ".bcsv")
                         continue;
 
-                    var bcsvFile = new BCSVFile(file);
+                    var bcsvFile = new BinaryCSV(file);
                     foreach (var item in bcsvFile.Fields)
                     {
-                        if (LoadedHashes.ContainsKey(item.Hash))
+                        if (CRCHashes.ContainsKey(item.Hash))
                         {
-                            var hashName = LoadedHashes[item.Hash];
+                            var hashName = CRCHashes[item.Hash];
                             if (!usedHashesHeaders.Contains(hashName)) usedHashesHeaders.Add(hashName);
                         }
                     }
 
                     foreach (var entry in bcsvFile.Entries)
-                        foreach (var entryField in entry.Fields)
+                        foreach (var entryField in entry)
                             if (entryField.Value is uint hashValue && (hashValue > 10000000))
                             {
-                                if (LoadedHashes.ContainsKey(hashValue))
+                                if (CRCHashes.ContainsKey(hashValue))
                                 {
-                                    var hashName = LoadedHashes[hashValue];
+                                    var hashName = CRCHashes[hashValue];
                                     if (!usedHashesValues.Contains(hashName)) usedHashesValues.Add(hashName);
                                 }
                             }
@@ -830,25 +965,27 @@ namespace HeavenTool
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                var field = LoadedFile.Fields.Single(x => x.HashedName == lastSelectedHash);
+                var field = LoadedFile.Fields.Single(x => x.HEX == lastSelectedHash);
 
                 var exportedValues = new List<string>();
                 foreach (var row in LoadedFile.Entries)
                 {
-                    var cell = row.Fields[lastSelectedHash];
-                    if (field.DataType == DataType.HashedCsc32)
+                    var cell = row[lastSelectedHash];
+                    if (field.DataType == BcsvDataType.HashedCsc32)
                     {
                         if (cell is uint hashValue)
                         {
-                            var containsKey = LoadedHashes.ContainsKey(hashValue);
+                            var containsKey = CRCHashes.ContainsKey(hashValue);
                             if (containsKey)
-                                exportedValues.Add(LoadedHashes[hashValue]);
+                                exportedValues.AddIfNotExist(CRCHashes[hashValue]);
                             else
-                                exportedValues.Add(hashValue.ToString("x"));
+                                exportedValues.AddIfNotExist(hashValue.ToString("x"));
+
+                            continue;
                         }
-                        else exportedValues.Add(cell.ToString());
                     }
-                    else exportedValues.Add(cell.ToString());
+
+                    exportedValues.Add(cell.ToString());
                 }
 
                 File.WriteAllLines(saveFileDialog.FileName, exportedValues);
@@ -875,14 +1012,14 @@ namespace HeavenTool
 
                         var outputFile = Path.Combine(outputDirectory, $"{Path.GetFileNameWithoutExtension(file)}-values.txt");
 
-                        var bcsvFile = new BCSVFile(file);
+                        var bcsvFile = new BinaryCSV(file);
                         var list = new List<string>();
 
                         if (bcsvFile.Fields.Any(x => x.GetTranslatedNameOrHash().StartsWith("Label string")))
                         {
                             var fieldId = bcsvFile.Fields.First(x => x.GetTranslatedNameOrHash().StartsWith("Label string"));
                             foreach (var entry in bcsvFile.Entries)
-                                list.Add(entry.Fields[fieldId.HashedName].ToString());
+                                list.Add(entry[fieldId.HEX].ToString());
 
                             File.WriteAllLines(outputFile, list);
                         }
@@ -942,7 +1079,10 @@ namespace HeavenTool
             }
 
             searchBox.Show();
+
+            RestoreSearchCache();
         }
+
 
         private string lastSearch = "";
         private bool lastCaseSensitive = false;
@@ -950,53 +1090,70 @@ namespace HeavenTool
         private int currentSearchIndex = -1;
         private DataGridViewCell[] searchCache;
         private DataGridViewCell lastSearchCell;
+        private Dictionary<DataGridViewCell, Color> oldColorCache = null;
 
-        internal void ClearSearchCache(bool colorOnly = false)
+        public static Color HIGHLIGHT_COLOR = Color.FromArgb(180, 180, 10);
+        public static Color HIGHLIGHT_COLOR_CURRENT = Color.YellowGreen;
+
+        private void RestoreSearchCache()
+        {
+            if (oldColorCache == null)
+                oldColorCache = new Dictionary<DataGridViewCell, Color>();
+
+            if (searchCache != null)
+            {
+                foreach (var cell in searchCache)
+                {
+                    if (!oldColorCache.ContainsKey(cell) && cell.Style.BackColor != HIGHLIGHT_COLOR && cell.Style.BackColor != HIGHLIGHT_COLOR_CURRENT)
+                        oldColorCache.Add(cell, cell.Style.BackColor);
+
+                    cell.Style.BackColor = cell == lastSearchCell ? HIGHLIGHT_COLOR_CURRENT : HIGHLIGHT_COLOR;
+                }
+            }
+        }
+
+        internal void ClearSearchCache()
         {
             if (searchCache != null && searchCache.Length > 0)
             {
+                ClearSearchColors();
+
                 lastSearchCell = null;
+                searchCache = null;
+            }
+        }
 
-                foreach(var current in searchCache)
-                    current.Style.BackColor = Color.White;
+        internal void ClearSearchColors()
+        {
+            if (oldColorCache != null)
+            {
+                foreach (var cache in oldColorCache)
+                    cache.Key.Style.BackColor = cache.Value;
 
-                if (!colorOnly)
-                    searchCache = null;
-                
+                oldColorCache.Clear();
+                oldColorCache = null;
             }
         }
 
         internal void Search(string search, SearchType searchType, bool searchBackwards, bool caseSensitive)
         {
-            if (lastSearch != search)
+            if (lastSearch != search || lastSearchType != searchType || lastCaseSensitive != caseSensitive)
             {
                 lastSearch = search;
-                ClearSearchCache();
-            }
-
-            if (lastSearchType != searchType)
-            {
                 lastSearchType = searchType;
+                lastCaseSensitive = caseSensitive;
+
                 ClearSearchCache();
             }
 
-            if (lastCaseSensitive != caseSensitive)
-            {
-                lastCaseSensitive = caseSensitive;
-                ClearSearchCache();
-            }
+            if (oldColorCache == null)
+                oldColorCache = new Dictionary<DataGridViewCell, Color>();
 
             if (searchCache == null || searchCache.Length == 0)
             {
-                var rows = new DataGridViewRow[mainDataGridView.Rows.Count];
-                mainDataGridView.Rows.CopyTo(rows, 0);
-
-                var cells = rows.SelectMany(x => {
-                    var y = new DataGridViewCell[x.Cells.Count];
-                    x.Cells.CopyTo(y, 0);
-
-                    return y;
-                }).Where(cell =>
+                var rows = mainDataGridView.Rows.Cast<DataGridViewRow>();
+                var cells = rows.SelectMany(x => x.Cells.Cast<DataGridViewCell>())
+                    .Where(cell =>
                     {
                         var formattedValue = cell.FormattedValue.ToString();
 
@@ -1025,8 +1182,13 @@ namespace HeavenTool
                 }
                 else
                 {
-                    foreach(var current in searchCache)
-                        current.Style.BackColor = Color.Yellow;
+                    foreach (var current in searchCache)
+                    {
+                        if (!oldColorCache.ContainsKey(current) && current.Style.BackColor != HIGHLIGHT_COLOR && current.Style.BackColor != HIGHLIGHT_COLOR_CURRENT)
+                            oldColorCache.Add(current, current.Style.BackColor);
+
+                        current.Style.BackColor = HIGHLIGHT_COLOR;
+                    }
                 }
 
             }
@@ -1042,7 +1204,12 @@ namespace HeavenTool
             if (searchCache.Length > 0 && currentSearchIndex < searchCache.Length && currentSearchIndex >= 0)
             {
                 if (lastSearchCell != null)
-                    lastSearchCell.Style.BackColor = Color.Yellow;
+                {
+                    if (!oldColorCache.ContainsKey(lastSearchCell) && lastSearchCell.Style.BackColor != HIGHLIGHT_COLOR && lastSearchCell.Style.BackColor != HIGHLIGHT_COLOR_CURRENT)
+                        oldColorCache.Add(lastSearchCell, lastSearchCell.Style.BackColor);
+
+                    lastSearchCell.Style.BackColor = HIGHLIGHT_COLOR;
+                }
 
                 searchBox.UpdateMatchesFound(searchCache.Length, currentSearchIndex);
 
@@ -1052,6 +1219,10 @@ namespace HeavenTool
                 mainDataGridView.FirstDisplayedScrollingRowIndex = current.RowIndex;
 
                 lastSearchCell = current;
+
+                if (!oldColorCache.ContainsKey(lastSearchCell) && lastSearchCell.Style.BackColor != HIGHLIGHT_COLOR && lastSearchCell.Style.BackColor != HIGHLIGHT_COLOR_CURRENT)
+                    oldColorCache.Add(lastSearchCell, lastSearchCell.Style.BackColor);
+
                 lastSearchCell.Style.BackColor = Color.YellowGreen;
 
                 if (searchBackwards)
@@ -1076,7 +1247,7 @@ namespace HeavenTool
         {
             if (LoadedFile == null) return;
 
-            var newFile = BCSVFile.CopyFileWithoutEntries(LoadedFile);
+            var newFile = BinaryCSV.CopyFileWithoutEntries(LoadedFile);
 
             var selectedRows = new IndexRow[mainDataGridView.SelectedRows.Count];
             mainDataGridView.SelectedRows.CopyTo(selectedRows, 0);
@@ -1107,7 +1278,7 @@ namespace HeavenTool
             if (openFileDialog.ShowDialog(this) == DialogResult.OK)
             {
                 var file = openFileDialog.FileName;
-                var bcsvToCopy = new BCSVFile(file);
+                var bcsvToCopy = new BinaryCSV(file);
 
                 var haveDifferentField = LoadedFile.Fields.Length != bcsvToCopy.Fields.Length;
                 if (!haveDifferentField)
@@ -1130,12 +1301,103 @@ namespace HeavenTool
                 foreach(var entry in bcsvToCopy.Entries)
                 {
                     LoadedFile.Entries.Add(entry);
-                    lastEntry = mainDataGridView.Rows.Add(entry.Fields.Values.ToArray());
+                    lastEntry = mainDataGridView.Rows.Add(entry.Values.ToArray());
                 }
 
                 if (lastEntry != -1)
                     mainDataGridView.FirstDisplayedScrollingRowIndex = lastEntry;
 
+            }
+        }
+
+        private void headerNameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lastSelectedHashUint == 0) return;
+
+            Clipboard.SetText(CRCHashes.ContainsKey(lastSelectedHashUint) ? CRCHashes[lastSelectedHashUint] : $"0x{lastSelectedHashUint:x}");
+        }
+
+        private void headerHashToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lastSelectedHashUint == 0) return;
+
+            Clipboard.SetText($"0x{lastSelectedHashUint:x}");
+        }
+
+        private void mainDataGridView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        {
+            var field = LoadedFile.GetFieldByHashedName(e.Column.Name);
+
+            if (field.DataType == BcsvDataType.HashedCsc32 || field.DataType == BcsvDataType.Murmur3)
+            {
+                var formattedValue1 = mainDataGridView.Rows[e.RowIndex1].Cells[e.Column.Name].FormattedValue.ToString();
+                var formattedValue2 = mainDataGridView.Rows[e.RowIndex2].Cells[e.Column.Name].FormattedValue.ToString();
+
+                e.SortResult = formattedValue1.CompareTo(formattedValue2);
+                e.Handled = true;
+            }
+        }
+
+        private void exportEnumsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+
+            var result = folderBrowserDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                var path = folderBrowserDialog.SelectedPath;
+                var outputDirectory = Path.Combine(path, "enum-output");
+
+                if (Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(outputDirectory);
+                    foreach (var file in Directory.GetFiles(path))
+                    {
+                        if (Path.GetExtension(file) != ".bcsv") continue;
+
+
+                        var bcsvFile = new BinaryCSV(file);
+                        var hashedFields = bcsvFile.Fields.Where(x => x.DataType == BcsvDataType.HashedCsc32).ToList();
+                        if (bcsvFile.Entries.Count > 0 && hashedFields.Count > 0)
+                        {
+                            var directoryPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file));
+                            Directory.CreateDirectory(directoryPath);
+
+                            foreach (var field in hashedFields)
+                            {
+                                var outputFile = Path.Combine(directoryPath, $"{field.HEX}.txt");
+                                var parsedList = new List<uint>();
+                                var registers = new List<string>();
+
+                                foreach (var entry in bcsvFile.Entries)
+                                {
+                                    if (entry[field.HEX] is uint value && !parsedList.Contains(value))
+                                    {
+                                        if (CRCHashes.ContainsKey(value))
+                                            registers.Add(CRCHashes[value]);
+                                        
+
+                                        parsedList.Add(value);
+                                    }
+                                }
+
+                                File.WriteAllLines(outputFile, registers);
+                            }
+                        }
+
+                        //if (bcsvFile.Fields.Any(x => x.GetTranslatedNameOrHash().StartsWith("Label string")))
+                        //{
+                        //    var fieldId = bcsvFile.Fields.First(x => x.GetTranslatedNameOrHash().StartsWith("Label string"));
+                        //    foreach (var entry in bcsvFile.Entries)
+                        //        list.Add(entry[fieldId.HEX].ToString());
+
+                        //    File.WriteAllLines(outputFile, list);
+                        //}
+                    }
+
+                    Process.Start(outputDirectory);
+                }
             }
         }
     }

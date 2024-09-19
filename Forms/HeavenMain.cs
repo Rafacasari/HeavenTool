@@ -11,7 +11,7 @@ namespace HeavenTool
         }
 
         // Forms
-        public static MainFrm bcsvEditor = new MainFrm();
+        public static BCSVForm bcsvEditor = new BCSVForm();
 
         private void bcsvEditorButton_Click(object sender, EventArgs e)
         {

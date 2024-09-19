@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // As informações gerais sobre um assembly são controladas por
 // conjunto de atributos. Altere estes valores de atributo para modificar as informações
 // associadas a um assembly.
-[assembly: AssemblyTitle("HeavenTool")]
+[assembly: AssemblyTitle("Heaven Tool")]
 [assembly: AssemblyDescription("A tool to help mod creation for Animal Crossing: New Horizons")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Rafa")]
-[assembly: AssemblyProduct("HeavenTool")]
-[assembly: AssemblyCopyright("Copyright ©  2024")]
+[assembly: AssemblyProduct("Heaven Tool")]
+[assembly: AssemblyCopyright("Copyright © 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // É possível especificar todos os valores ou usar como padrão os Números de Build e da Revisão
 // usando o "*" como mostrado abaixo:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.0")]
-[assembly: AssemblyFileVersion("1.1.0")]
+[assembly: AssemblyVersion("1.2.0")]
+[assembly: AssemblyFileVersion("1.2.0")]
