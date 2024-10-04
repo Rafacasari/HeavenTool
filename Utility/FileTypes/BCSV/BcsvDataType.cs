@@ -1,6 +1,6 @@
 ﻿namespace HeavenTool.Utility.FileTypes.BCSV
 {
-    public enum BcsvDataType
+    public enum BCSVDataType
     {
         S8,
         U8,

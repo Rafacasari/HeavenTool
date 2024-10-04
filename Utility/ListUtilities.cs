@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HeavenTool.Utility
 {
@@ -14,6 +15,16 @@ namespace HeavenTool.Utility
             if (list.Contains(key)) return;
 
             list.Add(key);
+        }
+
+        public static T? FirstOrNull<T>(this IEnumerable<T> sequence, Func<T, bool> predicate) where T : struct
+        {
+            if (sequence == null || predicate == null)
+                return null;
+
+            foreach (T item in sequence.Where(predicate))
+                return item;
+            return null;
         }
     }
 }

@@ -1,17 +1,27 @@
-﻿using System;
+﻿using HeavenTool.Forms.Search;
+using System;
 using System.Windows.Forms;
 
 namespace HeavenTool.Forms
 {
-    public partial class BCSVSearchBox : Form
+    public partial class SearchBox : Form
     {
-        private BCSVForm BCSVForm;
-        public BCSVSearchBox(BCSVForm bcsvForm)
+        // TODO: Update this form to be compatible with any file type (form)
+
+        private Form CallerForm;
+        private ISearchable SearchableForm;
+
+        public SearchBox(Form caller)
         {
             InitializeComponent();
 
-            BCSVForm = bcsvForm;
-            Owner = bcsvForm;
+            CallerForm = caller;
+            Owner = caller;
+
+            if (caller is ISearchable searchable)
+                SearchableForm = searchable;
+            else
+                MessageBox.Show("fodase");
 
             CenterToParent();
         }
@@ -19,13 +29,13 @@ namespace HeavenTool.Forms
         public new void Show()
         {
             // Return original form ownership
-            Owner = BCSVForm;
+            Owner = CallerForm;
             base.Show();
         }
 
         private void BCSVSearchBox_FormClosing(object sender, FormClosingEventArgs e)
         {
-            BCSVForm.ClearSearchColors();
+            SearchableForm.SearchClosing();
 
             // Remove original form ownership, so it can actually close without any issue
             Owner = null;
@@ -48,7 +58,7 @@ namespace HeavenTool.Forms
 
         private void findButton_Click(object sender, EventArgs e)
         {
-            BCSVForm.Search(searchValue.Text, exactlyButton.Checked ? SearchType.Exactly : SearchType.Contains, reverseDirectionCheckbox.Checked, caseSensitivivtyCheckbox.Checked);
+            SearchableForm.Search(searchValue.Text, exactlyButton.Checked ? SearchType.Exactly : SearchType.Contains, reverseDirectionCheckbox.Checked, caseSensitivivtyCheckbox.Checked);
         }
 
         public void UpdateMatchesFound(int quantity, int currentIndex)

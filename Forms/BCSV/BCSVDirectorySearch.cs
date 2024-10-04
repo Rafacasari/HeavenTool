@@ -5,9 +5,9 @@ using System.Windows.Forms;
 
 namespace HeavenTool.Forms
 {
-    public partial class DirectorySearch : Form
+    public partial class BCSVDirectorySearch : Form
     {
-        public DirectorySearch()
+        public BCSVDirectorySearch()
         {
             InitializeComponent();
         }

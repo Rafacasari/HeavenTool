@@ -6,10 +6,11 @@ using System.Linq;
 
 namespace HeavenTool
 {
+    // TODO: Move to BCSVHashing
     public static class KnownHashValueManager
     {
-        public static Dictionary<string, BcsvDataType> KnownTypes = new Dictionary<string, BcsvDataType>();
-        private static string FILE_PATH = Path.Combine(AppContext.BaseDirectory, "known-types.txt");
+        public static Dictionary<string, BCSVDataType> KnownTypes = new Dictionary<string, BCSVDataType>();
+        private static string FILE_PATH = Path.Combine(AppContext.BaseDirectory, "extra/known-types.txt");
 
         public static void Load()
         {
@@ -20,7 +21,7 @@ namespace HeavenTool
                 foreach (var line in lines)
                 {
                     var split = line.Split('=');
-                    KnownTypes.Add(split[0], (BcsvDataType) Enum.Parse(typeof(BcsvDataType), split[1]));
+                    KnownTypes.Add(split[0], (BCSVDataType) Enum.Parse(typeof(BCSVDataType), split[1]));
                 }
             }
         }
@@ -31,7 +32,7 @@ namespace HeavenTool
             }));
         }
 
-        public static void AddOrEdit(string key, BcsvDataType value) { 
+        public static void AddOrEdit(string key, BCSVDataType value) { 
             if (KnownTypes.ContainsKey(key))
                 KnownTypes[key] = value;
             else 

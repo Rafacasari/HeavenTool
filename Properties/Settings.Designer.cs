@@ -34,5 +34,17 @@ namespace HeavenTool.Properties {
                 this["lastLoadedFilePath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastSelectedRomFsDirectory {
+            get {
+                return ((string)(this["LastSelectedRomFsDirectory"]));
+            }
+            set {
+                this["LastSelectedRomFsDirectory"] = value;
+            }
+        }
     }
 }

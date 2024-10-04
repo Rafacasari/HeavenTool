@@ -1,6 +1,6 @@
 ﻿namespace HeavenTool.Forms
 {
-    partial class DirectorySearch
+    partial class BCSVDirectorySearch
     {
         /// <summary>
         /// Required designer variable.

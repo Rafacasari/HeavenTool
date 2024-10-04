@@ -1,80 +1,97 @@
 ﻿using HeavenTool.Utility.IO;
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace HeavenTool
 {
+    [SupportedOSPlatform("windows")]
     internal static class Program
     {
+        public const string VERSION = "v1.3.0";
+        public static Form TargetForm = null;
+
         [STAThread]
         static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            var mainFrm = new BCSVForm();
+            if (OperatingSystem.IsWindows())
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
 
-            if (args.Length > 0)
-                switch(args[0])
-                {
-                    case "--associate":
-                        {
-                            if (args.Length > 1)
+                if (args.Length > 0)
+                    switch (args[0])
+                    {
+                        case "--associate":
                             {
-                                var fileTypeToAssociate = args[1];
-                                switch(fileTypeToAssociate)
+                                if (args.Length > 1)
                                 {
-                                    case "bcsv":
-                                        ProgramAssociation.AssociateProgram(".bcsv", "BCSV", "BCSV File");
-                                        //TODO: Move associate to here, so user don't need to open program as admin
-                                        break;
+                                    var fileTypeToAssociate = args[1];
+                                    switch (fileTypeToAssociate)
+                                    {
+                                        case "bcsv":
+                                            ProgramAssociation.AssociateProgram(".bcsv", "BCSV", "BCSV File");
+                                            //TODO: Move associate to here, so user don't need to open program as admin
+                                            break;
 
+                                    }
                                 }
+                                return;
                             }
-                            return;
-                        }
 
-                    case "--disassociate":
-                        {
-                            if (args.Length > 1)
+                        case "--disassociate":
                             {
-                                var fileTypeToAssociate = args[1];
-                                switch (fileTypeToAssociate)
+                                if (args.Length > 1)
                                 {
-                                    case "bcsv":
-                                        ProgramAssociation.DisassociateProgram(".bcsv", "BCSV");
-                                        break;
+                                    var fileTypeToAssociate = args[1];
+                                    switch (fileTypeToAssociate)
+                                    {
+                                        case "bcsv":
+                                            ProgramAssociation.DisassociateProgram(".bcsv", "BCSV");
+                                            break;
 
+                                    }
                                 }
+                                return;
                             }
-                            return;
-                        }
 
-                    default:
-                        {
-                            mainFrm.HandleInput(args[0]);
-                        }
-                        break;
-                }
-            
+                        default:
+                            {
+                                TargetForm = HandleInput(args);
+                            }
+                            break;
+                    }
 
-            Application.Run(mainFrm);
+
+                // TargetForm is defined by the input provided by the system (user opened a file)
+                // If no input is provided (user opened the .exe alone), will open the Main Window
+                TargetForm ??= new HeavenMain();
+
+                Application.Run(TargetForm);
+            } else
+            {
+                Console.WriteLine("This is a Window Application, please run it on Windows OS.");
+            }
         }
 
         /// <summary>
         /// Handle path as an input; e.g. User double-clicked a .bcsv file or opened it with the editor.
         /// </summary>
         /// <param name="path">File path</param>
-        public static void HandleInput(string[] originalArguments)
+        public static Form HandleInput(string[] originalArguments)
         {
             var path = originalArguments[0];
             var extension = Path.GetExtension(path);
             switch (extension)
             {
                 case ".bcsv":
-                    HeavenMain.bcsvEditor.Show();
-                    HeavenMain.bcsvEditor.LoadBCSVFile(path);
-                    break;
+                    var bcsvEditor = new BCSVForm();
+                    bcsvEditor.LoadBCSVFile(path);
+                    return bcsvEditor;
+
+                default: 
+                    return null;
             }
         }
     }

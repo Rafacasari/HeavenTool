@@ -4,11 +4,12 @@ using System.Runtime.InteropServices;
 
 namespace HeavenTool.Utility
 {
+    // From https://github.com/JeremyEspresso/MurmurHash
+    // Since it's not available to .NET framework :(
     internal class Murmur
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint RotateLeft(uint value, int offset) => (value << offset) | (value >> (32 - offset));
-
 
         /// <summary>
         /// Hashes the <paramref name="bytes"/> into a MurmurHash3 as a <see cref="uint"/>.

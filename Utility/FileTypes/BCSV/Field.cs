@@ -1,10 +1,11 @@
 ﻿using System.Windows.Forms;
+using static HeavenTool.Utility.FileTypes.BCSV.BCSVHashing;
 
 namespace HeavenTool.Utility.FileTypes.BCSV
 {
     public class Field
     {
-        public BcsvDataType DataType { get; set; }
+        public BCSVDataType DataType { get; set; }
         public uint Hash { get; set; }
         public uint Offset { get; set; }
         public uint Size { get; set; }
@@ -13,27 +14,27 @@ namespace HeavenTool.Utility.FileTypes.BCSV
         {
             switch (DataType)
             {
-                case BcsvDataType.MultipleU8:
+                case BCSVDataType.MultipleU8:
                     return new byte[Size];
 
-                case BcsvDataType.U8:
+                case BCSVDataType.U8:
                     return (byte)0;
 
-                case BcsvDataType.UInt16:
+                case BCSVDataType.UInt16:
                     return (short)0;
 
-                case BcsvDataType.Int32:
+                case BCSVDataType.Int32:
                     return 0;
 
-                case BcsvDataType.Float32:
+                case BCSVDataType.Float32:
                     return (float)0;
 
-                case BcsvDataType.String:
+                case BCSVDataType.String:
                     return "";
 
-                case BcsvDataType.UInt32:
-                case BcsvDataType.HashedCsc32:
-                case BcsvDataType.Murmur3:
+                case BCSVDataType.UInt32:
+                case BCSVDataType.HashedCsc32:
+                case BCSVDataType.Murmur3:
                     {
                         return (uint)0;
                     }
@@ -48,17 +49,17 @@ namespace HeavenTool.Utility.FileTypes.BCSV
 
         public bool IsMissingHash()
         {
-            return BCSVForm.CRCHashes.ContainsKey(Hash) == false;
+            return CRCHashes.ContainsKey(Hash) == false;
         }
 
         public string GetTranslatedNameOrHash()
         {
-            return BCSVForm.CRCHashes.ContainsKey(Hash) ? BCSVForm.CRCHashes[Hash] : HEX;
+            return GetTranslatedNameOrNull() ?? HEX;
         }
 
         public string GetTranslatedNameOrNull()
         {
-            return BCSVForm.CRCHashes.ContainsKey(Hash) ? BCSVForm.CRCHashes[Hash] : null;
+            return CRCHashes.TryGetValue(Hash, out string value) ? value : null;
         }
     }
 }

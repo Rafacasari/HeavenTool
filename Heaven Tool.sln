@@ -1,9 +1,9 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heaven Tool", "Heaven Tool.csproj", "{6D35A83B-F96F-424C-9655-701D8080A698}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heaven Tool", "Heaven Tool.csproj", "{6D35A83B-F96F-424C-9655-701D8080A698}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
