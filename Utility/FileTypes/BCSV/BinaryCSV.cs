@@ -8,6 +8,9 @@ using System.Windows.Forms;
 
 namespace HeavenTool.Utility.FileTypes.BCSV;
 
+// Thanks to https://nintendo-formats.com/games/acnh/bcsv.html
+// The information about HasExtendedHeader and padding helped a lot =D
+
 public class BinaryCSV : IDisposable
 {
     /// <summary>
