@@ -45,10 +45,10 @@
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             updateSizesFromModdedRomFsFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            updateHashesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             checkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             devToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             checkIfFileSizesAreMatchingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            updateHashListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)mainDataGridView).BeginInit();
             darkMenuStrip1.SuspendLayout();
             SuspendLayout();
@@ -159,7 +159,7 @@
             openToolStripMenuItem.Name = "openToolStripMenuItem";
             openToolStripMenuItem.ShortcutKeyDisplayString = "";
             openToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O;
-            openToolStripMenuItem.Size = new System.Drawing.Size(306, 30);
+            openToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
             openToolStripMenuItem.Text = "&Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
@@ -170,38 +170,29 @@
             saveAsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
             saveAsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S;
-            saveAsToolStripMenuItem.Size = new System.Drawing.Size(306, 30);
+            saveAsToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
             saveAsToolStripMenuItem.Text = "&Save as...";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(303, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(242, 6);
             // 
             // updateSizesFromModdedRomFsFolderToolStripMenuItem
             // 
             updateSizesFromModdedRomFsFolderToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            updateSizesFromModdedRomFsFolderToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             updateSizesFromModdedRomFsFolderToolStripMenuItem.Name = "updateSizesFromModdedRomFsFolderToolStripMenuItem";
-            updateSizesFromModdedRomFsFolderToolStripMenuItem.Size = new System.Drawing.Size(306, 30);
-            updateSizesFromModdedRomFsFolderToolStripMenuItem.Text = "Update sizes from modded RomFs folder...";
+            updateSizesFromModdedRomFsFolderToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
+            updateSizesFromModdedRomFsFolderToolStripMenuItem.Text = "Update from modded RomFs...";
             updateSizesFromModdedRomFsFolderToolStripMenuItem.Click += updateSizesFromModdedRomFsFolderToolStripMenuItem_Click;
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { updateHashesToolStripMenuItem });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             optionsToolStripMenuItem.Text = "Options";
-            // 
-            // updateHashesToolStripMenuItem
-            // 
-            updateHashesToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            updateHashesToolStripMenuItem.Name = "updateHashesToolStripMenuItem";
-            updateHashesToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            updateHashesToolStripMenuItem.Text = "Update CRC hashes...";
-            updateHashesToolStripMenuItem.ToolTipText = "Updates CRC hashes from RomFs dir";
-            updateHashesToolStripMenuItem.Click += updateHashesToolStripMenuItem_Click;
             // 
             // checkToolStripMenuItem
             // 
@@ -212,7 +203,7 @@
             // 
             // devToolStripMenuItem
             // 
-            devToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { checkIfFileSizesAreMatchingToolStripMenuItem });
+            devToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { checkIfFileSizesAreMatchingToolStripMenuItem, updateHashListToolStripMenuItem });
             devToolStripMenuItem.Name = "devToolStripMenuItem";
             devToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             devToolStripMenuItem.Text = "Dev";
@@ -224,6 +215,14 @@
             checkIfFileSizesAreMatchingToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             checkIfFileSizesAreMatchingToolStripMenuItem.Text = "Check if file sizes are matching";
             checkIfFileSizesAreMatchingToolStripMenuItem.Click += checkIfFileSizesAreMatchingToolStripMenuItem_Click;
+            // 
+            // updateHashListToolStripMenuItem
+            // 
+            updateHashListToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            updateHashListToolStripMenuItem.Name = "updateHashListToolStripMenuItem";
+            updateHashListToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            updateHashListToolStripMenuItem.Text = "Update Hash List";
+            updateHashListToolStripMenuItem.Click += updateHashListToolStripMenuItem_Click;
             // 
             // RSTBEditor
             // 
@@ -250,7 +249,6 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem updateHashesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem updateSizesFromModdedRomFsFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.DataGridViewTextBoxColumn fileName;
@@ -260,5 +258,6 @@
         private System.Windows.Forms.ToolStripMenuItem checkToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem devToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkIfFileSizesAreMatchingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem updateHashListToolStripMenuItem;
     }
 }

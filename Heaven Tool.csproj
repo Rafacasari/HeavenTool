@@ -45,9 +45,7 @@
   <PropertyGroup>
     <StartupObject>HeavenTool.Program</StartupObject>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>Resources\leaf.ico</ApplicationIcon>
-  </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
     <SignManifests>false</SignManifests>
   </PropertyGroup>
@@ -72,6 +70,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="Forms\Components\DarkToolstripRenderer.cs" />
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -94,5 +97,13 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="NintendoTools" Version="2.16.5" />
   </ItemGroup>
-  <PropertyGroup />
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\leaf.ico</ApplicationIcon>
+  </PropertyGroup>
 </Project>

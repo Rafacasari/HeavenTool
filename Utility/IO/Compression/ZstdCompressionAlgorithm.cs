@@ -1,16 +1,15 @@
 ﻿using NintendoTools.Compression.Zstd;
 using System.IO;
+
 namespace HeavenTool.Utility.IO.Compression;
 
 public static class ZstdCompressionAlgorithm
 {
-    #region private members
     private static readonly ZstdDecompressor ZstdDecompressor = new();
-    #endregion
 
     public static MemoryStream Decompress(string path)
     {
-        using FileStream fileStream = new(path, FileMode.Open, FileAccess.Read);
+        using FileStream fileStream = File.OpenRead(path);
         MemoryStream memoryStream = new();
 
         ZstdDecompressor.Decompress(fileStream, memoryStream);
