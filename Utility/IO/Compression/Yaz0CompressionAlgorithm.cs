@@ -11,7 +11,7 @@ namespace HeavenTool.Utility.IO.Compression
     /// <summary>
     /// Class implementing the Yaz0 compression algorithm.
     /// </summary>
-    public sealed class Yaz0CompressionAlgorithm
+    public sealed class Yaz0CompressionAlgorithm(bool isCompressionLookAheadEnabled)
     {
         private const int MINIMUM_RUN_LENGTH = 3;
         private const int MAXIMUM_RUN_LENGTH = 273;
@@ -23,15 +23,9 @@ namespace HeavenTool.Utility.IO.Compression
         /// in a better run length. This improves the compression ratio, but makes compression about twice as slow.
         /// When <see langword="false"/> look ahead is not used, resulting in faster compression.
         /// </summary>
-        public bool IsCompressionLookAheadEnabled { get; }
+        public bool IsCompressionLookAheadEnabled { get; } = isCompressionLookAheadEnabled;
 
-        public Yaz0CompressionAlgorithm()
-            : this(isCompressionLookAheadEnabled: true) { }
-
-        public Yaz0CompressionAlgorithm(bool isCompressionLookAheadEnabled)
-        {
-            IsCompressionLookAheadEnabled = isCompressionLookAheadEnabled;
-        }
+        public Yaz0CompressionAlgorithm() : this(isCompressionLookAheadEnabled: true) { }
 
         /// <summary>
         /// Compress to Yaz0
@@ -46,7 +40,7 @@ namespace HeavenTool.Utility.IO.Compression
             var headerSpan = destination.GetSpan(HEADER_LENGTH);
             "Yaz0"u8.CopyTo(headerSpan);
             BinaryPrimitives.WriteInt32BigEndian(headerSpan[4..], sourceData.Length);
-            headerSpan[8..HEADER_LENGTH].Fill(0);
+            headerSpan[8..HEADER_LENGTH].Clear();
             destination.Advance(HEADER_LENGTH);
 
             int position = 0;
@@ -131,12 +125,9 @@ namespace HeavenTool.Utility.IO.Compression
             return destination.WrittenSpan.ToArray();
         }
 
-        public bool CanDecompress(ReadOnlySpan<byte> bytes)
-        {
-            return bytes[0..4].SequenceEqual("Yaz0"u8);
-        }
+        public static bool CanDecompress(ReadOnlySpan<byte> bytes) => bytes[0..4].SequenceEqual("Yaz0"u8);
 
-        public bool TryToDecompress(Stream stream, out ReadOnlySpan<byte> bytes)
+        public static bool TryToDecompress(Stream stream, out ReadOnlySpan<byte> bytes)
         {
             bytes = [];
             var compressedBytes = stream.ToArray();
@@ -156,7 +147,7 @@ namespace HeavenTool.Utility.IO.Compression
             
         }
 
-        public byte[] Decompress(ReadOnlySpan<byte> compressedData)
+        public static byte[] Decompress(ReadOnlySpan<byte> compressedData)
         {
             uint outputSize = BinaryPrimitives.ReadUInt32BigEndian(compressedData[4..]);
             var destination = new byte[outputSize];

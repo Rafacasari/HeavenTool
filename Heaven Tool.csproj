@@ -71,9 +71,7 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="Forms\Components\DarkToolstripRenderer.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="Forms\Components\DarkToolstripRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -94,6 +92,7 @@
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="NintendoTools" Version="2.16.5" />
   </ItemGroup>
   <PropertyGroup />
 </Project>

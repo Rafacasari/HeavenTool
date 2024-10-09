@@ -21,7 +21,7 @@ namespace HeavenTool
                 foreach (var line in lines)
                 {
                     var split = line.Split('=');
-                    KnownTypes.Add(split[0], (BCSVDataType) Enum.Parse(typeof(BCSVDataType), split[1]));
+                    KnownTypes.TryAdd(split[0], (BCSVDataType) Enum.Parse(typeof(BCSVDataType), split[1]));
                 }
             }
         }

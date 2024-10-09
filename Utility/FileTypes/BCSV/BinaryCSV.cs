@@ -139,7 +139,13 @@ public class BinaryCSV : IDisposable
                     break;
 
                 case 2:
-                    type = BCSVDataType.UInt16;
+                    {
+                        var translatedName = Fields[i].GetTranslatedNameOrNull();
+                        if (translatedName != null && translatedName.EndsWith(" s16"))
+                            type = BCSVDataType.Int16;
+                        else 
+                            type = BCSVDataType.UInt16;
+                    }
                     break;
 
                 case 4:
@@ -217,8 +223,12 @@ public class BinaryCSV : IDisposable
                         value = reader.ReadSingle();
                         break;
 
+                    case BCSVDataType.Int16:
+                        value = reader.ReadInt16(); 
+                        break;
+
                     case BCSVDataType.UInt16:
-                        value = reader.ReadInt16();
+                        value = reader.ReadUInt16();
                         break;
 
                     case BCSVDataType.Int32:
@@ -308,8 +318,12 @@ public class BinaryCSV : IDisposable
                             writer.Write((float)entryValue);
                             break;
 
-                        case BCSVDataType.UInt16:
+                        case BCSVDataType.Int16:
                             writer.Write((short)entryValue);
+                            break;
+
+                        case BCSVDataType.UInt16:
+                            writer.Write((ushort)entryValue);
                             break;
 
                         case BCSVDataType.Int32:

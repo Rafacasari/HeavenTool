@@ -4,6 +4,7 @@
     {
         S8,
         U8,
+        Int16,
         UInt16,
         Int32,
         UInt32,

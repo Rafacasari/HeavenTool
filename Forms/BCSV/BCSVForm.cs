@@ -13,6 +13,8 @@ using HeavenTool.Utility.FileTypes.BCSV;
 using System.Globalization;
 using HeavenTool.Utility.IO;
 using HeavenTool.Forms.Search;
+using System.Text.Json;
+using HeavenTool.Forms.Components;
 
 namespace HeavenTool;
 
@@ -37,6 +39,8 @@ public partial class BCSVForm : Form, ISearchable
 
         KnownHashValueManager.Load();
 
+        validHeaderContextMenu.Renderer = new ToolStripProfessionalRenderer(new DarkColorTable());
+        
         // Fixes a visual glitch when scrolling too fast
         DrawingControl.SetDoubleBuffered(mainDataGridView);
 
@@ -45,7 +49,7 @@ public partial class BCSVForm : Form, ISearchable
 
         versionNumberLabel.Text = Program.VERSION;
         Text = OriginalFormName;
-       
+
         associatebcsvWithThisProgramToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
     }
 
@@ -146,7 +150,7 @@ public partial class BCSVForm : Form, ISearchable
 
         Text = $"{OriginalFormName}: {Path.GetFileName(path)}";
 
-        DrawingControl.SuspendDrawing(mainDataGridView);      
+        DrawingControl.SuspendDrawing(mainDataGridView);
 
         foreach (var fieldHeader in LoadedFile.Fields)
         {
@@ -160,7 +164,7 @@ public partial class BCSVForm : Form, ISearchable
             }
 
             int columnId = mainDataGridView.Columns.Add(fieldHeader.Hash.ToString("x"), columnName);
-            
+
 
             var toolTip = $"0x{fieldHeader.Hash:x}{(fieldHeader.IsMissingHash() ? "" : $"\nName: {fieldHeader.GetTranslatedNameOrNull()}")}\nType: {fieldHeader.DataType}\nSize: {fieldHeader.Size}";
 
@@ -201,7 +205,7 @@ public partial class BCSVForm : Form, ISearchable
 
         bool parsedSuccessfully = uint.TryParse(hashedName, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out uint enumHash);
 
-        if (e.Control is TextBox txtControl) 
+        if (e.Control is TextBox txtControl)
         {
             // We have info about this hash, show auto-complete
             if (parsedSuccessfully && BCSVHashing.EnumHashes.TryGetValue(enumHash, out List<BCSV_CRC32Value> value))
@@ -212,7 +216,7 @@ public partial class BCSVForm : Form, ISearchable
                 txtControl.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
                 txtControl.AutoCompleteCustomSource = source;
                 txtControl.AutoCompleteSource = AutoCompleteSource.CustomSource;
-                
+
             }
 
             // We don't have info about this hash, remove auto-complete
@@ -222,7 +226,7 @@ public partial class BCSVForm : Form, ISearchable
             }
 
         }
-        
+
     }
 
     BCSVDirectorySearch directorySearchWindow;
@@ -263,7 +267,7 @@ public partial class BCSVForm : Form, ISearchable
             case BCSVDataType.String:
                 {
                     var bytes = Encoding.UTF8.GetBytes(newValue.ToString());
-                    if (bytes.Length <= field.Size) 
+                    if (bytes.Length <= field.Size)
                         formattedValue = newValue.ToString();
                     else
                     {
@@ -348,9 +352,9 @@ public partial class BCSVForm : Form, ISearchable
                     break;
                 }
 
-            case BCSVDataType.UInt32:
+            case BCSVDataType.Int16:
                 {
-                    if (uint.TryParse(newValue.ToString(), out var value))
+                    if (short.TryParse(newValue.ToString(), out var value))
                         formattedValue = value;
                     else invalidValue = true;
 
@@ -359,7 +363,7 @@ public partial class BCSVForm : Form, ISearchable
 
             case BCSVDataType.UInt16:
                 {
-                    if (short.TryParse(newValue.ToString(), out var value))
+                    if (ushort.TryParse(newValue.ToString(), out var value))
                         formattedValue = value;
                     else invalidValue = true;
 
@@ -381,6 +385,15 @@ public partial class BCSVForm : Form, ISearchable
                     else invalidValue = true;
                 }
                 break;
+
+            case BCSVDataType.UInt32:
+                {
+                    if (uint.TryParse(newValue.ToString(), out var value))
+                        formattedValue = value;
+                    else invalidValue = true;
+
+                    break;
+                }
         }
 
         // value is null or invalid, rollback to previous value and message an error
@@ -392,13 +405,13 @@ public partial class BCSVForm : Form, ISearchable
             else
                 MessageBox.Show(specificError, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
-           
+
             if (indexRow.Cells[e.ColumnIndex].Value != oldFieldValue)
             {
                 ignoreNextChangeEvent = true;
                 indexRow.Cells[e.ColumnIndex].Value = oldFieldValue;
             }
-           
+
         }
         else
         {
@@ -643,7 +656,7 @@ public partial class BCSVForm : Form, ISearchable
             var field = LoadedFile.Fields[e.ColumnIndex];
 
             viewAsToolStripMenuItem.Enabled = field.IsMissingHash() && field.Size <= 6;
-            validHeaderContextMenu.Show(Cursor.Position);  
+            validHeaderContextMenu.Show(Cursor.Position);
 
             lastSelectedHash = field.HEX;
             lastSelectedHashUint = field.Hash;
@@ -759,7 +772,7 @@ public partial class BCSVForm : Form, ISearchable
     }
 
 
- 
+
 
     private void exportValidHashesToolStripMenuItem_Click(object sender, EventArgs e)
     {
@@ -792,7 +805,7 @@ public partial class BCSVForm : Form, ISearchable
                         {
                             if (CRCHashes.TryGetValue(hashValue, out string hashName) && !usedHashesValues.Contains(hashName))
                                 usedHashesValues.Add(hashName);
-                            
+
                         }
 
 
@@ -926,11 +939,12 @@ public partial class BCSVForm : Form, ISearchable
         {
             var columnId = compareWindow.compareDataGrid.Columns.Add(column.Name, column.HeaderText);
             compareWindow.compareDataGrid.Columns[columnId].HeaderCell.Style = column.HeaderCell.Style;
-            
+
         }
-    
+
         compareWindow.compareDataGrid.Rows.Clear();
-        foreach (DataGridViewRow row in mainDataGridView.SelectedRows) {
+        foreach (DataGridViewRow row in mainDataGridView.SelectedRows)
+        {
             var values = new List<object>();
             foreach (DataGridViewCell entry in row.Cells)
                 values.Add(entry.FormattedValue);
@@ -1056,7 +1070,7 @@ public partial class BCSVForm : Form, ISearchable
 
             if (searchCache.Length > 1 && searchBackwards)
                 currentSearchIndex = searchCache.Length - 1;
-            else 
+            else
                 currentSearchIndex = 0;
 
             searchBox.UpdateMatchesFound(searchCache.Length, currentSearchIndex);
@@ -1184,7 +1198,7 @@ public partial class BCSVForm : Form, ISearchable
             }
 
             var lastEntry = -1;
-            foreach(var entry in bcsvToCopy.Entries)
+            foreach (var entry in bcsvToCopy.Entries)
             {
                 LoadedFile.Entries.Add(entry);
                 lastEntry = mainDataGridView.Rows.Add(entry.Values.ToArray());
@@ -1262,7 +1276,7 @@ public partial class BCSVForm : Form, ISearchable
                                 {
                                     if (CRCHashes.ContainsKey(value))
                                         registers.Add(CRCHashes[value]);
-                                    
+
 
                                     parsedList.Add(value);
                                 }
@@ -1275,6 +1289,40 @@ public partial class BCSVForm : Form, ISearchable
 
                 Process.Start(outputDirectory);
             }
+        }
+    }
+
+    public class FieldData(uint hash, uint offset)
+    {
+        public uint Hash { get; set; } = hash;
+        public uint Offset { get; set; } = offset;
+    }
+
+    private void dumpFieldsToJson_Click(object sender, EventArgs e)
+    {
+        if (LoadedFile == null) return;
+
+        var jsonObject = new List<FieldData>();
+
+        foreach (var field in LoadedFile.Fields)
+        {
+            jsonObject.Add(new FieldData(field.Hash, field.Offset));
+        }
+
+
+        SaveFileDialog saveFileDialog = new SaveFileDialog
+        {
+            Filter = "Json (*.json)|*.json",
+            FilterIndex = 1,
+            RestoreDirectory = true,
+            OverwritePrompt = true
+        };
+
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            var json = JsonSerializer.Serialize(jsonObject);
+
+            File.WriteAllText(saveFileDialog.FileName, json);
         }
     }
 }

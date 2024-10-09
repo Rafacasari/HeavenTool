@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -7,6 +7,17 @@ namespace HeavenTool.Forms.Components
     class DarkMenuStrip : MenuStrip
     {
         public DarkMenuStrip()
+        {
+            BackColor = Color.Transparent;
+            ForeColor = Color.White;
+
+            Renderer = new ToolStripProfessionalRenderer(new DarkColorTable());
+        }
+    }
+
+    class DarkContextMenuStrip : ContextMenuStrip
+    {
+        public DarkContextMenuStrip(IContainer container) : base(container)
         {
             BackColor = Color.Transparent;
             ForeColor = Color.White;
