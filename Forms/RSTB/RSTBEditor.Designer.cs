@@ -28,62 +28,67 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RSTBEditor));
             mainDataGridView = new System.Windows.Forms.DataGridView();
             fileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             fileSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
             DLC = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            darkMenuStrip1 = new Components.DarkMenuStrip();
+            TopMenu = new Components.DarkMenuStrip();
             fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            updateSizesFromModdedRomFsFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            updateFromModdedRomFs = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            closeFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            checkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             devToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             checkIfFileSizesAreMatchingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             updateHashListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            statusBar = new Components.DarkStatusStrip();
+            statusProgressBar = new System.Windows.Forms.ToolStripProgressBar();
+            statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)mainDataGridView).BeginInit();
-            darkMenuStrip1.SuspendLayout();
+            TopMenu.SuspendLayout();
+            statusBar.SuspendLayout();
             SuspendLayout();
             // 
             // mainDataGridView
             // 
             mainDataGridView.AllowUserToAddRows = false;
             mainDataGridView.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(30, 30, 30);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            mainDataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(30, 30, 30);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            mainDataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle6;
             mainDataGridView.BackgroundColor = System.Drawing.Color.FromArgb(60, 60, 60);
             mainDataGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             mainDataGridView.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
             mainDataGridView.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(80, 80, 80);
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(240, 240, 240);
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            mainDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(80, 80, 80);
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.FromArgb(240, 240, 240);
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            mainDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
             mainDataGridView.ColumnHeadersHeight = 25;
             mainDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { fileName, fileSize, DLC });
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            mainDataGridView.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            mainDataGridView.DefaultCellStyle = dataGridViewCellStyle8;
             mainDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             mainDataGridView.EnableHeadersVisualStyles = false;
             mainDataGridView.GridColor = System.Drawing.Color.FromArgb(60, 60, 60);
@@ -92,20 +97,20 @@
             mainDataGridView.Name = "mainDataGridView";
             mainDataGridView.ReadOnly = true;
             mainDataGridView.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(70, 70, 70);
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            mainDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle9.BackColor = System.Drawing.Color.FromArgb(70, 70, 70);
+            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            dataGridViewCellStyle9.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            mainDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle9;
             mainDataGridView.RowHeadersWidth = 25;
             mainDataGridView.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(51, 51, 51);
-            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.White;
-            mainDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle5;
-            mainDataGridView.Size = new System.Drawing.Size(625, 321);
+            dataGridViewCellStyle10.BackColor = System.Drawing.Color.FromArgb(51, 51, 51);
+            dataGridViewCellStyle10.ForeColor = System.Drawing.Color.White;
+            mainDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle10;
+            mainDataGridView.Size = new System.Drawing.Size(538, 321);
             mainDataGridView.StandardTab = true;
             mainDataGridView.TabIndex = 5;
             // 
@@ -132,21 +137,21 @@
             DLC.ToolTipText = "DLC Number";
             DLC.Width = 80;
             // 
-            // darkMenuStrip1
+            // TopMenu
             // 
-            darkMenuStrip1.BackColor = System.Drawing.Color.Transparent;
-            darkMenuStrip1.ForeColor = System.Drawing.Color.White;
-            darkMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { fileToolStripMenuItem, optionsToolStripMenuItem, checkToolStripMenuItem, devToolStripMenuItem });
-            darkMenuStrip1.Location = new System.Drawing.Point(0, 0);
-            darkMenuStrip1.Name = "darkMenuStrip1";
-            darkMenuStrip1.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
-            darkMenuStrip1.Size = new System.Drawing.Size(625, 24);
-            darkMenuStrip1.TabIndex = 6;
-            darkMenuStrip1.Text = "darkMenuStrip1";
+            TopMenu.BackColor = System.Drawing.Color.Transparent;
+            TopMenu.ForeColor = System.Drawing.Color.White;
+            TopMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { fileToolStripMenuItem, optionsToolStripMenuItem, devToolStripMenuItem });
+            TopMenu.Location = new System.Drawing.Point(0, 0);
+            TopMenu.Name = "TopMenu";
+            TopMenu.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
+            TopMenu.Size = new System.Drawing.Size(538, 24);
+            TopMenu.TabIndex = 6;
+            TopMenu.Text = "Top Menu";
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, updateSizesFromModdedRomFsFolderToolStripMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, updateFromModdedRomFs, toolStripSeparator2, closeFileToolStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             fileToolStripMenuItem.Text = "File";
@@ -179,27 +184,36 @@
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new System.Drawing.Size(242, 6);
             // 
-            // updateSizesFromModdedRomFsFolderToolStripMenuItem
+            // updateFromModdedRomFs
             // 
-            updateSizesFromModdedRomFsFolderToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            updateSizesFromModdedRomFsFolderToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            updateSizesFromModdedRomFsFolderToolStripMenuItem.Name = "updateSizesFromModdedRomFsFolderToolStripMenuItem";
-            updateSizesFromModdedRomFsFolderToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
-            updateSizesFromModdedRomFsFolderToolStripMenuItem.Text = "Update from modded RomFs...";
-            updateSizesFromModdedRomFsFolderToolStripMenuItem.Click += updateSizesFromModdedRomFsFolderToolStripMenuItem_Click;
+            updateFromModdedRomFs.ForeColor = System.Drawing.Color.White;
+            updateFromModdedRomFs.Image = Properties.Resources.update;
+            updateFromModdedRomFs.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            updateFromModdedRomFs.Name = "updateFromModdedRomFs";
+            updateFromModdedRomFs.Size = new System.Drawing.Size(245, 30);
+            updateFromModdedRomFs.Text = "Update from modded RomFs...";
+            updateFromModdedRomFs.Click += UpdateFromModdedRomFs_Click;
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(242, 6);
+            // 
+            // closeFileToolStripMenuItem
+            // 
+            closeFileToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            closeFileToolStripMenuItem.Image = Properties.Resources.cancel;
+            closeFileToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            closeFileToolStripMenuItem.Name = "closeFileToolStripMenuItem";
+            closeFileToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
+            closeFileToolStripMenuItem.Text = "Close File";
+            closeFileToolStripMenuItem.Click += closeFileToolStripMenuItem_Click;
             // 
             // optionsToolStripMenuItem
             // 
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             optionsToolStripMenuItem.Text = "Options";
-            // 
-            // checkToolStripMenuItem
-            // 
-            checkToolStripMenuItem.Name = "checkToolStripMenuItem";
-            checkToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
-            checkToolStripMenuItem.Text = "Check";
-            checkToolStripMenuItem.Click += checkToolStripMenuItem_Click;
             // 
             // devToolStripMenuItem
             // 
@@ -224,40 +238,74 @@
             updateHashListToolStripMenuItem.Text = "Update Hash List";
             updateHashListToolStripMenuItem.Click += updateHashListToolStripMenuItem_Click;
             // 
+            // statusBar
+            // 
+            statusBar.BackColor = System.Drawing.Color.Transparent;
+            statusBar.ForeColor = System.Drawing.Color.White;
+            statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { statusProgressBar, statusLabel });
+            statusBar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            statusBar.Location = new System.Drawing.Point(0, 323);
+            statusBar.Name = "statusBar";
+            statusBar.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            statusBar.Size = new System.Drawing.Size(538, 22);
+            statusBar.SizingGrip = false;
+            statusBar.TabIndex = 7;
+            statusBar.Text = "darkStatusStrip1";
+            // 
+            // statusProgressBar
+            // 
+            statusProgressBar.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            statusProgressBar.Name = "statusProgressBar";
+            statusProgressBar.Size = new System.Drawing.Size(100, 16);
+            statusProgressBar.Value = 25;
+            // 
+            // statusLabel
+            // 
+            statusLabel.Name = "statusLabel";
+            statusLabel.Size = new System.Drawing.Size(16, 17);
+            statusLabel.Text = "...";
+            // 
             // RSTBEditor
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             BackColor = System.Drawing.Color.FromArgb(51, 51, 51);
-            ClientSize = new System.Drawing.Size(625, 345);
+            ClientSize = new System.Drawing.Size(538, 345);
+            Controls.Add(statusBar);
             Controls.Add(mainDataGridView);
-            Controls.Add(darkMenuStrip1);
+            Controls.Add(TopMenu);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             Name = "RSTBEditor";
             Text = "RSTB Editor";
             ((System.ComponentModel.ISupportInitialize)mainDataGridView).EndInit();
-            darkMenuStrip1.ResumeLayout(false);
-            darkMenuStrip1.PerformLayout();
+            TopMenu.ResumeLayout(false);
+            TopMenu.PerformLayout();
+            statusBar.ResumeLayout(false);
+            statusBar.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
         private System.Windows.Forms.DataGridView mainDataGridView;
-        private Components.DarkMenuStrip darkMenuStrip1;
+        private Components.DarkMenuStrip TopMenu;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem updateSizesFromModdedRomFsFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem updateFromModdedRomFs;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.DataGridViewTextBoxColumn fileName;
         private System.Windows.Forms.DataGridViewTextBoxColumn fileSize;
         private System.Windows.Forms.DataGridViewTextBoxColumn DLC;
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem checkToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem devToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkIfFileSizesAreMatchingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem updateHashListToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem closeFileToolStripMenuItem;
+        private Components.DarkStatusStrip statusBar;
+        private System.Windows.Forms.ToolStripProgressBar statusProgressBar;
+        private System.Windows.Forms.ToolStripStatusLabel statusLabel;
     }
 }

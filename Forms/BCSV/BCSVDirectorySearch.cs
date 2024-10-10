@@ -92,7 +92,6 @@ namespace HeavenTool.Forms
             }
 
             bcsvFile = null;
-            GC.Collect();
         }
     }
 }

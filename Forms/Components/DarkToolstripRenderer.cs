@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace HeavenTool.Forms.Components
 {
-    class DarkMenuStrip : MenuStrip
+    public class DarkMenuStrip : MenuStrip
     {
         public DarkMenuStrip()
         {
@@ -15,7 +15,18 @@ namespace HeavenTool.Forms.Components
         }
     }
 
-    class DarkContextMenuStrip : ContextMenuStrip
+    public class DarkStatusStrip : StatusStrip { 
+        
+        public DarkStatusStrip() : base()
+        {
+            BackColor = Color.Transparent;
+            ForeColor = Color.White;
+
+            Renderer = new ToolStripProfessionalRenderer(new DarkColorTable());
+        }
+    }
+
+    public class DarkContextMenuStrip : ContextMenuStrip
     {
         public DarkContextMenuStrip(IContainer container) : base(container)
         {
@@ -28,6 +39,15 @@ namespace HeavenTool.Forms.Components
 
     class DarkColorTable : ProfessionalColorTable
     {
+        public override Color StatusStripBorder => Color.FromArgb(0xff, 0x47, 0x47, 0x47);
+        public override Color StatusStripGradientBegin => Color.FromArgb(0xff, 0x47, 0x47, 0x47);
+        public override Color StatusStripGradientEnd => Color.FromArgb(0xff, 0x47, 0x47, 0x47);
+
+        public override Color GripDark => Color.FromArgb(0xff, 40, 40, 40);
+        public override Color GripLight => Color.FromArgb(0xff, 50, 50, 50);
+
+        public override Color ToolStripBorder => Color.FromArgb(0xff, 0x47, 0x47, 0x47);
+
         public override Color MenuItemBorder => Color.Empty;
         public override Color MenuItemSelected => Color.FromArgb(0xff, 0x47, 0x47, 0x47);
         public override Color MenuItemSelectedGradientBegin => Color.FromArgb(0xff, 0x47, 0x47, 0x47);

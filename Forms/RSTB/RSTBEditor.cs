@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace HeavenTool.Forms.RSTB;
@@ -26,9 +27,22 @@ public partial class RSTBEditor : Form
         mainDataGridView.Columns["fileName"].ValueType = typeof(string);
         mainDataGridView.Columns["fileSize"].ValueType = typeof(uint);
         mainDataGridView.Columns["DLC"].ValueType = typeof(uint);
+        mainDataGridView.ShowCellToolTips = false;
+
+        statusBar.Visible = false;
+
+        RefreshMenuButtons();
     }
 
-    ResourceTable LoadedFile;
+    public ResourceTable LoadedFile { get; set; }
+
+    private void RefreshMenuButtons()
+    {
+        saveAsToolStripMenuItem.Enabled = LoadedFile?.IsLoaded == true;
+        updateFromModdedRomFs.Enabled = LoadedFile?.IsLoaded == true;
+        closeFileToolStripMenuItem.Enabled = LoadedFile?.IsLoaded == true;
+    }
+
     private void openToolStripMenuItem_Click(object sender, EventArgs e)
     {
         mainDataGridView.Rows.Clear();
@@ -47,13 +61,15 @@ public partial class RSTBEditor : Form
             var filePath = openFileDialog.FileName;
             LoadedFile = new ResourceTable(filePath);
             PopulateGridView();
+
+            RefreshMenuButtons();
         }
     }
 
     private void PopulateGridView()
     {
         mainDataGridView.Rows.Clear();
-        if (!LoadedFile.IsLoaded) return;
+        if (LoadedFile?.IsLoaded != true) return;
 
         DrawingControl.SuspendDrawing(mainDataGridView);
 
@@ -135,20 +151,6 @@ public partial class RSTBEditor : Form
             LoadedFile.SaveTo(saveFileDialog.FileName);
     }
 
-    private void checkToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        var fileOpen = new OpenFileDialog();
-
-        if (fileOpen.ShowDialog() == DialogResult.OK)
-        {
-            var filePath = fileOpen.FileName;
-
-            var size = GetFileSize(filePath);
-
-            MessageBox.Show($"Size: {size}");
-        }
-    }
-
     internal uint GetFileSize(string fileName)
     {
         long size;
@@ -196,12 +198,10 @@ public partial class RSTBEditor : Form
 
             var allFiles = Directory.GetFiles(romFsPath, "*", SearchOption.AllDirectories);
             bool success = true;
-
+            
             foreach (var file in allFiles)
             {
                 var path = Path.GetRelativePath(romFsPath, file).Replace('\\', '/');
-
-                //MessageBox.Show(path);
 
                 if (LoadedFile.Dictionary.TryGetValue(path, out var result))
                 {
@@ -223,7 +223,7 @@ public partial class RSTBEditor : Form
         }
     }
 
-    private void updateSizesFromModdedRomFsFolderToolStripMenuItem_Click(object sender, EventArgs e)
+    private void UpdateFromModdedRomFs_Click(object sender, EventArgs e)
     {
         if (LoadedFile == null || !LoadedFile.IsLoaded) return;
 
@@ -241,57 +241,113 @@ public partial class RSTBEditor : Form
             List<string> changedFiles = [];
             List<string> addedFiles = [];
 
-            foreach (var originalFile in allFiles)
+            TopMenu.Enabled = false;
+
+          
+            statusBar.Visible = true;
+            statusProgressBar.Maximum = allFiles.Length;
+            statusProgressBar.Value = 0;
+
+            void updateStatus(int quantity)
             {
-                var path = Path.GetRelativePath(romFsPath, originalFile).Replace('\\', '/');
+                if (IsDisposed || Disposing) return;
 
-                // Remove .zs extension
-                if (path.EndsWith(".zs"))
-                    path = path[..^3];
+                if (statusBar.InvokeRequired)
+                    statusBar.BeginInvoke(() => statusLabel.Text = $"Getting file size... ({quantity}/{allFiles.Length})");
 
-                var fileSize = GetFileSize(originalFile);
+                else
+                    statusLabel.Text = $"Getting file size... ({quantity}/{allFiles.Length})";
+            }
 
-                if (LoadedFile.Dictionary.TryGetValue(path, out var result) && fileSize != result.FileSize)
+            void updateProgress(int quantity)
+            {
+                if (IsDisposed || Disposing) return;
+
+                if (statusBar.InvokeRequired)
+                    statusBar.BeginInvoke(() => statusProgressBar.Value = quantity);
+                
+                else
+                    statusProgressBar.Value= quantity;
+            }
+
+
+            updateStatus(0);
+
+            Task.Factory.StartNew(() =>
+            {
+                int currentPosition = 1;
+                foreach (var originalFile in allFiles)
                 {
-                    result.FileSize = fileSize;
-                    changedFiles.Add(path);
-                }
-                else if (!LoadedFile.Dictionary.ContainsKey(path))
-                {
-                    LoadedFile.AddEntry(new ResourceTable.ResourceTableEntry()
+                    if (IsDisposed || Disposing) break;
+
+                    updateStatus(currentPosition);
+
+                    var path = Path.GetRelativePath(romFsPath, originalFile).Replace('\\', '/');
+
+                    // Remove .zs extension
+                    if (path.EndsWith(".zs"))
+                        path = path[..^3];
+
+                    var fileSize = GetFileSize(originalFile);
+
+                    if (IsDisposed || Disposing) break;
+                    if (LoadedFile.Dictionary.TryGetValue(path, out var result) && fileSize != result.FileSize)
                     {
-                        FileName = path,
-                        CRCHash = path.ToCRC32(),
-                        DLC = 0,
-                        FileSize = fileSize
-                    });
+                        result.FileSize = fileSize;
+                        changedFiles.Add(path);
+                    }
+                    else if (!LoadedFile.Dictionary.ContainsKey(path))
+                    {
+                        LoadedFile.AddEntry(new ResourceTable.ResourceTableEntry()
+                        {
+                            FileName = path,
+                            CRCHash = path.ToCRC32(),
+                            DLC = 0,
+                            FileSize = fileSize
+                        });
 
-                    addedFiles.Add(path);
+                        addedFiles.Add(path);
+                    }
+
+                    updateProgress(currentPosition);
+                    currentPosition++;
                 }
-            }
 
-            if (changedFiles.Count > 0 || addedFiles.Count > 0)
-            {
-                MessageBox.Show($"Successfully updated table values!" +
-                    (changedFiles.Count > 0 ? $"\nUpdated {changedFiles.Count} files." : "") +
-                    (addedFiles.Count > 0 ? $"\nAdded {addedFiles.Count} files." : "") +
-                    "\n\nYou need to manually save your file in File > Save as...",
-                    "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+                if (IsDisposed || Disposing) return;
 
-            // Repopulate grid view with up-to-date information
-            PopulateGridView();
+                BeginInvoke(() =>
+                {
+                    TopMenu.Enabled = true;
 
-            foreach (DataGridViewRow row in mainDataGridView.Rows)
-            {
-                var name = row.Cells[0].Value.ToString();
+                   
+                    statusBar.Visible = false;
+                   
 
-                if (changedFiles.Contains(name))
-                    row.DefaultCellStyle.BackColor = Color.Yellow;
+                    if (changedFiles.Count > 0 || addedFiles.Count > 0)
+                    {
+                        MessageBox.Show($"Successfully updated table values!" +
+                            (changedFiles.Count > 0 ? $"\nUpdated {changedFiles.Count} files." : "") +
+                            (addedFiles.Count > 0 ? $"\nAdded {addedFiles.Count} files." : "") +
+                            "\n\nYou need to manually save your file in File > Save as...",
+                            "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
 
-                if (addedFiles.Contains(name))
-                    row.DefaultCellStyle.BackColor = Color.Green;
-            }
+                    // Repopulate grid view with up-to-date information
+                    PopulateGridView();
+
+                    foreach (DataGridViewRow row in mainDataGridView.Rows)
+                    {
+                        var name = row.Cells[0].Value.ToString();
+
+                        if (changedFiles.Contains(name))
+                            row.DefaultCellStyle.BackColor = Color.Yellow;
+
+                        if (addedFiles.Contains(name))
+                            row.DefaultCellStyle.BackColor = Color.Green;
+                    }
+                });
+                
+            });
         }
     }
 
@@ -332,5 +388,16 @@ public partial class RSTBEditor : Form
             // Save
             RomFsNameManager.Update(files);
         }
+    }
+
+    private void closeFileToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        LoadedFile.Dispose();
+        LoadedFile = null;
+
+        mainDataGridView.Rows.Clear();
+        mainDataGridView.Dispose();
+
+        RefreshMenuButtons();
     }
 }

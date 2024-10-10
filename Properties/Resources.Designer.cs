@@ -115,7 +115,7 @@ namespace HeavenTool.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap export_csv {
             get {
-                object obj = ResourceManager.GetObject("export_csv", resourceCulture);
+                object obj = ResourceManager.GetObject("export-csv", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -145,7 +145,7 @@ namespace HeavenTool.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap lock_icon {
             get {
-                object obj = ResourceManager.GetObject("lock_icon", resourceCulture);
+                object obj = ResourceManager.GetObject("lock-icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -165,7 +165,7 @@ namespace HeavenTool.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap new_entry {
             get {
-                object obj = ResourceManager.GetObject("new_entry", resourceCulture);
+                object obj = ResourceManager.GetObject("new-entry", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -226,6 +226,16 @@ namespace HeavenTool.Properties {
         internal static System.Drawing.Bitmap search {
             get {
                 object obj = ResourceManager.GetObject("search", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap update {
+            get {
+                object obj = ResourceManager.GetObject("update", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

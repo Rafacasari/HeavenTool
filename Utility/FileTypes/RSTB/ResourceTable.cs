@@ -1,4 +1,5 @@
-﻿using HeavenTool.Utility.IO;
+﻿using HeavenTool.Utility.FileTypes.BCSV;
+using HeavenTool.Utility.IO;
 using HeavenTool.Utility.IO.Compression;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Windows.Forms;
 
 namespace HeavenTool.Utility.FileTypes.RSTB;
 
-public class ResourceTable
+public class ResourceTable : IDisposable
 {
     public class ResourceTableEntry
     {
@@ -134,6 +135,8 @@ public class ResourceTable
     /// <param name="entry"></param>
     public void AddEntry(ResourceTableEntry entry)
     {
+        if (entry == null) return;
+
         if (!string.IsNullOrEmpty(entry.FileName))
             RomFsNameManager.Add(entry.FileName);
         else throw new Exception("FileName is not defined!");
@@ -260,5 +263,28 @@ public class ResourceTable
         using var fileStream = File.OpenWrite(filePath);
         fileStream.Write(result);
 
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private bool disposed = false;
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                IsLoaded = false;
+                Dictionary.Clear();
+                Dictionary = null;
+            }
+
+            // Indicate that the instance has been disposed.
+            disposed = true;
+        }
     }
 }
