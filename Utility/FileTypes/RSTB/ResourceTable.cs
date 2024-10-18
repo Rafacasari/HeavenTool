@@ -1,5 +1,4 @@
-﻿using HeavenTool.Utility.FileTypes.BCSV;
-using HeavenTool.Utility.IO;
+﻿using HeavenTool.Utility.IO;
 using HeavenTool.Utility.IO.Compression;
 using System;
 using System.Collections.Generic;
@@ -14,7 +13,39 @@ public class ResourceTable : IDisposable
 {
     public class ResourceTableEntry
     {
-        public bool IsDuplicatedEntry;
+        public ResourceTableEntry()
+        {
+
+        }
+
+        public ResourceTableEntry(uint hash, uint fileSize, bool isDuplicated)
+        {
+            CRCHash = hash;
+            FileSize = fileSize;
+            IsDuplicatedEntry = isDuplicated;
+        }
+
+        public ResourceTableEntry(string name, uint fileSize, bool isDuplicated)
+        {
+            CRCHash = name.ToCRC32();
+            _fileName = name;
+            FileSize = fileSize;
+            IsDuplicatedEntry = isDuplicated;
+        }
+
+
+        private bool _isDuplicated;
+        public bool IsDuplicatedEntry
+        {
+            get
+            {
+                return _isDuplicated;
+            }
+            set
+            {
+                _isDuplicated = value;
+            }
+        }
 
         private bool unknownHash;
         private string _fileName;
@@ -26,9 +57,6 @@ public class ResourceTable : IDisposable
         {
             get
             {
-                // Duplicated entries don't should have a name
-                if (IsDuplicatedEntry) return null;
-
                 if (CRCHash > 0 && _fileName == null && !unknownHash)
                 {
                     // Try to get the file name using our files
@@ -101,29 +129,30 @@ public class ResourceTable : IDisposable
     /// </summary>
     public string HEADER { get; private set; }
 
+    /// <summary>
+    /// Get a <seealso cref="ResourceTableEntry"/> from <seealso cref="Entries"/> using <seealso cref="ResourceTableEntry.FileName"/>
+    /// </summary>
     public Dictionary<string, ResourceTableEntry> Dictionary { get; private set; }
 
-    /// <summary>
-    /// Get <b>ALL</b> entries, use <see cref="UniqueEntries"/> to get unique entries or <see cref="RepeatedHashesEntries"/> for repeated hashes
-    /// </summary>
+    public List<ResourceTableEntry> Entries { get; private set; }
+
+    ///// <summary>
+    ///// Get <b>ALL</b> entries, use <see cref="UniqueEntries"/> to get unique entries or <see cref="RepeatedHashesEntries"/> for repeated hashes
+    ///// </summary>
     //public List<ResourceTableEntry> Entries { get; private set; }
 
     /// <summary>
     /// <para>Used when the fileName CRC32 is <b>unique</b>.</para>
     /// Entries in that list does <b>NOT</b> contain the fileName parameter assigned, the CRC should be decrypted using the RomFs folder
     /// </summary>
-    public List<ResourceTableEntry> UniqueEntries
-    {
-        get { return Dictionary.Values.Where(x => !x.IsDuplicatedEntry).ToList(); }
-    }
+    public Dictionary<string, ResourceTableEntry> UniqueEntries() => Dictionary.Where(x => !x.Value.IsDuplicatedEntry).ToDictionary(x => x.Key, x => x.Value);
+    
 
     /// <summary>
     /// If have two (or more) file names that have the same hash both are put here
     /// </summary>
-    public List<ResourceTableEntry> RepeatedHashesEntries
-    {
-        get { return Dictionary.Values.Where(x => x.IsDuplicatedEntry).ToList(); }
-    }
+    public Dictionary<string, ResourceTableEntry> NonUniqueEntries() => Dictionary.Where(x => x.Value.IsDuplicatedEntry).ToDictionary(x => x.Key, x => x.Value);
+    
 
     public bool IsRSTC => HEADER == "RSTC";
 
@@ -159,20 +188,19 @@ public class ResourceTable : IDisposable
             var fileHeader = fileStream.ReadString(4, Encoding.ASCII);
             var isDecompressed = fileHeader == "RSTB" || fileHeader == "RSTC";
 
-            // Go to begin again
-            fileStream.Seek(0, SeekOrigin.Begin);
+            fileStream.Position = 0;
 
             MemoryStream memoryStream = new();
 
             if (!isDecompressed)
             {
-                if (!Yaz0CompressionAlgorithm.TryToDecompress(fileStream, out ReadOnlySpan<byte> decompressedBytes))
+                if (!Yaz0CompressionAlgorithm.TryToDecompress(fileStream, out byte[] decompressedBytes))
                 {
                     MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                memoryStream = new MemoryStream(decompressedBytes.ToArray());
+                memoryStream = new MemoryStream(decompressedBytes);
             }
             else
             {
@@ -197,17 +225,14 @@ public class ResourceTable : IDisposable
 
             for (int i = 0; i < uniqueEntriesCount; i++)
             {
-                var entry = new ResourceTableEntry
-                {
-                    CRCHash = reader.ReadUInt32(),
-                    FileSize = reader.ReadUInt32(),
-                    IsDuplicatedEntry = false
-                };
+                var hash = reader.ReadUInt32();
+                var fileSize = reader.ReadUInt32();
+
+                var entry = new ResourceTableEntry(hash, fileSize, false);
 
                 if (IsRSTC) entry.DLC = reader.ReadUInt32();
 
-                //Entries.Add(entry);
-
+                // If the hash is not found, we gonna throw an error and this should prevent the file from loading
                 if (entry.FileName != null)
                     Dictionary.TryAdd(entry.FileName, entry);
                 else throw new Exception($"Hash {entry.CRCHash:x} not found!");
@@ -215,12 +240,10 @@ public class ResourceTable : IDisposable
 
             for (int i = 0; i < repeatedEntriesCount; i++)
             {
-                var entry = new ResourceTableEntry
-                {
-                    FileName = reader.ReadString(128, Encoding.ASCII),
-                    FileSize = reader.ReadUInt32(),
-                    IsDuplicatedEntry = true
-                };
+                var fileName = reader.ReadString(128, Encoding.ASCII);
+                var fileSize = reader.ReadUInt32(); ;
+
+                var entry = new ResourceTableEntry(fileName, fileSize, true);
 
                 if (IsRSTC) entry.DLC = reader.ReadUInt32();
 
@@ -230,6 +253,30 @@ public class ResourceTable : IDisposable
         }
 
         IsLoaded = true;
+
+        UpdateUniques();
+
+        var nonUniqueEntries = Dictionary.Where(x => x.Value.IsDuplicatedEntry).ToList();
+        MessageBox.Show(Dictionary.Count(x => x.Value.IsDuplicatedEntry).ToString());
+    }
+
+    /// <summary>
+    /// This function will update <seealso cref="ResourceTableEntry.IsDuplicatedEntry"/> values in <seealso cref="Dictionary"/>.
+    /// </summary>
+    public void UpdateUniques()
+    {
+        if (!IsLoaded) return;
+
+        var groups = Dictionary.GroupBy(x => x.Value.CRCHash);
+
+        foreach(var group in groups)
+        {
+            var count = group.Count();
+
+            foreach(var (_, entry) in group)
+                entry.IsDuplicatedEntry = count > 1;
+            
+        }
     }
 
     /// <summary>
@@ -238,19 +285,29 @@ public class ResourceTable : IDisposable
     /// <param name="filePath">File Location</param>
     public void SaveTo(string filePath)
     {
+        //var orderableDictionary = Dictionary.OrderBy(x => x.Key).GroupBy(x => x.Value.CRCHash);
+
+        //var nonUniqueEntries = orderableDictionary.Where(x => x.Count() > 1).SelectMany(x => x.Select(y => y.Value)).ToList();
+        //var uniqueEntries = orderableDictionary.Where(x => x.Count() == 1).SelectMany(x => x.Select(y => y.Value)).ToList();
+
+        UpdateUniques();
+
+        var uniqueEntries = Dictionary.Where(x => !x.Value.IsDuplicatedEntry).ToList();
+        var nonUniqueEntries = Dictionary.Where(x => x.Value.IsDuplicatedEntry).ToList();
+
         using var memoryStream = new MemoryStream();
         using var writer = new BinaryWriter(memoryStream);
 
         // Write header
         writer.Write(Encoding.ASCII.GetBytes(HEADER));
 
-        writer.Write(UniqueEntries.Count);
-        writer.Write(RepeatedHashesEntries.Count);
+        writer.Write(uniqueEntries.Count);
+        writer.Write(nonUniqueEntries.Count);
 
-        foreach (var entry in UniqueEntries)
+        foreach (var (_, entry) in uniqueEntries)
             entry.Write(writer, IsRSTC);
 
-        foreach (var entry in RepeatedHashesEntries)
+        foreach (var (_, entry) in nonUniqueEntries)
             entry.Write(writer, IsRSTC);
 
 
@@ -262,7 +319,6 @@ public class ResourceTable : IDisposable
 
         using var fileStream = File.OpenWrite(filePath);
         fileStream.Write(result);
-
     }
 
     public void Dispose()

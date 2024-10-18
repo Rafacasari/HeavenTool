@@ -127,7 +127,7 @@ namespace HeavenTool.Utility.IO.Compression
 
         public static bool CanDecompress(ReadOnlySpan<byte> bytes) => bytes[0..4].SequenceEqual("Yaz0"u8);
 
-        public static bool TryToDecompress(Stream stream, out ReadOnlySpan<byte> bytes)
+        public static bool TryToDecompress(Stream stream, out byte[] bytes)
         {
             bytes = [];
             var compressedBytes = stream.ToArray();

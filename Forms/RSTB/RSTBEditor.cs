@@ -4,6 +4,7 @@ using HeavenTool.Utility.FileTypes.RSTB;
 using HeavenTool.Utility.IO;
 using HeavenTool.Utility.IO.Compression;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -29,6 +30,7 @@ public partial class RSTBEditor : Form
         mainDataGridView.Columns["DLC"].ValueType = typeof(uint);
         mainDataGridView.ShowCellToolTips = false;
 
+        statusProgressBar.Visible = false;
         statusBar.Visible = false;
 
         RefreshMenuButtons();
@@ -73,26 +75,32 @@ public partial class RSTBEditor : Form
 
         DrawingControl.SuspendDrawing(mainDataGridView);
 
-        foreach (var entry in LoadedFile.UniqueEntries)
+        var uniqueEntries = LoadedFile.Dictionary.Values.Where(x => !x.IsDuplicatedEntry).ToList();
+        var nonUniqueEntries = LoadedFile.Dictionary.Values.Where(x => x.IsDuplicatedEntry).ToList();
+
+        foreach (var entry in uniqueEntries)
+        {
+            var values = new List<object>() { entry.FileName, entry.FileSize };
+
+            if (LoadedFile.IsRSTC)
+                values.Add(entry.DLC);
+
+            mainDataGridView.Rows.Add([.. values]);
+        }
+
+        foreach (var entry in nonUniqueEntries)
         {
             var values = new List<object>() { entry.FileName, entry.FileSize };
 
             if (LoadedFile.HEADER == "RSTC")
                 values.Add(entry.DLC);
 
-            mainDataGridView.Rows.Add([.. values]);
+            var row = mainDataGridView.Rows.Add([.. values]);
         }
 
-        foreach (var entry in LoadedFile.RepeatedHashesEntries)
-        {
-            var values = new List<object>() { entry.FileName, entry.FileSize };
-
-            if (LoadedFile.HEADER == "RSTC")
-                values.Add(entry.DLC);
-
-            mainDataGridView.Rows.Add([.. values]);
-        }
-
+        statusBar.Visible = true;
+        statusLabel.Text = $"Entries: {LoadedFile.Dictionary.Count} ({LoadedFile.UniqueEntries().Count}/{LoadedFile.NonUniqueEntries().Count})";
+        
         DrawingControl.ResumeDrawing(mainDataGridView);
     }
 
@@ -243,17 +251,17 @@ public partial class RSTBEditor : Form
 
             TopMenu.Enabled = false;
 
-          
-            statusBar.Visible = true;
+            statusLabel.Text = $"";
+            statusProgressBar.Visible = true;
             statusProgressBar.Maximum = allFiles.Length;
             statusProgressBar.Value = 0;
 
-            void updateStatus(int quantity)
+            void updateStatus(int quantity, string fileName)
             {
                 if (IsDisposed || Disposing) return;
 
                 if (statusBar.InvokeRequired)
-                    statusBar.BeginInvoke(() => statusLabel.Text = $"Getting file size... ({quantity}/{allFiles.Length})");
+                    statusBar.BeginInvoke(() => statusLabel.Text = $"Getting file size... {fileName} ({quantity}/{allFiles.Length})");
 
                 else
                     statusLabel.Text = $"Getting file size... ({quantity}/{allFiles.Length})";
@@ -271,8 +279,6 @@ public partial class RSTBEditor : Form
             }
 
 
-            updateStatus(0);
-
             Task.Factory.StartNew(() =>
             {
                 int currentPosition = 1;
@@ -280,9 +286,8 @@ public partial class RSTBEditor : Form
                 {
                     if (IsDisposed || Disposing) break;
 
-                    updateStatus(currentPosition);
-
                     var path = Path.GetRelativePath(romFsPath, originalFile).Replace('\\', '/');
+                    updateStatus(currentPosition, path);
 
                     // Remove .zs extension
                     if (path.EndsWith(".zs"))
@@ -298,13 +303,7 @@ public partial class RSTBEditor : Form
                     }
                     else if (!LoadedFile.Dictionary.ContainsKey(path))
                     {
-                        LoadedFile.AddEntry(new ResourceTable.ResourceTableEntry()
-                        {
-                            FileName = path,
-                            CRCHash = path.ToCRC32(),
-                            DLC = 0,
-                            FileSize = fileSize
-                        });
+                        LoadedFile.AddEntry(new ResourceTable.ResourceTableEntry(path, fileSize, false));
 
                         addedFiles.Add(path);
                     }
@@ -318,10 +317,7 @@ public partial class RSTBEditor : Form
                 BeginInvoke(() =>
                 {
                     TopMenu.Enabled = true;
-
-                   
-                    statusBar.Visible = false;
-                   
+                    statusProgressBar.Visible = false;
 
                     if (changedFiles.Count > 0 || addedFiles.Count > 0)
                     {
