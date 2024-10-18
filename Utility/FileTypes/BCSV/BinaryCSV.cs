@@ -175,6 +175,8 @@ public class BinaryCSV : IDisposable
             {
                 if (translation.EndsWith(" u8") && currentField.Size > 1)
                     type = BCSVDataType.MultipleU8;
+                else if (translation.EndsWith(" s8") && currentField.Size > 1)
+                    type = BCSVDataType.MultipleS8;
             }
             else
             {
@@ -201,7 +203,8 @@ public class BinaryCSV : IDisposable
             {
                 var currentField = Fields[fieldId];
 
-                // Seems after the "MultipleU8" implementation this isn't really needed cause fields should always have the correct size, but it's better to keep just to make sure
+                // Since we don't have all headers translated, it's good to keep this right here.
+                // It will jump to the specific position of each entry.
                 reader.SeekBegin(entryPosition + currentField.Offset);
 
                 object value = 0;
@@ -209,6 +212,10 @@ public class BinaryCSV : IDisposable
                 {
                     case BCSVDataType.MultipleU8:
                         value = reader.ReadBytes((int)currentField.Size);
+                        break;
+
+                    case BCSVDataType.MultipleS8:
+                        value = (sbyte[])(Array) reader.ReadBytes((int) currentField.Size);
                         break;
 
                     case BCSVDataType.S8:
@@ -303,6 +310,7 @@ public class BinaryCSV : IDisposable
                     switch (field.DataType)
                     {
                         case BCSVDataType.MultipleU8:
+                        case BCSVDataType.MultipleS8:
                             writer.Write((byte[])entryValue);
                             break;
 

@@ -13,11 +13,6 @@ public class ResourceTable : IDisposable
 {
     public class ResourceTableEntry
     {
-        public ResourceTableEntry()
-        {
-
-        }
-
         public ResourceTableEntry(uint hash, uint fileSize, bool isDuplicated)
         {
             CRCHash = hash;
@@ -255,9 +250,6 @@ public class ResourceTable : IDisposable
         IsLoaded = true;
 
         UpdateUniques();
-
-        var nonUniqueEntries = Dictionary.Where(x => x.Value.IsDuplicatedEntry).ToList();
-        MessageBox.Show(Dictionary.Count(x => x.Value.IsDuplicatedEntry).ToString());
     }
 
     /// <summary>

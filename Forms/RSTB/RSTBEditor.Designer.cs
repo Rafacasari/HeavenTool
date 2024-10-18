@@ -166,7 +166,7 @@
             openToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O;
             openToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
             openToolStripMenuItem.Text = "&Open";
-            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            openToolStripMenuItem.Click += OpenToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
@@ -177,7 +177,7 @@
             saveAsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S;
             saveAsToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
             saveAsToolStripMenuItem.Text = "&Save as...";
-            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
+            saveAsToolStripMenuItem.Click += SaveAsToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
@@ -207,7 +207,7 @@
             closeFileToolStripMenuItem.Name = "closeFileToolStripMenuItem";
             closeFileToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
             closeFileToolStripMenuItem.Text = "Close File";
-            closeFileToolStripMenuItem.Click += closeFileToolStripMenuItem_Click;
+            closeFileToolStripMenuItem.Click += CloseFileToolStripMenuItem_Click;
             // 
             // optionsToolStripMenuItem
             // 
@@ -228,7 +228,7 @@
             checkIfFileSizesAreMatchingToolStripMenuItem.Name = "checkIfFileSizesAreMatchingToolStripMenuItem";
             checkIfFileSizesAreMatchingToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             checkIfFileSizesAreMatchingToolStripMenuItem.Text = "Check if file sizes are matching";
-            checkIfFileSizesAreMatchingToolStripMenuItem.Click += checkIfFileSizesAreMatchingToolStripMenuItem_Click;
+            checkIfFileSizesAreMatchingToolStripMenuItem.Click += CheckIfFileSizesAreMatchingToolStripMenuItem_Click;
             // 
             // updateHashListToolStripMenuItem
             // 
@@ -236,7 +236,7 @@
             updateHashListToolStripMenuItem.Name = "updateHashListToolStripMenuItem";
             updateHashListToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             updateHashListToolStripMenuItem.Text = "Update Hash List";
-            updateHashListToolStripMenuItem.Click += updateHashListToolStripMenuItem_Click;
+            updateHashListToolStripMenuItem.Click += UpdateHashListToolStripMenuItem_Click;
             // 
             // statusBar
             // 

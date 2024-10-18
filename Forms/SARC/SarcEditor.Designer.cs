@@ -64,7 +64,7 @@
             openToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O;
             openToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
             openToolStripMenuItem.Text = "Open";
-            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            openToolStripMenuItem.Click += OpenToolStripMenuItem_Click;
             // 
             // filesTreeView
             // 
@@ -85,7 +85,7 @@
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
             saveAsToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
             saveAsToolStripMenuItem.Text = "Save as...";
-            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
+            saveAsToolStripMenuItem.Click += SaveAsToolStripMenuItem_Click;
             // 
             // SarcEditor
             // 

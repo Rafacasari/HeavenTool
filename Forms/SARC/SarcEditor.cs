@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using HeavenTool.Forms.PBC;
 using HeavenTool.Utility.IO;
 using NintendoTools.Compression.Zstd;
-using NintendoTools.FileFormats;
 using NintendoTools.FileFormats.Sarc;
 
 namespace HeavenTool.Forms.SARC;
@@ -30,7 +23,7 @@ public partial class SarcEditor : Form
     private string LoadedFileName {  get; set; }
     private SarcFile LoadedFile;
 
-    private void openToolStripMenuItem_Click(object sender, EventArgs e)
+    private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
     {
         filesTreeView.Nodes.Clear();
 
@@ -114,7 +107,7 @@ public partial class SarcEditor : Form
 
     }
 
-    private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void SaveAsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (LoadedFile == null) return;
 

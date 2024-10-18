@@ -45,7 +45,7 @@ public partial class RSTBEditor : Form
         closeFileToolStripMenuItem.Enabled = LoadedFile?.IsLoaded == true;
     }
 
-    private void openToolStripMenuItem_Click(object sender, EventArgs e)
+    private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
     {
         mainDataGridView.Rows.Clear();
 
@@ -61,11 +61,16 @@ public partial class RSTBEditor : Form
         if (openFileDialog.ShowDialog() == DialogResult.OK)
         {
             var filePath = openFileDialog.FileName;
-            LoadedFile = new ResourceTable(filePath);
-            PopulateGridView();
-
-            RefreshMenuButtons();
+            LoadFile(filePath);
         }
+    }
+
+    public void LoadFile(string path)
+    {
+        LoadedFile = new ResourceTable(path);
+        PopulateGridView();
+
+        RefreshMenuButtons();
     }
 
     private void PopulateGridView()
@@ -104,7 +109,7 @@ public partial class RSTBEditor : Form
         DrawingControl.ResumeDrawing(mainDataGridView);
     }
 
-    private void updateHashesToolStripMenuItem_Click(object sender, EventArgs e)
+    private void UpdateHashesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var choose = MessageBox.Show("This action need the entire RomFs dump! (Including game-updates and DLC)\nIf you don't have all these files CANCEL the operation.", "Attention", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
         if (choose == DialogResult.Cancel) return;
@@ -143,7 +148,7 @@ public partial class RSTBEditor : Form
         }
     }
 
-    private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void SaveAsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (LoadedFile == null) return;
 
@@ -159,7 +164,7 @@ public partial class RSTBEditor : Form
             LoadedFile.SaveTo(saveFileDialog.FileName);
     }
 
-    internal uint GetFileSize(string fileName)
+    internal static uint GetFileSize(string fileName)
     {
         long size;
 
@@ -191,7 +196,7 @@ public partial class RSTBEditor : Form
         return Convert.ToUInt32(size);
     }
 
-    private void checkIfFileSizesAreMatchingToolStripMenuItem_Click(object sender, EventArgs e)
+    private void CheckIfFileSizesAreMatchingToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (LoadedFile == null || !LoadedFile.IsLoaded) return;
 
@@ -347,7 +352,7 @@ public partial class RSTBEditor : Form
         }
     }
 
-    private void updateHashListToolStripMenuItem_Click(object sender, EventArgs e)
+    private void UpdateHashListToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var choose = MessageBox.Show("This action need the entire RomFs dump! (Including game-updates and DLC)\nIf you don't have all these files CANCEL the operation.", "Attention", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
         if (choose == DialogResult.Cancel) return;
@@ -386,7 +391,7 @@ public partial class RSTBEditor : Form
         }
     }
 
-    private void closeFileToolStripMenuItem_Click(object sender, EventArgs e)
+    private void CloseFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         LoadedFile.Dispose();
         LoadedFile = null;

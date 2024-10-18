@@ -115,7 +115,7 @@ namespace HeavenTool
             openToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
             openToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
             openToolStripMenuItem.Text = "&Open";
-            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            openToolStripMenuItem.Click += OpenToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
@@ -126,7 +126,7 @@ namespace HeavenTool
             saveAsToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Alt | Keys.S;
             saveAsToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
             saveAsToolStripMenuItem.Text = "Save as...";
-            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
+            saveAsToolStripMenuItem.Click += SaveAsToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
@@ -142,7 +142,7 @@ namespace HeavenTool
             importFromFileToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
             importFromFileToolStripMenuItem.Text = "Import from file...";
             importFromFileToolStripMenuItem.ToolTipText = "Import lines from a BCSV file (headers must match)";
-            importFromFileToolStripMenuItem.Click += importFromFileToolStripMenuItem_Click;
+            importFromFileToolStripMenuItem.Click += ImportFromFileToolStripMenuItem_Click;
             // 
             // exportSelectionToolStripMenuItem
             // 
@@ -153,7 +153,7 @@ namespace HeavenTool
             exportSelectionToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
             exportSelectionToolStripMenuItem.Text = "Export selection...";
             exportSelectionToolStripMenuItem.ToolTipText = "Export the selected lines to a new BCSV file";
-            exportSelectionToolStripMenuItem.Click += exportSelectionToolStripMenuItem_Click;
+            exportSelectionToolStripMenuItem.Click += ExportSelectionToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
@@ -168,7 +168,7 @@ namespace HeavenTool
             exportToCSVFileToolStripMenuItem.Name = "exportToCSVFileToolStripMenuItem";
             exportToCSVFileToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
             exportToCSVFileToolStripMenuItem.Text = "Export as .CSV";
-            exportToCSVFileToolStripMenuItem.Click += exportToCSVFileToolStripMenuItem_Click;
+            exportToCSVFileToolStripMenuItem.Click += ExportToCSVFileToolStripMenuItem_Click;
             // 
             // unloadFileToolStripMenuItem
             // 
@@ -178,7 +178,7 @@ namespace HeavenTool
             unloadFileToolStripMenuItem.Name = "unloadFileToolStripMenuItem";
             unloadFileToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
             unloadFileToolStripMenuItem.Text = "Unload File";
-            unloadFileToolStripMenuItem.Click += unloadFileToolStripMenuItem_Click;
+            unloadFileToolStripMenuItem.Click += UnloadFileToolStripMenuItem_Click;
             // 
             // editToolStripMenuItem
             // 
@@ -187,7 +187,7 @@ namespace HeavenTool
             editToolStripMenuItem.Name = "editToolStripMenuItem";
             editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             editToolStripMenuItem.Text = "Edit";
-            editToolStripMenuItem.DropDownOpening += editToolStripMenuItem_DropDownOpening;
+            editToolStripMenuItem.DropDownOpening += EditToolStripMenuItem_DropDownOpening;
             // 
             // searchToolStripMenuItem
             // 
@@ -199,7 +199,7 @@ namespace HeavenTool
             searchToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
             searchToolStripMenuItem.Text = "Search";
             searchToolStripMenuItem.ToolTipText = "Search for a line on this file";
-            searchToolStripMenuItem.Click += searchToolStripMenuItem_Click;
+            searchToolStripMenuItem.Click += SearchToolStripMenuItem_Click;
             // 
             // newEntryToolStripMenuItem
             // 
@@ -211,7 +211,7 @@ namespace HeavenTool
             newEntryToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
             newEntryToolStripMenuItem.Text = "New Entry";
             newEntryToolStripMenuItem.ToolTipText = "Add a new entry into this file";
-            newEntryToolStripMenuItem.Click += newEntryToolStripMenuItem_Click;
+            newEntryToolStripMenuItem.Click += NewEntryToolStripMenuItem_Click;
             // 
             // duplicateRowToolStripMenuItem
             // 
@@ -223,7 +223,7 @@ namespace HeavenTool
             duplicateRowToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
             duplicateRowToolStripMenuItem.Text = "Duplicate Row(s)";
             duplicateRowToolStripMenuItem.ToolTipText = "Duplicate the selected row(s)";
-            duplicateRowToolStripMenuItem.Click += duplicateRowToolStripMenuItem_Click;
+            duplicateRowToolStripMenuItem.Click += DuplicateRowToolStripMenuItem_Click;
             // 
             // deleteRowsToolStripMenuItem
             // 
@@ -235,7 +235,7 @@ namespace HeavenTool
             deleteRowsToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
             deleteRowsToolStripMenuItem.Text = "Delete Row(s)";
             deleteRowsToolStripMenuItem.ToolTipText = "Delete the selected row(s)";
-            deleteRowsToolStripMenuItem.Click += deleteRowsToolStripMenuItem_Click;
+            deleteRowsToolStripMenuItem.Click += DeleteRowsToolStripMenuItem_Click;
             // 
             // compareRowsToolStripMenuItem
             // 
@@ -247,7 +247,7 @@ namespace HeavenTool
             compareRowsToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
             compareRowsToolStripMenuItem.Text = "Compare Rows";
             compareRowsToolStripMenuItem.ToolTipText = "Compare selected rows in a new window (read-only)";
-            compareRowsToolStripMenuItem.Click += compareRowsToolStripMenuItem_Click;
+            compareRowsToolStripMenuItem.Click += CompareRowsToolStripMenuItem_Click;
             // 
             // devToolStripMenuItem
             // 
@@ -263,7 +263,7 @@ namespace HeavenTool
             associatebcsvWithThisProgramToolStripMenuItem.Name = "associatebcsvWithThisProgramToolStripMenuItem";
             associatebcsvWithThisProgramToolStripMenuItem.Size = new System.Drawing.Size(295, 22);
             associatebcsvWithThisProgramToolStripMenuItem.Text = "Associate .BCSV files with this program";
-            associatebcsvWithThisProgramToolStripMenuItem.Click += associatebcsvWithThisProgramToolStripMenuItem_Click;
+            associatebcsvWithThisProgramToolStripMenuItem.Click += AssociatebcsvWithThisProgramToolStripMenuItem_Click;
             // 
             // exportValidHashesToolStripMenuItem
             // 
@@ -273,7 +273,7 @@ namespace HeavenTool
             exportValidHashesToolStripMenuItem.Size = new System.Drawing.Size(295, 22);
             exportValidHashesToolStripMenuItem.Text = "Export only used hashes of selected folder";
             exportValidHashesToolStripMenuItem.Visible = false;
-            exportValidHashesToolStripMenuItem.Click += exportValidHashesToolStripMenuItem_Click;
+            exportValidHashesToolStripMenuItem.Click += ExportValidHashesToolStripMenuItem_Click;
             // 
             // exportLabelFieldsToolStripMenuItem
             // 
@@ -283,7 +283,7 @@ namespace HeavenTool
             exportLabelFieldsToolStripMenuItem.Size = new System.Drawing.Size(295, 22);
             exportLabelFieldsToolStripMenuItem.Text = "Export Label Fields";
             exportLabelFieldsToolStripMenuItem.Visible = false;
-            exportLabelFieldsToolStripMenuItem.Click += exportLabelFieldsToolStripMenuItem_Click;
+            exportLabelFieldsToolStripMenuItem.Click += ExportLabelFieldsToolStripMenuItem_Click;
             // 
             // exportEnumsToolStripMenuItem
             // 
@@ -293,7 +293,7 @@ namespace HeavenTool
             exportEnumsToolStripMenuItem.Size = new System.Drawing.Size(295, 22);
             exportEnumsToolStripMenuItem.Text = "[Dev] Export Enum(s)";
             exportEnumsToolStripMenuItem.Visible = false;
-            exportEnumsToolStripMenuItem.Click += exportEnumsToolStripMenuItem_Click;
+            exportEnumsToolStripMenuItem.Click += ExportEnumsToolStripMenuItem_Click;
             // 
             // toolsToolStripMenuItem
             // 
@@ -311,7 +311,7 @@ namespace HeavenTool
             searchOnFilesToolStripMenuItem.Name = "searchOnFilesToolStripMenuItem";
             searchOnFilesToolStripMenuItem.Size = new System.Drawing.Size(158, 30);
             searchOnFilesToolStripMenuItem.Text = "Search on files";
-            searchOnFilesToolStripMenuItem.Click += searchOnFilesToolStripMenuItem_Click;
+            searchOnFilesToolStripMenuItem.Click += SearchOnFilesToolStripMenuItem_Click;
             // 
             // devToolsToolStripMenuItem
             // 
@@ -326,7 +326,7 @@ namespace HeavenTool
             dumpFieldsToJson.Name = "dumpFieldsToJson";
             dumpFieldsToJson.Size = new System.Drawing.Size(185, 22);
             dumpFieldsToJson.Text = "Dump Fields to JSON";
-            dumpFieldsToJson.Click += dumpFieldsToJson_Click;
+            dumpFieldsToJson.Click += DumpFieldsToJson_Click;
             // 
             // statusStripMenu
             // 
@@ -406,19 +406,19 @@ namespace HeavenTool
             mainDataGridView.Size = new System.Drawing.Size(684, 341);
             mainDataGridView.StandardTab = true;
             mainDataGridView.TabIndex = 4;
-            mainDataGridView.CellFormatting += mainDataGridView_CellFormatting;
-            mainDataGridView.CellValueChanged += mainDataGridView_CellValueChanged;
-            mainDataGridView.ColumnHeaderMouseClick += mainDataGridView_ColumnHeaderMouseClick;
-            mainDataGridView.EditingControlShowing += mainDataGridView_EditingControlShowing;
-            mainDataGridView.SelectionChanged += mainDataGridView_SelectionChanged;
-            mainDataGridView.SortCompare += mainDataGridView_SortCompare;
+            mainDataGridView.CellFormatting += MainDataGridView_CellFormatting;
+            mainDataGridView.CellValueChanged += MainDataGridView_CellValueChanged;
+            mainDataGridView.ColumnHeaderMouseClick += MainDataGridView_ColumnHeaderMouseClick;
+            mainDataGridView.EditingControlShowing += MainDataGridView_EditingControlShowing;
+            mainDataGridView.SelectionChanged += MainDataGridView_SelectionChanged;
+            mainDataGridView.SortCompare += MainDataGridView_SortCompare;
             // 
             // openBCSVFile
             // 
             openBCSVFile.DefaultExt = "*.bcsv";
             openBCSVFile.Filter = "BCSV|*.bcsv";
             openBCSVFile.Title = "Select a BCSV file...";
-            openBCSVFile.FileOk += openBCSVFile_FileOk;
+            openBCSVFile.FileOk += OpenBCSVFile_FileOk;
             // 
             // validHeaderContextMenu
             // 
@@ -441,7 +441,7 @@ namespace HeavenTool
             headerNameToolStripMenuItem.Name = "headerNameToolStripMenuItem";
             headerNameToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             headerNameToolStripMenuItem.Text = "Header Name";
-            headerNameToolStripMenuItem.Click += headerNameToolStripMenuItem_Click;
+            headerNameToolStripMenuItem.Click += HeaderNameToolStripMenuItem_Click;
             // 
             // headerHashToolStripMenuItem
             // 
@@ -449,7 +449,7 @@ namespace HeavenTool
             headerHashToolStripMenuItem.Name = "headerHashToolStripMenuItem";
             headerHashToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             headerHashToolStripMenuItem.Text = "Header Hash";
-            headerHashToolStripMenuItem.Click += headerHashToolStripMenuItem_Click;
+            headerHashToolStripMenuItem.Click += HeaderHashToolStripMenuItem_Click;
             // 
             // exportValuesAstxtFileToolStripMenuItem
             // 
@@ -457,7 +457,7 @@ namespace HeavenTool
             exportValuesAstxtFileToolStripMenuItem.Name = "exportValuesAstxtFileToolStripMenuItem";
             exportValuesAstxtFileToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             exportValuesAstxtFileToolStripMenuItem.Text = "Export values as .txt file";
-            exportValuesAstxtFileToolStripMenuItem.Click += exportValuesAstxtFileToolStripMenuItem_Click;
+            exportValuesAstxtFileToolStripMenuItem.Click += ExportValuesAstxtFileToolStripMenuItem_Click;
             // 
             // viewAsToolStripMenuItem
             // 
@@ -474,7 +474,7 @@ namespace HeavenTool
             s32u32ToolStripMenuItem.Name = "s32u32ToolStripMenuItem";
             s32u32ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             s32u32ToolStripMenuItem.Text = "UInt";
-            s32u32ToolStripMenuItem.Click += s32u32ToolStripMenuItem_Click;
+            s32u32ToolStripMenuItem.Click += S32u32ToolStripMenuItem_Click;
             // 
             // int32ToolStripMenuItem
             // 
@@ -483,7 +483,7 @@ namespace HeavenTool
             int32ToolStripMenuItem.Name = "int32ToolStripMenuItem";
             int32ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             int32ToolStripMenuItem.Text = "Int";
-            int32ToolStripMenuItem.Click += int32ToolStripMenuItem_Click;
+            int32ToolStripMenuItem.Click += Int32ToolStripMenuItem_Click;
             // 
             // f32ToolStripMenuItem
             // 
@@ -492,7 +492,7 @@ namespace HeavenTool
             f32ToolStripMenuItem.Name = "f32ToolStripMenuItem";
             f32ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             f32ToolStripMenuItem.Text = "Float";
-            f32ToolStripMenuItem.Click += f32ToolStripMenuItem_Click;
+            f32ToolStripMenuItem.Click += F32ToolStripMenuItem_Click;
             // 
             // stringToolStripMenuItem
             // 
@@ -501,7 +501,7 @@ namespace HeavenTool
             stringToolStripMenuItem.Name = "stringToolStripMenuItem";
             stringToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             stringToolStripMenuItem.Text = "String";
-            stringToolStripMenuItem.Click += stringToolStripMenuItem_Click;
+            stringToolStripMenuItem.Click += StringToolStripMenuItem_Click;
             // 
             // hshCstringRefToolStripMenuItem
             // 
@@ -510,7 +510,7 @@ namespace HeavenTool
             hshCstringRefToolStripMenuItem.Name = "hshCstringRefToolStripMenuItem";
             hshCstringRefToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             hshCstringRefToolStripMenuItem.Text = "Crc32";
-            hshCstringRefToolStripMenuItem.Click += hshCstringRefToolStripMenuItem_Click;
+            hshCstringRefToolStripMenuItem.Click += HshCstringRefToolStripMenuItem_Click;
             // 
             // murmurHashToolStripMenuItem
             // 
@@ -519,7 +519,7 @@ namespace HeavenTool
             murmurHashToolStripMenuItem.Name = "murmurHashToolStripMenuItem";
             murmurHashToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             murmurHashToolStripMenuItem.Text = "Murmur3";
-            murmurHashToolStripMenuItem.Click += murmurHashToolStripMenuItem_Click;
+            murmurHashToolStripMenuItem.Click += MurmurHashToolStripMenuItem_Click;
             // 
             // dragInfo
             // 

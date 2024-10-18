@@ -109,13 +109,13 @@ public partial class BCSVForm : Form, ISearchable
         ReloadInfo();
     }
 
-    private void openToolStripMenuItem_Click(object sender, EventArgs e)
+    private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
     {
         openBCSVFile.ShowDialog(this);
     }
 
     private BinaryCSV LoadedFile;
-    private void openBCSVFile_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+    private void OpenBCSVFile_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
     {
         var path = openBCSVFile.FileName;
 
@@ -183,23 +183,20 @@ public partial class BCSVForm : Form, ISearchable
             }
 
             mainDataGridView.Columns[columnId].ToolTipText = toolTip;
-            //mainDataGridView.Columns[columnId].ValueType = fieldHeader.GetValueType();
         }
 
         if (LoadedFile.Entries != null)
         {
             foreach (var entry in LoadedFile.Entries)
-            {
-                var addedRowId = mainDataGridView.Rows.Add(entry.Values.ToArray());
-                var addedRow = mainDataGridView.Rows[addedRowId];
-            }
+                mainDataGridView.Rows.Add([.. entry.Values]);
         }
+
         DrawingControl.ResumeDrawing(mainDataGridView);
 
         ReloadInfo();
     }
 
-    private void mainDataGridView_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+    private void MainDataGridView_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
     {
         var hashedName = mainDataGridView.CurrentCell.OwningColumn.Name;
 
@@ -230,17 +227,17 @@ public partial class BCSVForm : Form, ISearchable
     }
 
     BCSVDirectorySearch directorySearchWindow;
-    private void searchOnFilesToolStripMenuItem_Click(object sender, EventArgs e)
+    private void SearchOnFilesToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (directorySearchWindow == null)
-            directorySearchWindow = new BCSVDirectorySearch();
+        // Create directory search window if needed
+        directorySearchWindow ??= new BCSVDirectorySearch();
 
         directorySearchWindow.Show();
         directorySearchWindow.BringToFront();
     }
 
     bool ignoreNextChangeEvent = false;
-    private void mainDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+    private void MainDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
     {
 
         if (ignoreNextChangeEvent)
@@ -251,7 +248,7 @@ public partial class BCSVForm : Form, ISearchable
 
         if (LoadedFile == null) return;
 
-        if (!(mainDataGridView.Rows[e.RowIndex] is IndexRow indexRow)) return;
+        if (mainDataGridView.Rows[e.RowIndex] is not IndexRow indexRow) return;
 
         var field = LoadedFile.Fields[e.ColumnIndex];
         var oldFieldValue = LoadedFile.Entries[indexRow.OriginalIndex][field.HEX];
@@ -317,6 +314,15 @@ public partial class BCSVForm : Form, ISearchable
                     break;
                 }
 
+
+            case BCSVDataType.U8:
+                {
+                    if (byte.TryParse(newValue.ToString(), out var value))
+                        formattedValue = value;
+                    else invalidValue = true;
+                    break;
+                }
+
             case BCSVDataType.S8:
                 {
                     if (sbyte.TryParse(newValue.ToString(), out var value))
@@ -344,11 +350,22 @@ public partial class BCSVForm : Form, ISearchable
                     break;
                 }
 
-            case BCSVDataType.U8:
+            case BCSVDataType.MultipleS8:
                 {
-                    if (byte.TryParse(newValue.ToString(), out var value))
-                        formattedValue = value;
+                    var failedToReadBytes = false;
+                    var bytes = newValue.ToString().Split(' ').Select(x =>
+                    {
+                        if (sbyte.TryParse(x, out var value))
+                            return value;
+                        else failedToReadBytes = true;
+
+                        return (sbyte)0;
+                    }).ToArray();
+
+                    if (!failedToReadBytes)
+                        formattedValue = bytes;
                     else invalidValue = true;
+
                     break;
                 }
 
@@ -427,7 +444,7 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void mainDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+    private void MainDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
     {
         try
         {
@@ -445,6 +462,22 @@ public partial class BCSVForm : Form, ISearchable
                 case BCSVDataType.MultipleU8:
                     {
                         if (originalValue is byte[] bytesValue)
+                        {
+                            if (bytesValue.Length == 0)
+                                e.Value = "";
+                            else
+                                e.Value = string.Join(" ", bytesValue);
+                        }
+                        else
+                            e.Value = originalValue != null ? originalValue.ToString() : "";
+
+                        break;
+                    }
+
+
+                case BCSVDataType.MultipleS8:
+                    {
+                        if (originalValue is sbyte[] bytesValue)
                         {
                             if (bytesValue.Length == 0)
                                 e.Value = "";
@@ -519,7 +552,7 @@ public partial class BCSVForm : Form, ISearchable
     }
 
 
-    private void unloadFileToolStripMenuItem_Click(object sender, EventArgs e)
+    private void UnloadFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         // Seems theres a memory leak on DataGridView
         // A possible solution is using mainDataGridView.DataSource with a System.Data.DataTable
@@ -534,7 +567,7 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void newEntryToolStripMenuItem_Click(object sender, EventArgs e)
+    private void NewEntryToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (LoadedFile == null) return;
 
@@ -545,7 +578,7 @@ public partial class BCSVForm : Form, ISearchable
 
             LoadedFile.Entries.Add(newEntry);
 
-            mainDataGridView.Rows.Add(newEntry.Values.ToArray());
+            mainDataGridView.Rows.Add([.. newEntry.Values]);
         }
         else
         {
@@ -559,7 +592,7 @@ public partial class BCSVForm : Form, ISearchable
             // TODO: Check UniqueId and assign one?
             LoadedFile.Entries.Add(newEntry);
 
-            var newEntryRow = mainDataGridView.Rows.Add(newEntry.Values.ToArray());
+            var newEntryRow = mainDataGridView.Rows.Add([.. newEntry.Values]);
             mainDataGridView.Rows[newEntryRow].Selected = true;
             mainDataGridView.FirstDisplayedScrollingRowIndex = newEntryRow;
         }
@@ -567,11 +600,11 @@ public partial class BCSVForm : Form, ISearchable
         ReloadInfo();
     }
 
-    private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void SaveAsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (LoadedFile != null)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
+            var saveFileDialog = new SaveFileDialog
             {
                 Filter = "BCSV (*.bcsv)|*.bcsv",
                 FilterIndex = 1,
@@ -585,7 +618,7 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void editToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+    private void EditToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
     {
         if (LoadedFile == null)
         {
@@ -597,7 +630,7 @@ public partial class BCSVForm : Form, ISearchable
         deleteRowsToolStripMenuItem.Enabled = mainDataGridView.SelectedRows.Count > 0;
     }
 
-    private void duplicateRowToolStripMenuItem_Click(object sender, EventArgs e)
+    private void DuplicateRowToolStripMenuItem_Click(object sender, EventArgs e)
     {
         foreach (IndexRow selectedRow in mainDataGridView.SelectedRows)
         {
@@ -614,7 +647,7 @@ public partial class BCSVForm : Form, ISearchable
             // TODO: Check UniqueId and assign one?
             LoadedFile.Entries.Add(newEntry);
 
-            var newEntryRow = mainDataGridView.Rows.Add(newEntry.Values.ToArray());
+            var newEntryRow = mainDataGridView.Rows.Add([.. newEntry.Values]);
             mainDataGridView.Rows[newEntryRow].Selected = true;
             mainDataGridView.FirstDisplayedScrollingRowIndex = newEntryRow;
 
@@ -624,7 +657,7 @@ public partial class BCSVForm : Form, ISearchable
         ReloadInfo();
     }
 
-    private void deleteRowsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void DeleteRowsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var count = mainDataGridView.SelectedRows.Count;
         var text = count > 1 ? $"these {count} entries" : "this entry";
@@ -647,7 +680,7 @@ public partial class BCSVForm : Form, ISearchable
 
     private string lastSelectedHash = null;
     private uint lastSelectedHashUint = 0;
-    private void mainDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+    private void MainDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
     {
         if (LoadedFile == null || LoadedFile.Fields.Length <= e.ColumnIndex) return;
 
@@ -663,7 +696,7 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void hshCstringRefToolStripMenuItem_Click(object sender, EventArgs e)
+    private void HshCstringRefToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (lastSelectedHash == null) return;
 
@@ -672,7 +705,7 @@ public partial class BCSVForm : Form, ISearchable
         MessageBox.Show("Re-open your file to update values!");
     }
 
-    private void f32ToolStripMenuItem_Click(object sender, EventArgs e)
+    private void F32ToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (lastSelectedHash == null) return;
 
@@ -681,7 +714,7 @@ public partial class BCSVForm : Form, ISearchable
         MessageBox.Show("Re-open your file to update values!");
     }
 
-    private void s32u32ToolStripMenuItem_Click(object sender, EventArgs e)
+    private void S32u32ToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (lastSelectedHash == null) return;
 
@@ -690,7 +723,7 @@ public partial class BCSVForm : Form, ISearchable
         MessageBox.Show("Re-open your file to update values!");
     }
 
-    private void stringToolStripMenuItem_Click(object sender, EventArgs e)
+    private void StringToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (lastSelectedHash == null) return;
 
@@ -699,7 +732,7 @@ public partial class BCSVForm : Form, ISearchable
         MessageBox.Show("Re-open your file to update values!");
     }
 
-    private void murmurHashToolStripMenuItem_Click(object sender, EventArgs e)
+    private void MurmurHashToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (lastSelectedHash == null) return;
         KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.Murmur3);
@@ -707,8 +740,7 @@ public partial class BCSVForm : Form, ISearchable
         MessageBox.Show("Re-open your file to update values!");
     }
 
-
-    private void int32ToolStripMenuItem_Click(object sender, EventArgs e)
+    private void Int32ToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (lastSelectedHash == null) return;
         KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.Int32);
@@ -753,7 +785,7 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void associatebcsvWithThisProgramToolStripMenuItem_Click(object sender, EventArgs e)
+    private void AssociatebcsvWithThisProgramToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var exePath = Application.ExecutablePath;
         var arguments = $"--{(associatebcsvWithThisProgramToolStripMenuItem.Checked ? "disassociate" : "associate")} bcsv";
@@ -771,10 +803,7 @@ public partial class BCSVForm : Form, ISearchable
         associatebcsvWithThisProgramToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
     }
 
-
-
-
-    private void exportValidHashesToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ExportValidHashesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var folderBrowserDialog = new FolderBrowserDialog();
 
@@ -819,11 +848,11 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void exportToCSVFileToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ExportToCSVFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (mainDataGridView.Columns.Count == 0) return;
 
-        SaveFileDialog saveFileDialog = new SaveFileDialog
+        var saveFileDialog = new SaveFileDialog
         {
             Filter = "CSV (*.csv)|*.csv",
             FilterIndex = 1,
@@ -836,12 +865,42 @@ public partial class BCSVForm : Form, ISearchable
             var sb = new StringBuilder();
 
             var headers = mainDataGridView.Columns.Cast<DataGridViewColumn>();
-            sb.AppendLine(string.Join(",", headers.Select(column => "\"" + column.HeaderText + "\"").ToArray()));
+            sb.AppendLine(string.Join(",", headers.Select(column => $"\"{column.HeaderText}\"").ToArray()));
 
-            foreach (DataGridViewRow row in mainDataGridView.Rows)
+            foreach (var row in LoadedFile.Entries)
             {
-                var cells = row.Cells.Cast<DataGridViewCell>();
-                sb.AppendLine(string.Join(",", cells.Select(cell => "\"" + cell.Value + "\"").ToArray()));
+                
+                //var cells = row.Cells.Cast<DataGridViewCell>();
+                //sb.AppendLine(string.Join(",", cells.Select(cell => $"\"{cell.Value}\"").ToArray()));
+                sb.AppendLine(string.Join(",", row.Select(cell =>
+                {
+                    var parsedValue = $"\"{cell.Value}\"";
+                    var field = LoadedFile.GetFieldByHashedName(cell.Key);
+
+                    if (field != null)
+                    {
+                        switch(field.DataType)
+                        {
+                            case BCSVDataType.HashedCsc32:
+                                {
+                                    if (cell.Value is uint hashValue && BCSVHashing.CRCHashes.TryGetValue(hashValue, out string value))
+                                       parsedValue = value;
+                                    
+                                    break;
+                                }
+
+                            case BCSVDataType.Murmur3:
+                                {
+                                    if (cell.Value is uint hashValue && BCSVHashing.MurmurHashes.TryGetValue(hashValue, out string value))
+                                        parsedValue = value;
+
+                                    break;
+                                }
+                        }
+                    }
+
+                    return parsedValue;
+                }).ToArray()));
 
             }
 
@@ -849,12 +908,11 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void exportValuesAstxtFileToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ExportValuesAstxtFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (LoadedFile == null || lastSelectedHash == null) return;
 
-
-        SaveFileDialog saveFileDialog = new SaveFileDialog
+        var saveFileDialog = new SaveFileDialog
         {
             Filter = "Text files (*.txt)|*.txt",
             FilterIndex = 1,
@@ -891,9 +949,9 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void exportLabelFieldsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ExportLabelFieldsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+        var folderBrowserDialog = new FolderBrowserDialog();
 
         var result = folderBrowserDialog.ShowDialog();
 
@@ -930,7 +988,7 @@ public partial class BCSVForm : Form, ISearchable
     }
 
 
-    private void compareRowsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void CompareRowsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var compareWindow = new BCSVCompareWindow();
         compareWindow.compareDataGrid.Columns.Clear();
@@ -949,13 +1007,13 @@ public partial class BCSVForm : Form, ISearchable
             foreach (DataGridViewCell entry in row.Cells)
                 values.Add(entry.FormattedValue);
 
-            compareWindow.compareDataGrid.Rows.Add(values.ToArray());
+            compareWindow.compareDataGrid.Rows.Add([.. values]);
         }
 
         compareWindow.ShowDialog();
     }
 
-    private void mainDataGridView_SelectionChanged(object sender, EventArgs e)
+    private void MainDataGridView_SelectionChanged(object sender, EventArgs e)
     {
         if (mainDataGridView.SelectedRows.Count > 1)
         {
@@ -968,15 +1026,13 @@ public partial class BCSVForm : Form, ISearchable
     }
 
     private SearchBox searchBox;
-    private void searchToolStripMenuItem_Click(object sender, EventArgs e)
+    private void SearchToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (searchBox == null)
-        {
-            searchBox = new SearchBox(this)
+        // Create SearchBox Window if needed
+        searchBox ??= new SearchBox(this)
             {
                 StartPosition = FormStartPosition.CenterParent
             };
-        }
 
         searchBox.Show();
 
@@ -992,13 +1048,13 @@ public partial class BCSVForm : Form, ISearchable
     private DataGridViewCell lastSearchCell;
     private Dictionary<DataGridViewCell, Color> oldColorCache = null;
 
-    public static Color HIGHLIGHT_COLOR = Color.FromArgb(180, 180, 10);
-    public static Color HIGHLIGHT_COLOR_CURRENT = Color.YellowGreen;
+    public static readonly Color HIGHLIGHT_COLOR = Color.FromArgb(180, 180, 10);
+    public static readonly Color HIGHLIGHT_COLOR_CURRENT = Color.YellowGreen;
 
     private void RestoreSearchCache()
     {
-        if (oldColorCache == null)
-            oldColorCache = new Dictionary<DataGridViewCell, Color>();
+        // Create cache if doesn't exist
+        oldColorCache ??= [];
 
         if (searchCache != null)
         {
@@ -1046,8 +1102,8 @@ public partial class BCSVForm : Form, ISearchable
             ClearSearchCache();
         }
 
-        if (oldColorCache == null)
-            oldColorCache = new Dictionary<DataGridViewCell, Color>();
+        // Create cache if doesn't exist
+        oldColorCache ??= [];
 
         if (searchCache == null || searchCache.Length == 0)
         {
@@ -1143,7 +1199,7 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void exportSelectionToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ExportSelectionToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (LoadedFile == null) return;
 
@@ -1166,7 +1222,7 @@ public partial class BCSVForm : Form, ISearchable
             newFile.SaveAs(saveFileDialog.FileName);
     }
 
-    private void importFromFileToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ImportFromFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var openFileDialog = new OpenFileDialog()
         {
@@ -1201,7 +1257,7 @@ public partial class BCSVForm : Form, ISearchable
             foreach (var entry in bcsvToCopy.Entries)
             {
                 LoadedFile.Entries.Add(entry);
-                lastEntry = mainDataGridView.Rows.Add(entry.Values.ToArray());
+                lastEntry = mainDataGridView.Rows.Add([.. entry.Values]);
             }
 
             if (lastEntry != -1)
@@ -1210,21 +1266,21 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void headerNameToolStripMenuItem_Click(object sender, EventArgs e)
+    private void HeaderNameToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (lastSelectedHashUint == 0) return;
 
         Clipboard.SetText(CRCHashes.TryGetValue(lastSelectedHashUint, out string value) ? value : $"0x{lastSelectedHashUint:x}");
     }
 
-    private void headerHashToolStripMenuItem_Click(object sender, EventArgs e)
+    private void HeaderHashToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (lastSelectedHashUint == 0) return;
 
         Clipboard.SetText($"0x{lastSelectedHashUint:x}");
     }
 
-    private void mainDataGridView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+    private void MainDataGridView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
     {
         var field = LoadedFile.GetFieldByHashedName(e.Column.Name);
 
@@ -1238,9 +1294,9 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
-    private void exportEnumsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ExportEnumsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+        var folderBrowserDialog = new FolderBrowserDialog();
 
         var result = folderBrowserDialog.ShowDialog();
 
@@ -1255,7 +1311,6 @@ public partial class BCSVForm : Form, ISearchable
                 foreach (var file in Directory.GetFiles(path))
                 {
                     if (Path.GetExtension(file) != ".bcsv") continue;
-
 
                     var bcsvFile = new BinaryCSV(file);
                     var hashedFields = bcsvFile.Fields.Where(x => x.DataType == BCSVDataType.HashedCsc32).ToList();
@@ -1272,13 +1327,13 @@ public partial class BCSVForm : Form, ISearchable
 
                             foreach (var entry in bcsvFile.Entries)
                             {
-                                if (entry[field.HEX] is uint value && !parsedList.Contains(value))
+                                if (entry[field.HEX] is uint fieldHash && !parsedList.Contains(fieldHash))
                                 {
-                                    if (CRCHashes.ContainsKey(value))
-                                        registers.Add(CRCHashes[value]);
+                                    if (CRCHashes.TryGetValue(fieldHash, out string value))
+                                        registers.Add(value);
 
 
-                                    parsedList.Add(value);
+                                    parsedList.Add(fieldHash);
                                 }
                             }
 
@@ -1298,7 +1353,7 @@ public partial class BCSVForm : Form, ISearchable
         public uint Offset { get; set; } = offset;
     }
 
-    private void dumpFieldsToJson_Click(object sender, EventArgs e)
+    private void DumpFieldsToJson_Click(object sender, EventArgs e)
     {
         if (LoadedFile == null) return;
 
@@ -1310,7 +1365,7 @@ public partial class BCSVForm : Form, ISearchable
         }
 
 
-        SaveFileDialog saveFileDialog = new SaveFileDialog
+        var saveFileDialog = new SaveFileDialog
         {
             Filter = "Json (*.json)|*.json",
             FilterIndex = 1,

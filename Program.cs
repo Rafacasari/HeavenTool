@@ -1,4 +1,5 @@
-﻿using HeavenTool.Utility.IO;
+﻿using HeavenTool.Forms.RSTB;
+using HeavenTool.Utility.IO;
 using System;
 using System.IO;
 using System.Runtime.Versioning;
@@ -89,6 +90,11 @@ namespace HeavenTool
                     var bcsvEditor = new BCSVForm();
                     bcsvEditor.LoadBCSVFile(path);
                     return bcsvEditor;
+
+                case ".resourcesize":
+                    var rstbEditor = new RSTBEditor();
+                    rstbEditor.LoadFile(path);
+                    return rstbEditor;
 
                 default: 
                     return null;

@@ -12,6 +12,7 @@
         HashedCsc32,
         String,
         MultipleU8,
+        MultipleS8,
         Murmur3
     }
 }
