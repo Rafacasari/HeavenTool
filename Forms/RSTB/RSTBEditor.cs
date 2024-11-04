@@ -80,8 +80,8 @@ public partial class RSTBEditor : Form
 
         DrawingControl.SuspendDrawing(mainDataGridView);
 
-        var uniqueEntries = LoadedFile.Dictionary.Values.Where(x => !x.IsDuplicatedEntry).ToList();
-        var nonUniqueEntries = LoadedFile.Dictionary.Values.Where(x => x.IsDuplicatedEntry).ToList();
+        var uniqueEntries = LoadedFile.Dictionary.Values.Where(x => !x.IsCollided).ToList();
+        var nonUniqueEntries = LoadedFile.Dictionary.Values.Where(x => x.IsCollided).ToList();
 
         foreach (var entry in uniqueEntries)
         {

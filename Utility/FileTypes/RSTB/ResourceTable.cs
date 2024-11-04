@@ -13,35 +13,40 @@ public class ResourceTable : IDisposable
 {
     public class ResourceTableEntry
     {
+        /// <summary>
+        /// Creates a entry using a hash
+        /// </summary>
+        /// <param name="hash">CRC32 hash of a <see cref="FileName"/></param>
+        /// <param name="fileSize"><inheritdoc cref="FileSize"/></param>
+        /// <param name="isDuplicated"></param>
         public ResourceTableEntry(uint hash, uint fileSize, bool isDuplicated)
         {
             CRCHash = hash;
             FileSize = fileSize;
-            IsDuplicatedEntry = isDuplicated;
+            IsCollided = isDuplicated;
         }
 
+        /// <summary>
+        /// Creates a entry using a name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="fileSize"></param>
+        /// <param name="isDuplicated"></param>
         public ResourceTableEntry(string name, uint fileSize, bool isDuplicated)
         {
             CRCHash = name.ToCRC32();
             _fileName = name;
             FileSize = fileSize;
-            IsDuplicatedEntry = isDuplicated;
+            IsCollided = isDuplicated;
         }
 
 
-        private bool _isDuplicated;
-        public bool IsDuplicatedEntry
-        {
-            get
-            {
-                return _isDuplicated;
-            }
-            set
-            {
-                _isDuplicated = value;
-            }
-        }
+        /// <summary>
+        /// <b>true</b> if <see cref="CRCHash"/> is colliding with another entry
+        /// </summary>
+        public bool IsCollided { get; set; }
 
+        // Just to prevent a lot of attempts in FileName
         private bool unknownHash;
         private string _fileName;
 
@@ -68,6 +73,10 @@ public class ResourceTable : IDisposable
         }
 
         private uint _hash;
+
+        /// <summary>
+        /// CRC32 hash for <see cref="FileName"/>
+        /// </summary>
         public uint CRCHash
         {
             get
@@ -81,7 +90,10 @@ public class ResourceTable : IDisposable
             set { _hash = value; }
         }
 
-        public uint FileSize;
+        /// <summary>
+        /// File size in bytes 
+        /// </summary>
+        public uint FileSize { get; set; }
 
         /// <summary>
         /// Only present on RSTC files, seems to be a DLC number since it's only 1 when it's a file from Happy Home Paradise DLC
@@ -95,11 +107,15 @@ public class ResourceTable : IDisposable
         /// <param name="isRSTC">If the file is RSTC</param>
         public void Write(BinaryWriter writer, bool isRSTC)
         {
-            if (IsDuplicatedEntry)
+            if (IsCollided)
             {
-                // This seems stupid but we have to make sure that our byte array is 128 length
                 var bytes = Encoding.ASCII.GetBytes(_fileName);
-                if (bytes.Length != 128) Array.Resize(ref bytes, 128);
+
+                // Theorically this is useless Array.Resize should be enough, but for some reason the game keeps crashing so let's try this
+                if (bytes.Length < 128)
+                    bytes = [.. bytes, .. new byte[128 - bytes.Length]];
+                else if (bytes.Length > 128) 
+                    Array.Resize(ref bytes, 128);
 
                 writer.Write(bytes);
             }
@@ -140,13 +156,13 @@ public class ResourceTable : IDisposable
     /// <para>Used when the fileName CRC32 is <b>unique</b>.</para>
     /// Entries in that list does <b>NOT</b> contain the fileName parameter assigned, the CRC should be decrypted using the RomFs folder
     /// </summary>
-    public Dictionary<string, ResourceTableEntry> UniqueEntries() => Dictionary.Where(x => !x.Value.IsDuplicatedEntry).ToDictionary(x => x.Key, x => x.Value);
+    public Dictionary<string, ResourceTableEntry> UniqueEntries() => Dictionary.Where(x => !x.Value.IsCollided).ToDictionary(x => x.Key, x => x.Value);
     
 
     /// <summary>
     /// If have two (or more) file names that have the same hash both are put here
     /// </summary>
-    public Dictionary<string, ResourceTableEntry> NonUniqueEntries() => Dictionary.Where(x => x.Value.IsDuplicatedEntry).ToDictionary(x => x.Key, x => x.Value);
+    public Dictionary<string, ResourceTableEntry> NonUniqueEntries() => Dictionary.Where(x => x.Value.IsCollided).ToDictionary(x => x.Key, x => x.Value);
     
 
     public bool IsRSTC => HEADER == "RSTC";
@@ -167,10 +183,10 @@ public class ResourceTable : IDisposable
 
         if (Dictionary.Values.Any(x => x.CRCHash == entry.CRCHash))
         {
-            entry.IsDuplicatedEntry = true;
+            entry.IsCollided = true;
 
             foreach (var repeatedEntry in Dictionary.Values.Where(x => x.CRCHash == entry.CRCHash))
-                repeatedEntry.IsDuplicatedEntry = true;
+                repeatedEntry.IsCollided = true;
         }
 
         Dictionary.TryAdd(entry.FileName, entry);
@@ -180,6 +196,7 @@ public class ResourceTable : IDisposable
     {
         using (var fileStream = File.OpenRead(path))
         {
+            // Reads the first 4 bytes to see if we have a uncompressed file (RSTB / RSTC header)
             var fileHeader = fileStream.ReadString(4, Encoding.ASCII);
             var isDecompressed = fileHeader == "RSTB" || fileHeader == "RSTC";
 
@@ -253,20 +270,22 @@ public class ResourceTable : IDisposable
     }
 
     /// <summary>
-    /// This function will update <seealso cref="ResourceTableEntry.IsDuplicatedEntry"/> values in <seealso cref="Dictionary"/>.
+    /// This function will update <seealso cref="ResourceTableEntry.IsCollided"/> values in <seealso cref="Dictionary"/>.
     /// </summary>
     public void UpdateUniques()
     {
         if (!IsLoaded) return;
 
+        // Group by CRC hash
         var groups = Dictionary.GroupBy(x => x.Value.CRCHash);
 
         foreach(var group in groups)
         {
+            // If this group have more than 1 child, so it is a duplicated entry
             var count = group.Count();
 
             foreach(var (_, entry) in group)
-                entry.IsDuplicatedEntry = count > 1;
+                entry.IsCollided = count > 1;
             
         }
     }
@@ -284,8 +303,8 @@ public class ResourceTable : IDisposable
 
         UpdateUniques();
 
-        var uniqueEntries = Dictionary.Where(x => !x.Value.IsDuplicatedEntry).ToList();
-        var nonUniqueEntries = Dictionary.Where(x => x.Value.IsDuplicatedEntry).ToList();
+        var uniqueEntries = Dictionary.Where(x => !x.Value.IsCollided).ToList();
+        var nonUniqueEntries = Dictionary.Where(x => x.Value.IsCollided).ToList();
 
         using var memoryStream = new MemoryStream();
         using var writer = new BinaryWriter(memoryStream);
