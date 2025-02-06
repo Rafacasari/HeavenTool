@@ -10,7 +10,7 @@ namespace HeavenTool
     [SupportedOSPlatform("windows")]
     internal static class Program
     {
-        public const string VERSION = "v1.3.1";
+        public const string VERSION = "v1.3.2";
         public static Form TargetForm = null;
 
         [STAThread]
