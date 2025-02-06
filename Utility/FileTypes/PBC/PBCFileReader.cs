@@ -36,7 +36,6 @@ public class PBCFileReader
         using var stream = new MemoryStream(buffer);
         using var reader = new BinaryFileReader(stream);
 
-
         if (!"pbc\0"u8.SequenceEqual(reader.ReadBytes(4))) throw new Exception("This is not a PBC file!");
 
         Width = reader.ReadInt32();
@@ -47,7 +46,6 @@ public class PBCFileReader
 
         //var tilesBuffer = new byte[Width * Height * 4];
 
-        // Criação da imagem
         using var bmp = new Bitmap(Width * 2, Height * 2);
 
         for (int y = 0; y < Height; y++)
@@ -61,11 +59,9 @@ public class PBCFileReader
                 var c = reader.ReadByte();
                 var d = reader.ReadByte();
 
-                // Calcula as coordenadas base
                 int baseX = x * 2;
                 int baseY = y * 2;
 
-               
 
                 try
                 {
@@ -76,7 +72,6 @@ public class PBCFileReader
                 }
                 catch (Exception ex)
                 {
-                    // Define os pixels com base nos valores lidos
                     MessageBox.Show($"Width: {Width * 2} | Height: {Height * 2} | x{baseX} y{baseY}\n{ex}");
                 }
             }
@@ -84,7 +79,6 @@ public class PBCFileReader
 
         Image = bmp.Clone() as Image;
         bmp.Save("output.png");
-        //MessageBox.Show($"Missing bytes: {buffer.Length - reader.Position}");
     }
 }
 

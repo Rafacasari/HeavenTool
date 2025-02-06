@@ -196,7 +196,6 @@ public class ResourceTable : IDisposable
     {
         using (var fileStream = File.OpenRead(path))
         {
-            // Reads the first 4 bytes to see if we have a uncompressed file (RSTB / RSTC header)
             var fileHeader = fileStream.ReadString(4, Encoding.ASCII);
             var isDecompressed = fileHeader == "RSTB" || fileHeader == "RSTC";
 
@@ -247,6 +246,7 @@ public class ResourceTable : IDisposable
                 // If the hash is not found, we gonna throw an error and this should prevent the file from loading
                 if (entry.FileName != null)
                     Dictionary.TryAdd(entry.FileName, entry);
+
                 else throw new Exception($"Hash {entry.CRCHash:x} not found!");
             }
 
@@ -327,9 +327,7 @@ public class ResourceTable : IDisposable
         memoryStream.Read(array, 0, array.Length);
 
         var result = Compressor.Compress(array);
-
-        using var fileStream = File.OpenWrite(filePath);
-        fileStream.Write(result);
+        File.WriteAllBytes(filePath, result);
     }
 
     public void Dispose()

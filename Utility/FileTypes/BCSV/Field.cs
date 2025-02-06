@@ -10,6 +10,8 @@ namespace HeavenTool.Utility.FileTypes.BCSV
         public uint Offset { get; set; }
         public uint Size { get; set; }
 
+        public bool TrustedType { get; set; } = false;
+
         public object GetFieldDefaultValue()
         {
             switch (DataType)

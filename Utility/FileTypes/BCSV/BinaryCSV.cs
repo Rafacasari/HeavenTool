@@ -91,21 +91,23 @@ public class BinaryCSV : IDisposable
         using var fileStream = File.OpenRead(filePath);
         using var reader = new BinaryFileReader(fileStream);
 
-        var entryCount = reader.ReadUInt32();
-        EntrySize = reader.ReadUInt32();
-        var fieldCount = reader.ReadUInt16();
+        var entryCount = reader.ReadUInt32();//0
+        EntrySize = reader.ReadUInt32();//4
+        var fieldCount = reader.ReadUInt16();//8
 
-        HasExtendedHeader = reader.ReadByte();
-        UnknownField = reader.ReadByte();
+        HasExtendedHeader = reader.ReadByte(); // 10
+        UnknownField = reader.ReadByte(); // 11
 
         if (HasExtendedHeader == 1)
         {
-            HeaderMagic = reader.ReadString(4, Encoding.ASCII); // BCSV but inverted "VSCB"
-            HeaderVersion = reader.ReadUInt16();
+            HeaderMagic = reader.ReadString(4, Encoding.ASCII); // 12 BCSV but inverted "VSCB" 
+            HeaderVersion = reader.ReadUInt16(); // 16
 
             // 10 byte padding
-            reader.Position += 10;
+            reader.Position += 10; // 18
         }
+
+        //start at 28 if extended header is true
 
         // Read Fields
         Fields = new Field[fieldCount];
@@ -135,6 +137,7 @@ public class BinaryCSV : IDisposable
 
                         if (translatedName != null && translatedName.EndsWith(" s8"))
                             type = BCSVDataType.S8;
+                        
                     }
                     break;
 
@@ -173,6 +176,7 @@ public class BinaryCSV : IDisposable
             var translation = currentField.GetTranslatedNameOrNull();
             if (translation != null)
             {
+                currentField.TrustedType = true;
                 if (translation.EndsWith(" u8") && currentField.Size > 1)
                     type = BCSVDataType.MultipleU8;
                 else if (translation.EndsWith(" s8") && currentField.Size > 1)
@@ -181,9 +185,15 @@ public class BinaryCSV : IDisposable
             else
             {
                 if (KnownHashValueManager.KnownTypes.TryGetValue(currentField.HEX, out BCSVDataType value))
+                {
+                    currentField.TrustedType = true;
                     type = value;
+                }
                 else if (type == BCSVDataType.String && currentField.Size <= 6)
+                {
                     type = BCSVDataType.MultipleU8;
+                }
+                
             }
 
             currentField.DataType = type;
@@ -242,6 +252,10 @@ public class BinaryCSV : IDisposable
                         value = reader.ReadInt32();
                         break;
 
+                    case BCSVDataType.Float64:
+                        value = reader.ReadDouble();
+                        break;
+
                     case BCSVDataType.UInt32:
                     case BCSVDataType.HashedCsc32:
                     case BCSVDataType.Murmur3:
@@ -268,8 +282,7 @@ public class BinaryCSV : IDisposable
 
     public void SaveAs(string filePath)
     {
-        var fileStream = File.OpenWrite(filePath);
-
+        using (var fileStream = File.Create(filePath))
         using (var writer = new BinaryWriter(fileStream))
         {
 
@@ -369,7 +382,7 @@ public class BinaryCSV : IDisposable
             }
         }
 
-        fileStream.Close();
+        
     }
 
     private bool disposed = false;

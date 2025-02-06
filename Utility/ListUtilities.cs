@@ -8,13 +8,11 @@ namespace HeavenTool.Utility
     {
         public static void AddIfNotExist<T>(this List<T> list, T key) where T : class
         {
-            if (list == null) throw new ArgumentNullException("list");
+            ArgumentNullException.ThrowIfNull(list);
+            ArgumentNullException.ThrowIfNull(key);
 
-            if (key == null) throw new ArgumentNullException("key");
-
-            if (list.Contains(key)) return;
-
-            list.Add(key);
+            if (!list.Contains(key)) 
+                list.Add(key);
         }
 
         public static T? FirstOrNull<T>(this IEnumerable<T> sequence, Func<T, bool> predicate) where T : struct

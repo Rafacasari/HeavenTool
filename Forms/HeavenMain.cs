@@ -15,9 +15,9 @@ namespace HeavenTool
         }
 
         // Forms
-        public static BCSVForm bcsvEditor = new ();
-        public static RSTBEditor rstbEditor = new ();
-        public static SarcEditor sarcEditor = new ();
+        public static BCSVForm bcsvEditor = new();
+        public static RSTBEditor rstbEditor = new();
+        public static SarcEditor sarcEditor = new();
 
         private void bcsvEditorButton_Click(object sender, EventArgs e)
         {

@@ -100,7 +100,8 @@
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="NintendoTools" Version="2.16.5" />
+    <PackageReference Include="NintendoTools" Version="2.24.1" />
+    <PackageReference Include="YamlConvert" Version="3.1.0" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
