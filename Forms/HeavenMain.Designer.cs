@@ -37,6 +37,7 @@ namespace HeavenTool
             pictureBox1 = new System.Windows.Forms.PictureBox();
             rstbEditorButton = new System.Windows.Forms.Button();
             sarcEditorButton = new System.Windows.Forms.Button();
+            itemParamHelperButton = new System.Windows.Forms.Button();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -119,12 +120,29 @@ namespace HeavenTool
             sarcEditorButton.UseVisualStyleBackColor = false;
             sarcEditorButton.Click += sarcEditorButton_Click;
             // 
+            // itemParamHelperButton
+            // 
+            itemParamHelperButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            itemParamHelperButton.BackColor = System.Drawing.Color.FromArgb(40, 40, 40);
+            itemParamHelperButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(70, 70, 70);
+            itemParamHelperButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            itemParamHelperButton.ForeColor = System.Drawing.Color.White;
+            itemParamHelperButton.Location = new System.Drawing.Point(377, 159);
+            itemParamHelperButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            itemParamHelperButton.Name = "itemParamHelperButton";
+            itemParamHelperButton.Size = new System.Drawing.Size(240, 32);
+            itemParamHelperButton.TabIndex = 10;
+            itemParamHelperButton.Text = "Open ItemParam Helper";
+            itemParamHelperButton.UseVisualStyleBackColor = false;
+            itemParamHelperButton.Click += itemParamHelperButton_Click;
+            // 
             // HeavenMain
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             BackColor = System.Drawing.Color.FromArgb(51, 51, 51);
             ClientSize = new System.Drawing.Size(631, 293);
+            Controls.Add(itemParamHelperButton);
             Controls.Add(sarcEditorButton);
             Controls.Add(rstbEditorButton);
             Controls.Add(bcsvEditorButton);
@@ -150,5 +168,6 @@ namespace HeavenTool
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button rstbEditorButton;
         private System.Windows.Forms.Button sarcEditorButton;
+        private System.Windows.Forms.Button itemParamHelperButton;
     }
 }

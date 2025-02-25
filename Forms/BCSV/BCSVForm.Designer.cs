@@ -59,6 +59,7 @@ namespace HeavenTool
             exportValidHashesToolStripMenuItem = new ToolStripMenuItem();
             exportLabelFieldsToolStripMenuItem = new ToolStripMenuItem();
             exportEnumsToolStripMenuItem = new ToolStripMenuItem();
+            devExportHeadersToolStripMenuItem = new ToolStripMenuItem();
             toolsToolStripMenuItem = new ToolStripMenuItem();
             searchOnFilesToolStripMenuItem = new ToolStripMenuItem();
             devToolsToolStripMenuItem = new ToolStripMenuItem();
@@ -81,7 +82,6 @@ namespace HeavenTool
             hshCstringRefToolStripMenuItem = new ToolStripMenuItem();
             murmurHashToolStripMenuItem = new ToolStripMenuItem();
             dragInfo = new Label();
-            devExportHeadersToolStripMenuItem = new ToolStripMenuItem();
             topMenuStrip.SuspendLayout();
             statusStripMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)mainDataGridView).BeginInit();
@@ -296,6 +296,14 @@ namespace HeavenTool
             exportEnumsToolStripMenuItem.Visible = false;
             exportEnumsToolStripMenuItem.Click += ExportEnumsToolStripMenuItem_Click;
             // 
+            // devExportHeadersToolStripMenuItem
+            // 
+            devExportHeadersToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            devExportHeadersToolStripMenuItem.Name = "devExportHeadersToolStripMenuItem";
+            devExportHeadersToolStripMenuItem.Size = new System.Drawing.Size(294, 22);
+            devExportHeadersToolStripMenuItem.Text = "[Dev] Export Headers";
+            devExportHeadersToolStripMenuItem.Click += devExportHeadersToolStripMenuItem_Click;
+            // 
             // toolsToolStripMenuItem
             // 
             toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { searchOnFilesToolStripMenuItem });
@@ -310,7 +318,7 @@ namespace HeavenTool
             searchOnFilesToolStripMenuItem.Image = Properties.Resources.search;
             searchOnFilesToolStripMenuItem.ImageScaling = ToolStripItemImageScaling.None;
             searchOnFilesToolStripMenuItem.Name = "searchOnFilesToolStripMenuItem";
-            searchOnFilesToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
+            searchOnFilesToolStripMenuItem.Size = new System.Drawing.Size(158, 30);
             searchOnFilesToolStripMenuItem.Text = "Search on files";
             searchOnFilesToolStripMenuItem.Click += SearchOnFilesToolStripMenuItem_Click;
             // 
@@ -534,14 +542,6 @@ namespace HeavenTool
             dragInfo.TabIndex = 5;
             dragInfo.Text = "Drag a file here\r\nor use File > Open";
             dragInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // devExportHeadersToolStripMenuItem
-            // 
-            devExportHeadersToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            devExportHeadersToolStripMenuItem.Name = "devExportHeadersToolStripMenuItem";
-            devExportHeadersToolStripMenuItem.Size = new System.Drawing.Size(294, 22);
-            devExportHeadersToolStripMenuItem.Text = "[Dev] Export Headers";
-            devExportHeadersToolStripMenuItem.Click += devExportHeadersToolStripMenuItem_Click;
             // 
             // BCSVForm
             // 

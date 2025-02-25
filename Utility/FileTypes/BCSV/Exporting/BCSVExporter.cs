@@ -9,9 +9,7 @@ using System.Collections;
 using System.Reflection;
 using System.ComponentModel;
 using System.IO;
-using System.Xml;
 using YamlConverter;
-using System.Threading.Tasks;
 
 namespace HeavenTool.Utility.FileTypes.BCSV.Exporting;
 
@@ -89,10 +87,12 @@ public static class BCSVExporter
     };
     #endregion
 
+
     public static void ExportConfig (this GameConfig config, string path)
     {
         var content = YamlConvert.SerializeObject(config, JsonSettings);
 
+       
         File.WriteAllText(path, content);
     }
 
@@ -102,9 +102,19 @@ public static class BCSVExporter
         public BcsvConfig Bcsv { get; set; } = new();
     }
 
+    public class FieldHashes
+    {
+        [JsonProperty("crc32"), IgnoreEmptyCollection]
+        public List<string> CRCHashes { get; set; } = [];
+
+
+        [JsonProperty("mmh3"), IgnoreEmptyCollection]
+        public List<string> MurmurHashes { get; set; } = [];
+    }
+
     public class BcsvHeader
     {
-        [JsonProperty("hash")]
+        [JsonProperty("hash", DefaultValueHandling = DefaultValueHandling.Ignore), DefaultValue("")]
         public string Hash { get; set; } // e.g. 0x36E8EBE
 
         [JsonProperty("name", DefaultValueHandling = DefaultValueHandling.Ignore), DefaultValue("")]
@@ -116,33 +126,30 @@ public static class BCSVExporter
 
     public class BcsvConfig
     {
-        [JsonProperty("header"), IgnoreEmptyCollection]
+        [JsonProperty("headers"), IgnoreEmptyCollection]
         public List<BcsvHeader> Headers { get; set; } = [];
 
-        [JsonProperty("crc"), IgnoreEmptyCollection]
-        public List<string> CRCHashes { get; set; } = [];
-
-        [JsonProperty("murmur"), IgnoreEmptyCollection]
-        public List<string> MurmurHashes { get; set; } = [];
+        [JsonProperty("fieldHashes")]
+        public FieldHashes FieldHashes { get; set; }
     }
 
     public static string GetName(this BCSVDataType type)
     {
         return type switch
         {
-            BCSVDataType.String => "string",
-            BCSVDataType.S8 => "sbyte",
-            BCSVDataType.U8 => "byte",
-            BCSVDataType.Int16 => "int16",
-            BCSVDataType.UInt16 => "uint16",
-            BCSVDataType.Int32 => "int32",
-            BCSVDataType.UInt32 => "uint32",
-            BCSVDataType.Float32 => "float32",
-            BCSVDataType.Float64 => "float64",
+            BCSVDataType.String => "str",
+            BCSVDataType.S8 => "s8",
+            BCSVDataType.U8 => "u8",
+            BCSVDataType.Int16 => "s16",
+            BCSVDataType.UInt16 => "u16",
+            BCSVDataType.Int32 => "s32",
+            BCSVDataType.UInt32 => "u32",
+            BCSVDataType.Float32 => "f32",
+            BCSVDataType.Float64 => "f64",
             BCSVDataType.HashedCsc32 => "crc32",
-            BCSVDataType.MultipleU8 => "byte[]",
-            BCSVDataType.MultipleS8 => "sbyte[]",
-            BCSVDataType.Murmur3 => "murmur",
+            BCSVDataType.MultipleU8 => "u8[]",
+            BCSVDataType.MultipleS8 => "s8[]",
+            BCSVDataType.Murmur3 => "mmh3",
             _ => throw new NotImplementedException(),
         };
     }

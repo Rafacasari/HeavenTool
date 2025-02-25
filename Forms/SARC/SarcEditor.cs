@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using HeavenTool.Forms.PBC;
 using HeavenTool.Utility.IO;
@@ -15,17 +17,44 @@ public partial class SarcEditor : Form
     {
         InitializeComponent();
     }
+
     private static readonly ZstdCompressor Compressor = new();
     private static readonly ZstdDecompressor Decompressor = new();
     private static readonly SarcFileParser SarcFileParser = new();
     private static readonly SarcFileCompiler SarcCompiler = new();
 
-    private string LoadedFileName {  get; set; }
+    private string LoadedFileName { get; set; }
     private SarcFile LoadedFile;
+
+    private Dictionary<SarcContent, TreeNode> Nodes;
+    private List<SarcContent> OpenedFiles;
+    private List<Form> OpenedEditors;
+
+    private bool _isDirty;
+    private bool IsDirty
+    {
+        get => _isDirty;
+        set
+        {
+            if (_isDirty != value)
+                _isDirty = value;
+
+            if (LoadedFile != null)
+                Text = $"SARC Editor: {LoadedFileName}{(_isDirty ? "*" : "")}";
+            else
+                Text = "SARC Editor";
+        }
+    }
 
     private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        filesTreeView.Nodes.Clear();
+        if (IsDirty || (OpenedEditors != null && OpenedEditors.Count > 0))
+        {
+            var result = MessageBox.Show("Do you really want to open a new file?\n\nAll current editors will be closed and you'll lose any non-saved progress!", "Open a new file?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Cancel)
+                return;
+        }
 
         var openFileDialog = new OpenFileDialog()
         {
@@ -36,36 +65,63 @@ public partial class SarcEditor : Form
         if (openFileDialog.ShowDialog() == DialogResult.OK)
         {
             var path = openFileDialog.FileName;
-            
+
             Stream file = File.OpenRead(path);
             MemoryStream fileStream = new();
 
-            // Check for compressor
-            if (Decompressor.CanDecompress(file))
-                Decompressor.Decompress(file, fileStream);
-            else
-                // No compressor found, copy file to memoryStream
-                file.CopyTo(fileStream);
+            file.CopyTo(fileStream);
 
+            var isDecompressed = fileStream.ReadString(4, Encoding.ASCII) == "SARC";
+            fileStream.Position = 0;
+
+            // Check for compressor
+            if (!isDecompressed && Decompressor.CanDecompress(file))
+                Decompressor.Decompress(file, fileStream);
 
             if (fileStream.Length == 0) throw new Exception("Failed to open SARC file!");
 
+            filesTreeView.Nodes.Clear();
+
             LoadedFileName = Path.GetFileName(path);
             LoadedFile = SarcFileParser.Parse(fileStream);
+            OpenedFiles = [];
+
+            if (OpenedEditors != null && OpenedEditors.Count > 0)
+                foreach (var editor in OpenedEditors)
+                    editor.Close();
+
+            OpenedEditors = [];
+            Nodes = [];
+            IsDirty = false;
 
             foreach (var sarcContent in LoadedFile.Files)
             {
-
                 var treeNode = filesTreeView.Nodes.Add(sarcContent.Name);
                 var context = new ContextMenuStrip();
 
-
                 if (sarcContent.Name.EndsWith(".pbc"))
                 {
-                    var item = context.Items.Add("Open PBC Editor", null, (_, _) =>
+                    ToolStripItem item = null;
+                    item = context.Items.Add("Open with PBC Editor", null, (_, _) =>
                     {
-                        var editor = new PBCEditor(sarcContent.Data);
+                        void saveFunction(byte[] bytes)
+                        {
+                            IsDirty = true;
+                            sarcContent.Data = bytes;
+                            treeNode.Text = $"{sarcContent.Name}*";
+                        }
+
+                        var editor = new PBCEditor(sarcContent.Data, sarcContent.Name, saveFunction);
                         editor.Show();
+
+                        OpenedFiles.Add(sarcContent);
+                        OpenedEditors.Add(editor);
+                        item.Enabled = false;
+
+                        editor.FormClosed += (_, _) =>
+                        {
+                            item.Enabled = true;
+                        };
                     });
                 }
 
@@ -98,10 +154,11 @@ public partial class SarcEditor : Form
 
                 treeNode.ContextMenuStrip = context;
 
-
+                Nodes[sarcContent] = treeNode;
             }
 
             filesTreeView.Invalidate();
+            fileStream.Close();
         }
 
 
@@ -143,5 +200,17 @@ public partial class SarcEditor : Form
             var path = saveFileDialog.FileName;
             File.WriteAllBytes(path, memoryStream.ToArray());
         }
+
+        IsDirty = false;
+
+        // Remove Dirty Asterisk
+        foreach (var (sarcConcent, node) in Nodes)
+            node.Text = sarcConcent.Name;
+
+    }
+
+    private void searchTextBox_Click(object sender, EventArgs e)
+    {
+
     }
 }

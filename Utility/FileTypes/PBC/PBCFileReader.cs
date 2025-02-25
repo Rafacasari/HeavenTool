@@ -1,21 +1,88 @@
-﻿using HeavenTool.Utility.IO;
-using HeavenTool.Utility.IO.Compression;
+﻿// Big thanks to https://github.com/McSpazzy/PBC
+using HeavenTool.Utility.IO;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace HeavenTool.Utility.FileTypes.PBC;
 
 /// <summary>
 /// A class to read PBC files
 /// </summary>
-public class PBCFileReader
+public partial class PBCFileReader
 {
+    public class Tile
+    {
+        public float[][,] Layers;
+        public TileType[,] Type;
+
+        public Tile(BinaryReader reader)
+        {
+            // Read Height Map(s)
+            Layers = new float[3][,];
+
+            for (var i = 0; i < 3; i++)
+            {
+                Layers[i] = new float[2, 2];
+
+                //for (int subX = 0; subX < 2; subX++)
+                //    for (int subY = 0; subY < 2; subY++)
+                //        Layers[i][subY, subX] = reader.ReadSingle();
+
+                //for (int y = 0; y < 2; y++)
+                //    for (int x = 0; x < 2; x++)
+                //        Layers[i][1 - y, 1 - x] = reader.ReadSingle();
+
+
+
+                // correct
+                Layers[i][1, 1] = reader.ReadSingle();// seems correct
+                Layers[i][1, 0] = reader.ReadSingle();
+                Layers[i][0, 0] = reader.ReadSingle();// seems correct
+                Layers[i][0, 1] = reader.ReadSingle();
+            }
+
+            // Read Collision Map
+            Type = new TileType[2, 2];
+            Type[1, 1] = (TileType) reader.ReadByte();
+            Type[1, 0] = (TileType) reader.ReadByte();
+            Type[0, 0] = (TileType) reader.ReadByte();
+            Type[0, 1] = (TileType) reader.ReadByte();
+        }
+
+        public float[,] GetHeightMap(int index)
+        {
+            if (index >= Layers.Length || index < 0)
+                return null;
+
+            return Layers[index];
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            for (var i = 0; i < 3; i++)
+                for (var y = 0; y < 2; y++)
+                    for (var x = 0; x < 2; x++)
+                         writer.Write(Layers[i][x, y]);
+            
+
+            writer.Write((byte) Type[0, 0]);
+            writer.Write((byte) Type[0, 1]);
+            writer.Write((byte) Type[1, 1]);
+            writer.Write((byte) Type[1, 0]);
+        }
+    }
+
+    /// <summary>
+    /// Check for file magic, return true if <paramref name="magic"/> is <b>pbc\0</b>
+    /// </summary>
+    /// <param name="magic">The first 4 bytes of the file.</param>
+    /// <returns></returns>
+    public static bool MagicMatches(byte[] magic)
+    {
+        return "pbc\0"u8.SequenceEqual(magic);
+    }
+
     /// <summary>
     /// Image Width
     /// </summary>
@@ -29,14 +96,22 @@ public class PBCFileReader
     public int OffsetX { get; }
     public int OffsetY { get; }
 
-    public Image Image { get; }
+    public Tile[,] Tiles { get; set; }
+
+    public Tile this[int height, int width]
+    {
+        get => Tiles[height, width];
+        set => Tiles[height, width] = value;
+    }
+
 
     public PBCFileReader(byte[] buffer)
     {
         using var stream = new MemoryStream(buffer);
         using var reader = new BinaryFileReader(stream);
-
-        if (!"pbc\0"u8.SequenceEqual(reader.ReadBytes(4))) throw new Exception("This is not a PBC file!");
+        
+        if (!MagicMatches(reader.ReadBytes(4))) 
+            throw new Exception("This is not a PBC file!");
 
         Width = reader.ReadInt32();
         Height = reader.ReadInt32();
@@ -44,50 +119,27 @@ public class PBCFileReader
         OffsetX = reader.ReadInt32();
         OffsetY = reader.ReadInt32();
 
-        //var tilesBuffer = new byte[Width * Height * 4];
+        Tiles = new Tile[Height, Width];
 
-        using var bmp = new Bitmap(Width * 2, Height * 2);
+        for (var h = 0; h < Height; h++)
+            for (var w = 0; w < Width; w++)
+                Tiles[h, w] = new Tile(reader);
+    }   
 
-        for (int y = 0; y < Height; y++)
-            for (int x = 0; x < Width; x++)
-            { 
-                // Padding?
-                reader.ReadBytes(0x30);
-
-                var a = reader.ReadByte();
-                var b = reader.ReadByte();
-                var c = reader.ReadByte();
-                var d = reader.ReadByte();
-
-                int baseX = x * 2;
-                int baseY = y * 2;
-
-
-                try
-                {
-                    bmp.SetPixel(baseX, baseY, Color.FromArgb(255, a, a, a));
-                    bmp.SetPixel(baseX, baseY + 1, Color.FromArgb(255, b, b, b));
-                    bmp.SetPixel(baseX + 1, baseY + 1, Color.FromArgb(255, c, c, c));
-                    bmp.SetPixel(baseX + 1, baseY, Color.FromArgb(255, d, d, d));
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Width: {Width * 2} | Height: {Height * 2} | x{baseX} y{baseY}\n{ex}");
-                }
-            }
-        
-
-        Image = bmp.Clone() as Image;
-        bmp.Save("output.png");
-    }
-}
-
-
-public class TileData
-{
-    public static TileData ReadTileData(BinaryFileReader reader)
+    public byte[] SaveAsBytes()
     {
+        using var stream = new MemoryStream();
+        using var writer = new BinaryWriter(stream);
 
-        return new TileData(); 
+        writer.Write(Width);
+        writer.Write(Height);
+        writer.Write(OffsetX);
+        writer.Write(OffsetY);
+
+        for (var h = 0; h < Height; h++)
+            for (var w = 0; w < Width; w++)
+                Tiles[h, w].Write(writer);
+
+        return stream.ToArray();
     }
 }

@@ -1,4 +1,5 @@
-﻿using HeavenTool.Forms.RSTB;
+﻿using HeavenTool.Forms.Pack;
+using HeavenTool.Forms.RSTB;
 using HeavenTool.Forms.SARC;
 using System;
 using System.Windows.Forms;
@@ -18,10 +19,11 @@ namespace HeavenTool
         public static BCSVForm bcsvEditor = new();
         public static RSTBEditor rstbEditor = new();
         public static SarcEditor sarcEditor = new();
+        public static ItemIDHelper itemIDHelper = new();
 
         private void bcsvEditorButton_Click(object sender, EventArgs e)
         {
-            if (bcsvEditor.IsDisposed) bcsvEditor = new BCSVForm();
+            if (bcsvEditor.IsDisposed) bcsvEditor = new();
 
             bcsvEditor.Show();
             bcsvEditor.BringToFront();
@@ -29,7 +31,7 @@ namespace HeavenTool
 
         private void rstbEditorButton_Click(object sender, EventArgs e)
         {
-            if (rstbEditor.IsDisposed) rstbEditor = new RSTBEditor();
+            if (rstbEditor.IsDisposed) rstbEditor = new();
 
             rstbEditor.Show();
             rstbEditor.BringToFront();
@@ -41,6 +43,14 @@ namespace HeavenTool
 
             sarcEditor.Show();
             sarcEditor.BringToFront();
+        }
+
+        private void itemParamHelperButton_Click(object sender, EventArgs e)
+        {
+            if (itemIDHelper.IsDisposed) itemIDHelper = new();
+
+            itemIDHelper.Show();
+            itemIDHelper.BringToFront();
         }
     }
 }

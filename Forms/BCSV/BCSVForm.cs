@@ -16,6 +16,7 @@ using HeavenTool.Forms.Search;
 using System.Text.Json;
 using HeavenTool.Forms.Components;
 using HeavenTool.Utility.FileTypes.BCSV.Exporting;
+using HeavenTool.Forms.BCSV;
 
 namespace HeavenTool;
 
@@ -1417,7 +1418,7 @@ public partial class BCSVForm : Form, ISearchable
                     // Find Enums
                     if (field.DataType == BCSVDataType.HashedCsc32 || field.DataType == BCSVDataType.Murmur3)
                     {
-                        foreach(var entry in bcsv.Entries)
+                        foreach (var entry in bcsv.Entries)
                         {
                             var entryValue = entry[field.HEX];
                             if (entryValue == null) continue;
@@ -1431,14 +1432,14 @@ public partial class BCSVForm : Form, ISearchable
                             }
                         }
                     }
-                    
+
                     // Get Header Info
                     if (dir.ContainsKey(field.HEX))
                         continue;
-                    
+
                     var headerInfo = new BCSVExporter.BcsvHeader()
                     {
-                        Hash = field.HEX,
+                        Hash = field.GetTranslatedNameOrNull() != null ? string.Empty : $"0x{field.HEX}",
                         Name = field.GetTranslatedNameOrNull() ?? string.Empty
                     };
 
@@ -1455,8 +1456,11 @@ public partial class BCSVForm : Form, ISearchable
                 Bcsv = new BCSVExporter.BcsvConfig()
                 {
                     Headers = [.. dir.Values],
-                    MurmurHashes = murmurList,
-                    CRCHashes = crcList
+                    FieldHashes = new BCSVExporter.FieldHashes()
+                    {
+                        MurmurHashes = murmurList,
+                        CRCHashes = crcList
+                    }
                 }
             };
 

@@ -276,8 +276,6 @@ public class BinaryCSV : IDisposable
         }
 
         fileStream.Close();
-
-
     }
 
     public void SaveAs(string filePath)

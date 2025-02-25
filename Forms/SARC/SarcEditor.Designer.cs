@@ -32,8 +32,9 @@
             darkMenuStrip1 = new Components.DarkMenuStrip();
             fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            filesTreeView = new System.Windows.Forms.TreeView();
             saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            filesTreeView = new System.Windows.Forms.TreeView();
+            searchTextBox = new System.Windows.Forms.ToolStripTextBox();
             darkMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -41,7 +42,7 @@
             // 
             darkMenuStrip1.BackColor = System.Drawing.Color.FromArgb(40, 40, 40);
             darkMenuStrip1.ForeColor = System.Drawing.Color.White;
-            darkMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { fileToolStripMenuItem });
+            darkMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { fileToolStripMenuItem, searchTextBox });
             darkMenuStrip1.Location = new System.Drawing.Point(0, 0);
             darkMenuStrip1.Name = "darkMenuStrip1";
             darkMenuStrip1.Size = new System.Drawing.Size(636, 24);
@@ -66,6 +67,16 @@
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += OpenToolStripMenuItem_Click;
             // 
+            // saveAsToolStripMenuItem
+            // 
+            saveAsToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            saveAsToolStripMenuItem.Image = Properties.Resources.save;
+            saveAsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            saveAsToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
+            saveAsToolStripMenuItem.Text = "Save as...";
+            saveAsToolStripMenuItem.Click += SaveAsToolStripMenuItem_Click;
+            // 
             // filesTreeView
             // 
             filesTreeView.BackColor = System.Drawing.Color.FromArgb(40, 40, 40);
@@ -77,15 +88,18 @@
             filesTreeView.Size = new System.Drawing.Size(233, 373);
             filesTreeView.TabIndex = 1;
             // 
-            // saveAsToolStripMenuItem
+            // searchTextBox
             // 
-            saveAsToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            saveAsToolStripMenuItem.Image = Properties.Resources.save;
-            saveAsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new System.Drawing.Size(188, 30);
-            saveAsToolStripMenuItem.Text = "Save as...";
-            saveAsToolStripMenuItem.Click += SaveAsToolStripMenuItem_Click;
+            searchTextBox.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            searchTextBox.BackColor = System.Drawing.Color.FromArgb(40, 40, 40);
+            searchTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            searchTextBox.ForeColor = System.Drawing.Color.White;
+            searchTextBox.Margin = new System.Windows.Forms.Padding(0, 0, 5, 0);
+            searchTextBox.Name = "searchTextBox";
+            searchTextBox.Size = new System.Drawing.Size(100, 20);
+            searchTextBox.Text = "Search";
+            searchTextBox.ToolTipText = "Search in SARC";
+            searchTextBox.Click += searchTextBox_Click;
             // 
             // SarcEditor
             // 
@@ -113,5 +127,6 @@
         private System.Windows.Forms.TreeView filesTreeView;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox searchTextBox;
     }
 }
