@@ -27,6 +27,7 @@ public class TileEditor : Control
 
     public int Zoom { get; set; } = 10;
     public bool DisplayGrid { get; set; } = true;
+    public bool ShowType { get; set; } = true;
 
     public TileType? TileBrush = TileType.Custom1;
     public ViewType CurrentView
@@ -125,6 +126,9 @@ public class TileEditor : Control
         using var pen = new Pen(Color.FromArgb(50, 255, 255, 255), 1);
         using var bigGridPen = new Pen(Color.FromArgb(30, 255, 255, 255), 2);
 
+        var sf = new StringFormat { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center };
+        var f = new Font(FontFamily.GenericMonospace, (float)(Zoom / 2), FontStyle.Regular, GraphicsUnit.Pixel);
+
         for (int h = 0; h < PBCFile.Height; h++)
         {
             for (int w = 0; w < PBCFile.Width; w++)
@@ -145,11 +149,16 @@ public class TileEditor : Control
                             var c = PBCImageUtilities.GetHeightColor(heightInfo, MinHeight.Value, MaxHeight.Value);
                             using var brush = new SolidBrush(c);
                             e.Graphics.FillRectangle(brush, globalX * Zoom + offset.X, globalY * Zoom + offset.Y, Zoom, Zoom);
+                            if (heightInfo != -10000000 && ShowType)
+                                e.Graphics.DrawString(heightInfo.ToString(), f, Brushes.White, new Rectangle(globalX * Zoom + offset.X, globalY * Zoom + offset.Y, Zoom, Zoom));
                         }
                         else
                         {
                             using var brush = new SolidBrush(PBCImageUtilities.GetColor(tile.Type[subY, subX]));
                             e.Graphics.FillRectangle(brush, globalX * Zoom + offset.X, globalY * Zoom + offset.Y, Zoom, Zoom);
+
+                            if (ShowType)
+                                e.Graphics.DrawString(((int) tile.Type[subY, subX]).ToString(), f, Brushes.White, new Rectangle(globalX * Zoom + offset.X, globalY * Zoom + offset.Y, Zoom, Zoom));
                         }
 
                         if (DisplayGrid)
@@ -221,9 +230,9 @@ public class TileEditor : Control
                 && tileY >= 0 
                 && tileY < PBCFile.Height && subX >= 0 && subY >= 0)
             {
-              
+
                 var tile = PBCFile[tileY, tileX];
-                HighlightedHeight = tile.GetHeightMap(HeightId)[subX, subY];
+                HighlightedHeight = tile.GetHeightMap(HeightId)[subY, subX];
                 Invalidate();
             }
 

@@ -11,7 +11,6 @@ public partial class PBCEditor : Form
     public PBCFileReader CurrentPBC;
     //public ViewType CurrentView = ViewType.Collision;
     //public bool GridView = true;
-    public bool ShowType = true;
 
     private Action<byte[]> SaveFunction = null;
 
@@ -29,7 +28,7 @@ public partial class PBCEditor : Form
         UpdateStatusLabel();
 
         gridToolStripMenuItem.Checked = pbcPreview.DisplayGrid;
-        viewIDToolStripMenuItem.Checked = ShowType;
+        viewIDToolStripMenuItem.Checked = pbcPreview.ShowType;
 
         ReloadPBCImage();
 
@@ -95,8 +94,8 @@ public partial class PBCEditor : Form
 
     private void viewIDToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        ShowType = !ShowType;
-        viewIDToolStripMenuItem.Checked = ShowType;
+        pbcPreview.ShowType = !pbcPreview.ShowType;
+        viewIDToolStripMenuItem.Checked = pbcPreview.ShowType;
 
         ReloadPBCImage();
     }
