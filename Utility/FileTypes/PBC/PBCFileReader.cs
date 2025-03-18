@@ -25,29 +25,10 @@ public partial class PBCFileReader
             {
                 Layers[i] = new float[2, 2];
 
-                //for (int subX = 0; subX < 2; subX++)
-                //    for (int subY = 0; subY < 2; subY++)
-                //        Layers[i][subY, subX] = reader.ReadSingle();
-
-                //for (int subX = 0; subX < 2; subX++)
-                //    for (int subY = 0; subY < 2; subY++)
-                //        Layers[i][subY, subX] = reader.ReadSingle();
-
-                //for (int y = 0; y < 2; y++)
-                //    for (int x = 0; x < 2; x++)
-                //        Layers[i][1 - y, 1 - x] = reader.ReadSingle();
-
-
                 Layers[i][1, 1] = reader.ReadSingle();
                 Layers[i][0, 0] = reader.ReadSingle();
                 Layers[i][0, 1] = reader.ReadSingle();
                 Layers[i][1, 0] = reader.ReadSingle();
-
-                // correct
-                //Layers[i][1, 1] = reader.ReadSingle();// seems correct
-                //Layers[i][1, 0] = reader.ReadSingle();
-                //Layers[i][0, 0] = reader.ReadSingle();// seems correct
-                //Layers[i][0, 1] = reader.ReadSingle();
             }
 
             // Read Collision Map
