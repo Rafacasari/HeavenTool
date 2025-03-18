@@ -54,6 +54,7 @@ namespace HeavenTool
             duplicateRowToolStripMenuItem = new ToolStripMenuItem();
             deleteRowsToolStripMenuItem = new ToolStripMenuItem();
             compareRowsToolStripMenuItem = new ToolStripMenuItem();
+            sortByRowIdToolStripMenuItem = new ToolStripMenuItem();
             devToolStripMenuItem = new ToolStripMenuItem();
             associatebcsvWithThisProgramToolStripMenuItem = new ToolStripMenuItem();
             exportValidHashesToolStripMenuItem = new ToolStripMenuItem();
@@ -183,7 +184,7 @@ namespace HeavenTool
             // 
             // editToolStripMenuItem
             // 
-            editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { searchToolStripMenuItem, newEntryToolStripMenuItem, duplicateRowToolStripMenuItem, deleteRowsToolStripMenuItem, compareRowsToolStripMenuItem });
+            editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { searchToolStripMenuItem, newEntryToolStripMenuItem, duplicateRowToolStripMenuItem, deleteRowsToolStripMenuItem, compareRowsToolStripMenuItem, sortByRowIdToolStripMenuItem });
             editToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             editToolStripMenuItem.Name = "editToolStripMenuItem";
             editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
@@ -249,6 +250,16 @@ namespace HeavenTool
             compareRowsToolStripMenuItem.Text = "Compare Rows";
             compareRowsToolStripMenuItem.ToolTipText = "Compare selected rows in a new window (read-only)";
             compareRowsToolStripMenuItem.Click += CompareRowsToolStripMenuItem_Click;
+            // 
+            // sortByRowIdToolStripMenuItem
+            // 
+            sortByRowIdToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            sortByRowIdToolStripMenuItem.Image = Properties.Resources.sort;
+            sortByRowIdToolStripMenuItem.ImageScaling = ToolStripItemImageScaling.None;
+            sortByRowIdToolStripMenuItem.Name = "sortByRowIdToolStripMenuItem";
+            sortByRowIdToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
+            sortByRowIdToolStripMenuItem.Text = "Sort by Row Id";
+            sortByRowIdToolStripMenuItem.Click += sortByRowIdToolStripMenuItem_Click;
             // 
             // devToolStripMenuItem
             // 
@@ -618,6 +629,7 @@ namespace HeavenTool
         private ToolStripMenuItem devToolsToolStripMenuItem;
         private ToolStripMenuItem dumpFieldsToJson;
         private ToolStripMenuItem devExportHeadersToolStripMenuItem;
+        private ToolStripMenuItem sortByRowIdToolStripMenuItem;
     }
 }
 

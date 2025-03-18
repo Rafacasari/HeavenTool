@@ -68,6 +68,12 @@ public partial class RSTBEditor : Form
     public void LoadFile(string path)
     {
         LoadedFile = new ResourceTable(path);
+
+        if (LoadedFile == null || !LoadedFile.IsLoaded) {
+            MessageBox.Show("Failed to load this file!");
+            return;
+        }
+
         PopulateGridView();
 
         RefreshMenuButtons();
@@ -247,12 +253,13 @@ public partial class RSTBEditor : Form
 
         if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
         {
-            var romFsPath = folderBrowserDialog.SelectedPath;
+            var moddedRomFsPath = folderBrowserDialog.SelectedPath;
 
-            var allFiles = Directory.GetFiles(romFsPath, "*", SearchOption.AllDirectories);
+            var allFiles = Directory.GetFiles(moddedRomFsPath, "*", SearchOption.AllDirectories);
 
             List<string> changedFiles = [];
             List<string> addedFiles = [];
+            List<string> skippedFiles = [];
 
             TopMenu.Enabled = false;
 
@@ -290,8 +297,18 @@ public partial class RSTBEditor : Form
                 foreach (var originalFile in allFiles)
                 {
                     if (IsDisposed || Disposing) break;
+                 
 
-                    var path = Path.GetRelativePath(romFsPath, originalFile).Replace('\\', '/');
+                    var path = Path.GetRelativePath(moddedRomFsPath, originalFile).Replace('\\', '/');
+
+                    if (path == "System/Resource/ResourceSizeTable.srsizetable" 
+                    || path == "System/Resource/ResourceSizeTable.rsizetable"
+                    || path.EndsWith(".DS_Store"))
+                    {
+                        skippedFiles.Add(originalFile);
+                        continue;
+                    }
+
                     updateStatus(currentPosition, path);
 
                     // Remove .zs extension
@@ -329,6 +346,7 @@ public partial class RSTBEditor : Form
                         MessageBox.Show($"Successfully updated table values!" +
                             (changedFiles.Count > 0 ? $"\nUpdated {changedFiles.Count} files." : "") +
                             (addedFiles.Count > 0 ? $"\nAdded {addedFiles.Count} files." : "") +
+                            (skippedFiles.Count > 0 ? $"\nSkipped {skippedFiles.Count} files." : "") +
                             "\n\nYou need to manually save your file in File > Save as...",
                             "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }

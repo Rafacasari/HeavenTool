@@ -16,7 +16,6 @@ using HeavenTool.Forms.Search;
 using System.Text.Json;
 using HeavenTool.Forms.Components;
 using HeavenTool.Utility.FileTypes.BCSV.Exporting;
-using HeavenTool.Forms.BCSV;
 
 namespace HeavenTool;
 
@@ -1475,6 +1474,43 @@ public partial class BCSVForm : Form, ISearchable
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 gameConfig.ExportConfig(saveFileDialog.FileName);
 
+        }
+    }
+
+    private bool sortByAscending = true;
+    private void sortByRowIdToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        //mainDataGridView.Sort(new DefaultSort(sortByAscending ? SortOrder.Ascending : SortOrder.Descending));
+        mainDataGridView.Sort(new DefaultSort(SortOrder.Ascending));
+        sortByAscending = !sortByAscending;
+    }
+
+    private class DefaultSort : System.Collections.IComparer
+    {
+        private static int sortOrderModifier = 1;
+
+        public DefaultSort(SortOrder sortOrder)
+        {
+            if (sortOrder == SortOrder.Descending)
+            {
+                sortOrderModifier = -1;
+            }
+            else if (sortOrder == SortOrder.Ascending)
+            {
+                sortOrderModifier = 1;
+            }
+        }
+
+        public int Compare(object x, object y)
+        {
+            IndexRow DataGridViewRow1 = (IndexRow)x;
+            IndexRow DataGridViewRow2 = (IndexRow)y;
+
+            // Try to sort based on the Last Name column.
+
+            int CompareResult = DataGridViewRow1.OriginalIndex.CompareTo(DataGridViewRow2.OriginalIndex);
+
+            return CompareResult * sortOrderModifier;
         }
     }
 }

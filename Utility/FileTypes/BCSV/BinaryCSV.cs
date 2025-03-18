@@ -23,15 +23,25 @@ public class BinaryCSV : IDisposable
     /// </summary>
     public Field[] Fields { get; set; }
 
+
     /// <summary>
     /// List of <see cref="BCSVEntry"/>
     /// </summary>
     public List<BCSVEntry> Entries { get; set; }
+    // TODO: Change List<BCSVEntry> to object[][] as it should use less memory
+    //public object[][] Entries { get; set; }
 
     /// <summary>
     /// Cache to get a <see cref="Field"/> using a hash/hex, use <see cref="GetFieldByHashedName(string)"/>
     /// </summary>
     public Dictionary<string, Field> Cache { get; set; }
+
+
+    public object this[int row, string header]
+    {
+        get => Entries[row][header];
+        set => Entries[row][header] = value;
+    }
 
     /// <summary>
     /// Get a <see cref="Field"/> using a hash/hex (<seealso cref="Field.HEX"/>)
@@ -278,109 +288,107 @@ public class BinaryCSV : IDisposable
         fileStream.Close();
     }
 
+    
+
     public void SaveAs(string filePath)
     {
-        using (var fileStream = File.Create(filePath))
-        using (var writer = new BinaryWriter(fileStream))
+        using var fileStream = File.Create(filePath);
+        using var writer = new BinaryWriter(fileStream);
+
+        writer.Write(Entries.Count);
+        writer.Write(EntrySize);
+        writer.Write((ushort)Fields.Length);
+
+        writer.Write(HasExtendedHeader);
+        writer.Write(UnknownField);
+
+        if (HasExtendedHeader == 1)
+        {
+            writer.Write(Encoding.UTF8.GetBytes(HeaderMagic));
+            writer.Write(HeaderVersion);
+
+            // Padding
+            writer.Seek(10, SeekOrigin.Current);
+        }
+
+
+        foreach (var field in Fields)
+        {
+            writer.Write(field.Hash);
+            writer.Write(field.Offset);
+        }
+
+        foreach (var entry in Entries)
         {
 
-            writer.Write(Entries.Count);
-            writer.Write(EntrySize);
-            writer.Write((ushort)Fields.Length);
-
-            writer.Write(HasExtendedHeader);
-            writer.Write(UnknownField);
-
-            if (HasExtendedHeader == 1)
-            {
-                writer.Write(Encoding.UTF8.GetBytes(HeaderMagic));
-                writer.Write(HeaderVersion);
-
-                // Padding
-                writer.Seek(10, SeekOrigin.Current);
-            }
-
+            var pos = (int)writer.BaseStream.Position;
+            writer.Write(pos);
 
             foreach (var field in Fields)
             {
-                writer.Write(field.Hash);
-                writer.Write(field.Offset);
-            }
+                writer.Seek(pos + (int)field.Offset, SeekOrigin.Begin);
 
-            foreach (var entry in Entries)
-            {
-
-                var pos = (int)writer.BaseStream.Position;
-                writer.Write(pos);
-
-                foreach (var field in Fields)
+                var entryValue = entry[field.HEX];
+                switch (field.DataType)
                 {
-                    writer.Seek(pos + (int)field.Offset, SeekOrigin.Begin);
+                    case BCSVDataType.MultipleU8:
+                    case BCSVDataType.MultipleS8:
+                        writer.Write((byte[])entryValue);
+                        break;
 
-                    var entryValue = entry[field.HEX];
-                    switch (field.DataType)
-                    {
-                        case BCSVDataType.MultipleU8:
-                        case BCSVDataType.MultipleS8:
-                            writer.Write((byte[])entryValue);
-                            break;
+                    case BCSVDataType.S8:
+                        writer.Write((sbyte)entryValue);
+                        break;
 
-                        case BCSVDataType.S8:
-                            writer.Write((sbyte)entryValue);
-                            break;
+                    case BCSVDataType.U8:
+                        writer.Write((byte)entryValue);
+                        break;
 
-                        case BCSVDataType.U8:
-                            writer.Write((byte)entryValue);
-                            break;
+                    case BCSVDataType.Float32:
+                        writer.Write((float)entryValue);
+                        break;
 
-                        case BCSVDataType.Float32:
-                            writer.Write((float)entryValue);
-                            break;
+                    case BCSVDataType.Int16:
+                        writer.Write((short)entryValue);
+                        break;
 
-                        case BCSVDataType.Int16:
-                            writer.Write((short)entryValue);
-                            break;
+                    case BCSVDataType.UInt16:
+                        writer.Write((ushort)entryValue);
+                        break;
 
-                        case BCSVDataType.UInt16:
-                            writer.Write((ushort)entryValue);
-                            break;
+                    case BCSVDataType.Int32:
+                        writer.Write((int)entryValue);
+                        break;
 
-                        case BCSVDataType.Int32:
-                            writer.Write((int)entryValue);
-                            break;
-
-                        case BCSVDataType.UInt32:
-                        case BCSVDataType.HashedCsc32:
-                        case BCSVDataType.Murmur3:
-                            writer.Write((uint)entryValue);
-                            break;
+                    case BCSVDataType.UInt32:
+                    case BCSVDataType.HashedCsc32:
+                    case BCSVDataType.Murmur3:
+                        writer.Write((uint)entryValue);
+                        break;
 
 
-                        case BCSVDataType.String:
+                    case BCSVDataType.String:
+                        {
+                            try
                             {
-                                try
-                                {
-                                    string stringValue = entryValue.ToString().Trim();
+                                string stringValue = entryValue.ToString().Trim();
 
-                                    var bytes = Encoding.UTF8.GetBytes(stringValue);
-                                    Array.Resize(ref bytes, (int)field.Size);
-                                    writer.Write(bytes);
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show($"Failed to save string\n{ex}");
-                                }
+                                var bytes = Encoding.UTF8.GetBytes(stringValue);
+                                Array.Resize(ref bytes, (int)field.Size);
+                                writer.Write(bytes);
                             }
-                            break;
-                    }
-
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Failed to save string\n{ex}");
+                            }
+                        }
+                        break;
                 }
 
-                writer.Seek(pos + (int)EntrySize, SeekOrigin.Begin);
             }
-        }
 
-        
+            writer.Seek(pos + (int)EntrySize, SeekOrigin.Begin);
+        }
     }
 
     private bool disposed = false;

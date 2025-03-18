@@ -32,11 +32,23 @@ public partial class PBCEditor : Form
         viewIDToolStripMenuItem.Checked = ShowType;
 
         ReloadPBCImage();
+
+        var colors = Enum.GetValues(typeof(TileType));
+        foreach(TileType color in colors)
+            colorList.Items.Add(color);
+
+        pbcPreview.TileBrush = TileType.Null;
+        colorList.SelectedIndex = colorList.Items.IndexOf(TileType.Null);
     }
 
     private void UpdateStatusLabel()
     {
-        statusLabel.Text = $"Width: {CurrentPBC.Width * 2} | Height: {CurrentPBC.Height * 2} | Offset: (X {CurrentPBC.OffsetX}, Y {CurrentPBC.OffsetY}) ";
+        var statusText = $"Width: {CurrentPBC.Width * 2} | Height: {CurrentPBC.Height * 2} | Offset: (X {CurrentPBC.OffsetX}, Y {CurrentPBC.OffsetY}) ";
+
+        if (pbcPreview != null && pbcPreview.TileBrush != null)
+            statusText += $"| Brush: {pbcPreview.TileBrush}";
+
+        statusLabel.Text = statusText;
     }
 
     private void MouseMoved(object sender, MouseEventArgs e)
@@ -60,15 +72,6 @@ public partial class PBCEditor : Form
         heightMap2ToolStripMenuItem.Checked = pbcPreview.CurrentView == ViewType.HeightMap2;
         heightMap3ToolStripMenuItem.Checked = pbcPreview.CurrentView == ViewType.HeightMap3;
         collisionMapToolStripMenuItem.Checked = pbcPreview.CurrentView == ViewType.Collision;
-        ////var image = CurrentPBC.GenerateImage(CurrentView, tileEditor1.Zoom, GridView, ShowType);
-        //currentZoomMenu.Text = $"Zoom: {tileEditor1.Zoom}x";
-
-        //pbcPreview.Image = image;
-        //pbcPreview.SizeMode = PictureBoxSizeMode.Normal;
-        //pbcPreview.Width = image.Width;
-        //pbcPreview.Height = image.Height;
-        //pbcPreview.Invalidate();
-
 
         propertyGrid1.SelectedObject = CurrentPBC;
     }
@@ -101,7 +104,7 @@ public partial class PBCEditor : Form
     private void gridToolStripMenuItem_Click(object sender, EventArgs e)
     {
         //GridView = !GridView;
-        
+
         pbcPreview.DisplayGrid = !pbcPreview.DisplayGrid;
         gridToolStripMenuItem.Checked = pbcPreview.DisplayGrid;
 
@@ -142,5 +145,33 @@ public partial class PBCEditor : Form
     {
         if (CurrentPBC != null)
             SaveFunction?.Invoke(CurrentPBC.SaveAsBytes());
+    }
+
+    private void colorList_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (colorList.SelectedItem != null && colorList.SelectedItem is TileType tileType) 
+            pbcPreview.TileBrush = tileType;
+
+        UpdateStatusLabel();
+    }
+
+    private void colorList_DrawItem(object sender, DrawItemEventArgs e)
+    {
+        if (e.Index == -1)
+            return;
+
+        var tileType = (TileType) colorList.Items[e.Index];
+       
+        e.DrawBackground();
+        var rect = new Rectangle(e.Bounds.X + 10, e.Bounds.Y + 2, 12, e.Bounds.Height - 4);
+        using (SolidBrush brush = new(PBCImageUtilities.GetColor(tileType)))
+        {
+            e.Graphics.FillRectangle(brush, rect);
+        }
+       
+      
+        e.Graphics.DrawString(tileType.ToString(), e.Font, Brushes.White, new Rectangle(e.Bounds.X + 25, e.Bounds.Y - 1, e.Bounds.Width, e.Bounds.Height), StringFormat.GenericDefault);
+
+        e.DrawFocusRectangle();
     }
 }

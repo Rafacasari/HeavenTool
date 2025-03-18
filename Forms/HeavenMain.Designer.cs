@@ -38,6 +38,9 @@ namespace HeavenTool
             rstbEditorButton = new System.Windows.Forms.Button();
             sarcEditorButton = new System.Windows.Forms.Button();
             itemParamHelperButton = new System.Windows.Forms.Button();
+            compressionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            yaz0ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            yaz0DecompressToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -72,6 +75,7 @@ namespace HeavenTool
             // 
             // optionsToolStripMenuItem
             // 
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { compressionToolStripMenuItem });
             optionsToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
@@ -136,6 +140,30 @@ namespace HeavenTool
             itemParamHelperButton.UseVisualStyleBackColor = false;
             itemParamHelperButton.Click += itemParamHelperButton_Click;
             // 
+            // compressionToolStripMenuItem
+            // 
+            compressionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { yaz0ToolStripMenuItem });
+            compressionToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            compressionToolStripMenuItem.Name = "compressionToolStripMenuItem";
+            compressionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            compressionToolStripMenuItem.Text = "Compression";
+            // 
+            // yaz0ToolStripMenuItem
+            // 
+            yaz0ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { yaz0DecompressToolStripMenuItem });
+            yaz0ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            yaz0ToolStripMenuItem.Name = "yaz0ToolStripMenuItem";
+            yaz0ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            yaz0ToolStripMenuItem.Text = "Yaz0";
+            // 
+            // yaz0DecompressToolStripMenuItem
+            // 
+            yaz0DecompressToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            yaz0DecompressToolStripMenuItem.Name = "yaz0DecompressToolStripMenuItem";
+            yaz0DecompressToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            yaz0DecompressToolStripMenuItem.Text = "Decompress";
+            yaz0DecompressToolStripMenuItem.Click += yaz0DecompressToolStripMenuItem_Click;
+            // 
             // HeavenMain
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -169,5 +197,8 @@ namespace HeavenTool
         private System.Windows.Forms.Button rstbEditorButton;
         private System.Windows.Forms.Button sarcEditorButton;
         private System.Windows.Forms.Button itemParamHelperButton;
+        private System.Windows.Forms.ToolStripMenuItem compressionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem yaz0ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem yaz0DecompressToolStripMenuItem;
     }
 }

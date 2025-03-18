@@ -137,7 +137,6 @@ public class TileEditor : Control
                     int globalY = h * 2 + subY;
                     for (int subX = 0; subX < 2; subX++)
                     {
- 
                         int globalX = w * 2 + subX;
 
                         if (HeightId > -1 && MinHeight.HasValue && MaxHeight.HasValue)
@@ -187,7 +186,7 @@ public class TileEditor : Control
             if (PBCFile != null && tileX >= 0 && tileX < PBCFile.Width && tileY >= 0 && tileY < PBCFile.Height && subX >= 0 && subY >= 0) 
             {
                 var tile = PBCFile[tileY, tileX];
-                tile.Type[subX, subY] = TileBrush.Value;
+                tile.Type[subY, subX] = TileBrush.Value;
                 Invalidate();
             }
         }

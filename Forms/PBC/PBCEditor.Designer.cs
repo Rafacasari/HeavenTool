@@ -48,13 +48,14 @@
             viewIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             gridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             pbcPreview = new TileEditor();
+            colorList = new System.Windows.Forms.ListBox();
             fileInfoBar.SuspendLayout();
             darkMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // propertyGrid1
             // 
-            propertyGrid1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            propertyGrid1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             propertyGrid1.BackColor = System.Drawing.Color.FromArgb(40, 40, 40);
             propertyGrid1.CategoryForeColor = System.Drawing.Color.FromArgb(230, 230, 230);
             propertyGrid1.CategorySplitterColor = System.Drawing.Color.FromArgb(40, 40, 40);
@@ -221,6 +222,10 @@
             // 
             pbcPreview.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             pbcPreview.BackColor = System.Drawing.Color.Black;
+            pbcPreview.CurrentView = Utility.FileTypes.PBC.ViewType.Collision;
+            pbcPreview.DisplayGrid = true;
+            pbcPreview.HeightId = -1;
+            pbcPreview.HighlightedHeight = null;
             pbcPreview.Location = new System.Drawing.Point(12, 27);
             pbcPreview.Name = "pbcPreview";
             pbcPreview.PBCFile = null;
@@ -229,12 +234,30 @@
             pbcPreview.Text = "tileEditor1";
             pbcPreview.Zoom = 10;
             // 
+            // colorList
+            // 
+            colorList.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            colorList.BackColor = System.Drawing.Color.FromArgb(40, 40, 40);
+            colorList.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            colorList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            colorList.ForeColor = System.Drawing.Color.White;
+            colorList.FormattingEnabled = true;
+            colorList.IntegralHeight = false;
+            colorList.ItemHeight = 15;
+            colorList.Location = new System.Drawing.Point(531, 27);
+            colorList.Name = "colorList";
+            colorList.Size = new System.Drawing.Size(221, 309);
+            colorList.TabIndex = 7;
+            colorList.DrawItem += colorList_DrawItem;
+            colorList.SelectedIndexChanged += colorList_SelectedIndexChanged;
+            // 
             // PBCEditor
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             BackColor = System.Drawing.Color.FromArgb(51, 51, 51);
             ClientSize = new System.Drawing.Size(764, 559);
+            Controls.Add(colorList);
             Controls.Add(pbcPreview);
             Controls.Add(fileInfoBar);
             Controls.Add(darkMenuStrip1);
@@ -273,5 +296,6 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private TileEditor pbcPreview;
+        private System.Windows.Forms.ListBox colorList;
     }
 }

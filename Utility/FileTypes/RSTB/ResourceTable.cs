@@ -109,14 +109,15 @@ public class ResourceTable : IDisposable
         {
             if (IsCollided)
             {
-                var bytes = Encoding.ASCII.GetBytes(_fileName);
+                if (string.IsNullOrEmpty(FileName))
+                    throw new Exception($"File name is null! (Hash: {CRCHash})\nMake sure you have a \"extra/romfs-files.txt\" file and it have every ACNH file path!");
 
-                // Theorically this is useless Array.Resize should be enough, but for some reason the game keeps crashing so let's try this
-                if (bytes.Length < 128)
-                    bytes = [.. bytes, .. new byte[128 - bytes.Length]];
-                else if (bytes.Length > 128) 
-                    Array.Resize(ref bytes, 128);
+                var bytes = Encoding.ASCII.GetBytes(FileName);
 
+                if (bytes.Length > 128)
+                    throw new Exception($"File name \"{FileName}\" exceed the 128 bytes!");
+
+                Array.Resize(ref bytes, 128);
                 writer.Write(bytes);
             }
             else
@@ -245,22 +246,25 @@ public class ResourceTable : IDisposable
 
                 // If the hash is not found, we gonna throw an error and this should prevent the file from loading
                 if (entry.FileName != null)
-                    Dictionary.TryAdd(entry.FileName, entry);
-
+                {
+                    if (!Dictionary.TryAdd(entry.FileName, entry)) throw new Exception($"Failed to add {entry.FileName} to Dictionary, probably a duplicated entry.");
+                }
                 else throw new Exception($"Hash {entry.CRCHash:x} not found!");
             }
 
             for (int i = 0; i < repeatedEntriesCount; i++)
             {
                 var fileName = reader.ReadString(128, Encoding.ASCII);
-                var fileSize = reader.ReadUInt32(); ;
+                var fileSize = reader.ReadUInt32();
 
                 var entry = new ResourceTableEntry(fileName, fileSize, true);
 
                 if (IsRSTC) entry.DLC = reader.ReadUInt32();
 
                 if (entry.FileName != null)
-                    Dictionary.TryAdd(entry.FileName, entry);
+                {
+                    if (!Dictionary.TryAdd(entry.FileName, entry)) throw new Exception($"Failed to add {entry.FileName} to Dictionary, probably a duplicated entry.");
+                }
             }
         }
 
@@ -302,32 +306,39 @@ public class ResourceTable : IDisposable
         //var uniqueEntries = orderableDictionary.Where(x => x.Count() == 1).SelectMany(x => x.Select(y => y.Value)).ToList();
 
         UpdateUniques();
+        try
+        {
+            var uniqueEntries = Dictionary.Where(x => !x.Value.IsCollided).ToList();
+            var nonUniqueEntries = Dictionary.Where(x => x.Value.IsCollided).ToList();
 
-        var uniqueEntries = Dictionary.Where(x => !x.Value.IsCollided).ToList();
-        var nonUniqueEntries = Dictionary.Where(x => x.Value.IsCollided).ToList();
+            using var memoryStream = new MemoryStream();
+            using var writer = new BinaryWriter(memoryStream);
 
-        using var memoryStream = new MemoryStream();
-        using var writer = new BinaryWriter(memoryStream);
+            // Write header
+            writer.Write(Encoding.ASCII.GetBytes(HEADER));
 
-        // Write header
-        writer.Write(Encoding.ASCII.GetBytes(HEADER));
+            writer.Write((uint) uniqueEntries.Count);
+            writer.Write((uint) nonUniqueEntries.Count);
 
-        writer.Write(uniqueEntries.Count);
-        writer.Write(nonUniqueEntries.Count);
+            foreach (var (_, entry) in uniqueEntries)
+                entry.Write(writer, IsRSTC);
 
-        foreach (var (_, entry) in uniqueEntries)
-            entry.Write(writer, IsRSTC);
-
-        foreach (var (_, entry) in nonUniqueEntries)
-            entry.Write(writer, IsRSTC);
+            foreach (var (_, entry) in nonUniqueEntries)
+                entry.Write(writer, IsRSTC);
 
 
-        byte[] array = new byte[memoryStream.Length];
-        memoryStream.Seek(0L, SeekOrigin.Begin);
-        memoryStream.Read(array, 0, array.Length);
+            byte[] array = new byte[memoryStream.Length];
+            memoryStream.Position = 0;
+            memoryStream.Read(array, 0, array.Length);
 
-        var result = Compressor.Compress(array);
-        File.WriteAllBytes(filePath, result);
+            var wantToCompress = MessageBox.Show("Do you want to compress the file?", "Compress to Yaz0?", MessageBoxButtons.YesNo);
+            var result = wantToCompress == DialogResult.Yes ? Compressor.Compress(array) : array;
+
+            File.WriteAllBytes(filePath, result);
+        }
+        catch (Exception ex) { 
+            MessageBox.Show(ex.Message, "Failed to save!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     public void Dispose()
