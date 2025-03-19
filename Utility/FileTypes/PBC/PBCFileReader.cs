@@ -11,54 +11,77 @@ namespace HeavenTool.Utility.FileTypes.PBC;
 /// </summary>
 public partial class PBCFileReader
 {
-    public class Tile
+    public class Quadrant
     {
-        public float[][,] Layers;
-        public TileType[,] Type;
+        public float Val1;
+        public float Val2;
+        public float Val3;
 
-        public Tile(BinaryReader reader)
+        public Quadrant(BinaryReader reader)
         {
-            // Read Height Map(s)
-            Layers = new float[3][,];
-
-            for (var i = 0; i < 3; i++)
-            {
-                Layers[i] = new float[2, 2];
-
-                Layers[i][1, 1] = reader.ReadSingle();
-                Layers[i][0, 0] = reader.ReadSingle();
-                Layers[i][0, 1] = reader.ReadSingle();
-                Layers[i][1, 0] = reader.ReadSingle();
-            }
-
-            // Read Collision Map
-            Type = new TileType[2, 2];
-            Type[1, 1] = (TileType) reader.ReadByte();
-            Type[1, 0] = (TileType) reader.ReadByte();
-            Type[0, 0] = (TileType) reader.ReadByte();
-            Type[0, 1] = (TileType) reader.ReadByte();
-        }
-
-        public float[,] GetHeightMap(int index)
-        {
-            if (index >= Layers.Length || index < 0)
-                return null;
-
-            return Layers[index];
+            Val1 = reader.ReadSingle();
+            Val2 = reader.ReadSingle();
+            Val3 = reader.ReadSingle();
         }
 
         public void Write(BinaryWriter writer)
         {
-            for (var i = 0; i < 3; i++)
-                for (var y = 0; y < 2; y++)
-                    for (var x = 0; x < 2; x++)
-                         writer.Write(Layers[i][x, y]);
-            
+            writer.Write(Val1);
+            writer.Write(Val2);
+            writer.Write(Val3);
+        }
+    }
 
-            writer.Write((byte) Type[0, 0]);
-            writer.Write((byte) Type[0, 1]);
-            writer.Write((byte) Type[1, 1]);
-            writer.Write((byte) Type[1, 0]);
+    public class HeightMap
+    {
+        public Quadrant[,] Quadrants;
+
+        public HeightMap(BinaryReader reader) {
+
+            Quadrants = new Quadrant[2, 2];
+
+            for (int subY = 0; subY < 2; subY++)
+                for (int subX = 0; subX < 2; subX++)
+                    Quadrants[subY, subX] = new Quadrant(reader);
+
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            for (int subY = 0; subY < 2; subY++)
+                for (int subX = 0; subX < 2; subX++)
+                    Quadrants[subY, subX].Write(writer);
+        }
+    }
+
+
+    public class Tile
+    {
+        //public float[][,] Layers;
+        public HeightMap HeightMap;
+        public TileType[,] Type;
+
+        public Tile(BinaryReader reader)
+        {
+            // Read Height Map
+            HeightMap = new HeightMap(reader);
+
+            // Read Collision Map
+            Type = new TileType[2, 2];
+
+            for (int subY = 0; subY < 2; subY++)
+                for (int subX = 0; subX < 2; subX++)
+                    Type[subY, subX] = (TileType) reader.ReadByte();      
+        }
+
+
+        public void Write(BinaryWriter writer)
+        {
+            HeightMap.Write(writer);
+
+            for (int subY = 0; subY < 2; subY++)
+                for (int subX = 0; subX < 2; subX++)
+                    writer.Write((byte) Type[subY, subX]);
         }
     }
 
@@ -120,8 +143,11 @@ public partial class PBCFileReader
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream);
 
+        writer.Write("pbc\0"u8);
+
         writer.Write(Width);
         writer.Write(Height);
+
         writer.Write(OffsetX);
         writer.Write(OffsetY);
 

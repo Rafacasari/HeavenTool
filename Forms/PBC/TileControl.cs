@@ -77,18 +77,18 @@ public class TileEditor : Control
             for (var h = 0; h < PBCFile.Height; h++)
                 for (var w = 0; w < PBCFile.Width; w++)
                 {
-                    var tileHeight = PBCFile.Tiles[h, w].GetHeightMap(HeightId);
+                    var tileHeight = PBCFile.Tiles[h, w].HeightMap;
                     if (tileHeight != null)
                     {
-                        foreach (var heightTile in tileHeight)
+                        foreach (var heightTile in tileHeight.Quadrants)
                         {
-                            if (heightTile == -10000000) continue;
+                            if (heightTile.Val2 == -10000000) continue;
 
-                            if (MinHeight == null || heightTile < MinHeight)
-                                MinHeight = heightTile;
+                            if (MinHeight == null || heightTile.Val2 < MinHeight)
+                                MinHeight = heightTile.Val2;
 
-                            if (MaxHeight == null || heightTile > MaxHeight)
-                                MaxHeight = heightTile;
+                            if (MaxHeight == null || heightTile.Val2 > MaxHeight)
+                                MaxHeight = heightTile.Val2;
                         }
                     }
                 }
@@ -134,8 +134,8 @@ public class TileEditor : Control
             for (int w = 0; w < PBCFile.Width; w++)
             {
                 var tile = PBCFile.Tiles[h, w];
-                var tileHeight = tile.GetHeightMap(HeightId);
-
+                //var tileHeight = tile.GetHeightMap(HeightId);
+                var tileHeight = tile.HeightMap;
                 for (int subY = 0; subY < 2; subY++)   
                 {
                     int globalY = h * 2 + subY;
@@ -145,7 +145,8 @@ public class TileEditor : Control
 
                         if (HeightId > -1 && MinHeight.HasValue && MaxHeight.HasValue)
                         {
-                            var heightInfo = tileHeight[subY, subX];
+                            //var heightInfo = tileHeight[subY, subX];
+                            var heightInfo = tileHeight.Quadrants[subY, subX].Val2;
                             var c = PBCImageUtilities.GetHeightColor(heightInfo, MinHeight.Value, MaxHeight.Value);
                             using var brush = new SolidBrush(c);
                             e.Graphics.FillRectangle(brush, globalX * Zoom + offset.X, globalY * Zoom + offset.Y, Zoom, Zoom);
@@ -232,7 +233,7 @@ public class TileEditor : Control
             {
 
                 var tile = PBCFile[tileY, tileX];
-                HighlightedHeight = tile.GetHeightMap(HeightId)[subY, subX];
+                //HighlightedHeight = tile.GetHeightMap(HeightId)[subY, subX];
                 Invalidate();
             }
 

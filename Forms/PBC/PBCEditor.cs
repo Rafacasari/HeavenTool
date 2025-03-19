@@ -45,7 +45,7 @@ public partial class PBCEditor : Form
         var statusText = $"Width: {CurrentPBC.Width * 2} | Height: {CurrentPBC.Height * 2} | Offset: (X {CurrentPBC.OffsetX}, Y {CurrentPBC.OffsetY}) ";
 
         if (pbcPreview != null && pbcPreview.TileBrush != null)
-            statusText += $"| Brush: {pbcPreview.TileBrush}";
+            statusText += $"| Brush: {pbcPreview.TileBrush} ({(byte) pbcPreview.TileBrush})";
 
         statusLabel.Text = statusText;
     }
@@ -167,9 +167,17 @@ public partial class PBCEditor : Form
         {
             e.Graphics.FillRectangle(brush, rect);
         }
-       
-      
+
+        var ft = new StringFormat()
+        {
+            LineAlignment = StringAlignment.Center,
+            Alignment = StringAlignment.Far
+        };
+
         e.Graphics.DrawString(tileType.ToString(), e.Font, Brushes.White, new Rectangle(e.Bounds.X + 25, e.Bounds.Y - 1, e.Bounds.Width, e.Bounds.Height), StringFormat.GenericDefault);
+
+
+        e.Graphics.DrawString(((byte) tileType).ToString(), e.Font, Brushes.DarkGray, new Rectangle(e.Bounds.X + 25, e.Bounds.Y, e.Bounds.Width - 27, e.Bounds.Height), ft);
 
         e.DrawFocusRectangle();
     }
