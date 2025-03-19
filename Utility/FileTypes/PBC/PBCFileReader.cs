@@ -13,9 +13,9 @@ public partial class PBCFileReader
 {
     public class Quadrant
     {
-        public float Val1;
-        public float Val2;
-        public float Val3;
+        public float Val1 { get; set; }
+        public float Val2 { get; set; }
+        public float Val3 { get; set; }
 
         public Quadrant(BinaryReader reader)
         {
@@ -40,9 +40,13 @@ public partial class PBCFileReader
 
             Quadrants = new Quadrant[2, 2];
 
-            for (int subY = 0; subY < 2; subY++)
-                for (int subX = 0; subX < 2; subX++)
-                    Quadrants[subY, subX] = new Quadrant(reader);
+            //for (int subY = 0; subY < 2; subY++)
+            //    for (int subX = 0; subX < 2; subX++)
+            //        Quadrants[subY, subX] = new Quadrant(reader);
+            Quadrants[0, 1] = new Quadrant(reader);
+            Quadrants[0, 0] = new Quadrant(reader);           
+            Quadrants[1, 0] = new Quadrant(reader);
+            Quadrants[1, 1] = new Quadrant(reader);
 
         }
 
@@ -69,9 +73,14 @@ public partial class PBCFileReader
             // Read Collision Map
             Type = new TileType[2, 2];
 
-            for (int subY = 0; subY < 2; subY++)
-                for (int subX = 0; subX < 2; subX++)
-                    Type[subY, subX] = (TileType) reader.ReadByte();      
+
+            Type[0, 1] = (TileType)reader.ReadByte();
+            Type[0, 0] = (TileType)reader.ReadByte();
+            Type[1, 0] = (TileType)reader.ReadByte();
+            Type[1, 1] = (TileType)reader.ReadByte();
+            //for (int subY = 0; subY < 2; subY++)
+            //    for (int subX = 0; subX < 2; subX++)
+            //        Type[subY, subX] = (TileType) reader.ReadByte();      
         }
 
 

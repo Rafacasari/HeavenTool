@@ -72,32 +72,26 @@ public class TileEditor : Control
 
     private void UpdateHeight()
     {
-        if (HeightId != -1)
-        {
-            for (var h = 0; h < PBCFile.Height; h++)
-                for (var w = 0; w < PBCFile.Width; w++)
+        for (var h = 0; h < PBCFile.Height; h++)
+            for (var w = 0; w < PBCFile.Width; w++)
+            {
+                var tileHeight = PBCFile.Tiles[h, w].HeightMap;
+                if (tileHeight != null)
                 {
-                    var tileHeight = PBCFile.Tiles[h, w].HeightMap;
-                    if (tileHeight != null)
+                    foreach (var heightTile in tileHeight.Quadrants)
                     {
-                        foreach (var heightTile in tileHeight.Quadrants)
-                        {
-                            if (heightTile.Val2 == -10000000) continue;
+                        // Ignore void height
+                        if (heightTile.Val2 == -10000000) continue;
 
-                            if (MinHeight == null || heightTile.Val2 < MinHeight)
-                                MinHeight = heightTile.Val2;
+                        if (MinHeight == null || heightTile.Val2 < MinHeight)
+                            MinHeight = heightTile.Val2;
 
-                            if (MaxHeight == null || heightTile.Val2 > MaxHeight)
-                                MaxHeight = heightTile.Val2;
-                        }
+                        if (MaxHeight == null || heightTile.Val2 > MaxHeight)
+                            MaxHeight = heightTile.Val2;
                     }
                 }
-        }
-        else
-        {
-            MinHeight = null; 
-            MaxHeight = null;
-        }
+            }
+
     }
 
     private Point offset;
@@ -127,14 +121,13 @@ public class TileEditor : Control
         using var bigGridPen = new Pen(Color.FromArgb(30, 255, 255, 255), 2);
 
         var sf = new StringFormat { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center };
-        var f = new Font(FontFamily.GenericMonospace, (float)(Zoom / 2), FontStyle.Regular, GraphicsUnit.Pixel);
+        var f = new Font(FontFamily.GenericMonospace, Zoom / 2, FontStyle.Regular, GraphicsUnit.Pixel);
 
         for (int h = 0; h < PBCFile.Height; h++)
         {
             for (int w = 0; w < PBCFile.Width; w++)
             {
                 var tile = PBCFile.Tiles[h, w];
-                //var tileHeight = tile.GetHeightMap(HeightId);
                 var tileHeight = tile.HeightMap;
                 for (int subY = 0; subY < 2; subY++)   
                 {
@@ -143,6 +136,7 @@ public class TileEditor : Control
                     {
                         int globalX = w * 2 + subX;
 
+                        // Render HeightMap
                         if (HeightId > -1 && MinHeight.HasValue && MaxHeight.HasValue)
                         {
                             //var heightInfo = tileHeight[subY, subX];
@@ -150,9 +144,12 @@ public class TileEditor : Control
                             var c = PBCImageUtilities.GetHeightColor(heightInfo, MinHeight.Value, MaxHeight.Value);
                             using var brush = new SolidBrush(c);
                             e.Graphics.FillRectangle(brush, globalX * Zoom + offset.X, globalY * Zoom + offset.Y, Zoom, Zoom);
+                            
+                            // Render text if ShowType is true and it's not void
                             if (heightInfo != -10000000 && ShowType)
                                 e.Graphics.DrawString(heightInfo.ToString(), f, Brushes.White, new Rectangle(globalX * Zoom + offset.X, globalY * Zoom + offset.Y, Zoom, Zoom));
                         }
+                        // Render Tile Color
                         else
                         {
                             using var brush = new SolidBrush(PBCImageUtilities.GetColor(tile.Type[subY, subX]));
