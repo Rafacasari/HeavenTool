@@ -1,0 +1,3 @@
+EventObj
+NPC
+Ftr

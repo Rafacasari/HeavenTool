@@ -1,0 +1,4 @@
+Daytime
+Morning
+Night
+AllDay

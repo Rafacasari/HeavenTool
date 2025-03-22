@@ -3,7 +3,5 @@
 public enum ViewType
 {
     Collision,
-    HeightMap1,
-    HeightMap2,
-    HeightMap3
+    HeightMap,
 }

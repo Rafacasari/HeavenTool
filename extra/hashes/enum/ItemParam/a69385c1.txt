@@ -1,0 +1,11 @@
+White
+None
+Warm
+Green
+LightBlue
+Pink
+Red
+Orange
+Yellow
+Purple
+Blue

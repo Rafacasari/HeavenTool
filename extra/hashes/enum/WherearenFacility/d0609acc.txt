@@ -1,0 +1,5 @@
+School
+Hospital
+Restaurant
+Cafe
+Tailor

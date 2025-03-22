@@ -1,0 +1,11 @@
+Base
+River
+Cliff
+Soil
+RoadStone
+Brick
+DarkSoil
+StonePattern
+Sand
+Tile
+Wood

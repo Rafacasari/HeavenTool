@@ -1,0 +1,7 @@
+DisableOnlyLowerBody
+EnableOnlyLowerBody_GroundSit
+EnableOnlyLowerBody_Sit
+EnableOnlyLowerBody_Bed
+EnableOnlyLowerBody_Swim
+EnableOnlyLowerBody_Stand
+EnableOnlyLowerBody_SWalk

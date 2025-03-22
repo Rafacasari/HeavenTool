@@ -1,0 +1,4 @@
+None
+VillagerRandom
+ShareHouse
+NonVillagerRandom

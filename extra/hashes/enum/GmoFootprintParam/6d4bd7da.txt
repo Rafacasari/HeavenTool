@@ -1,0 +1,9 @@
+None
+Circle
+Pad
+Oval
+ThinOval
+Bird
+Bird2
+Hoof
+Pumps

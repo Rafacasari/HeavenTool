@@ -1,0 +1,5 @@
+None
+Bed
+Chair
+Table
+ChestOrCloset

@@ -40,9 +40,6 @@ public partial class PBCFileReader
 
             Quadrants = new Quadrant[2, 2];
 
-            //for (int subY = 0; subY < 2; subY++)
-            //    for (int subX = 0; subX < 2; subX++)
-            //        Quadrants[subY, subX] = new Quadrant(reader);
             Quadrants[0, 1] = new Quadrant(reader);
             Quadrants[0, 0] = new Quadrant(reader);           
             Quadrants[1, 0] = new Quadrant(reader);
@@ -52,9 +49,10 @@ public partial class PBCFileReader
 
         public void Write(BinaryWriter writer)
         {
-            for (int subY = 0; subY < 2; subY++)
-                for (int subX = 0; subX < 2; subX++)
-                    Quadrants[subY, subX].Write(writer);
+            Quadrants[0, 1].Write(writer);
+            Quadrants[0, 0].Write(writer);
+            Quadrants[1, 0].Write(writer);
+            Quadrants[1, 1].Write(writer);
         }
     }
 
@@ -73,14 +71,10 @@ public partial class PBCFileReader
             // Read Collision Map
             Type = new TileType[2, 2];
 
-
-            Type[0, 1] = (TileType)reader.ReadByte();
-            Type[0, 0] = (TileType)reader.ReadByte();
-            Type[1, 0] = (TileType)reader.ReadByte();
-            Type[1, 1] = (TileType)reader.ReadByte();
-            //for (int subY = 0; subY < 2; subY++)
-            //    for (int subX = 0; subX < 2; subX++)
-            //        Type[subY, subX] = (TileType) reader.ReadByte();      
+            Type[0, 1] = (TileType) reader.ReadByte();
+            Type[0, 0] = (TileType) reader.ReadByte();
+            Type[1, 0] = (TileType) reader.ReadByte();
+            Type[1, 1] = (TileType) reader.ReadByte();
         }
 
 
@@ -88,9 +82,10 @@ public partial class PBCFileReader
         {
             HeightMap.Write(writer);
 
-            for (int subY = 0; subY < 2; subY++)
-                for (int subX = 0; subX < 2; subX++)
-                    writer.Write((byte) Type[subY, subX]);
+            writer.Write((byte) Type[0, 1]);
+            writer.Write((byte) Type[0, 0]);
+            writer.Write((byte) Type[1, 0]);
+            writer.Write((byte) Type[1, 1]);
         }
     }
 

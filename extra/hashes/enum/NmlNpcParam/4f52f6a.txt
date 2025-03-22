@@ -1,0 +1,8 @@
+Boy_pride
+Boy_active
+Girl_active
+Girl_pride
+Girl_normal
+Boy_snobby
+Boy_normal
+Girl_big_sis

@@ -19,9 +19,11 @@ public class TileEditor : Control
                 Zoom = 10;
                 offset = default;
                 lastMousePos = null;
+
             }
 
             _pbcFile = value;
+            UpdateHeight();
         }
     }
 
@@ -30,49 +32,23 @@ public class TileEditor : Control
     public bool ShowType { get; set; } = true;
 
     public TileType? TileBrush = TileType.Custom1;
-    public ViewType CurrentView
-    {
-        get
-        {
-            return _heightId switch
-            {
-                0 => ViewType.HeightMap1,
-                1 => ViewType.HeightMap2,
-                2 => ViewType.HeightMap3,
-                _ => ViewType.Collision
-            };
+    public ViewType CurrentView { get; set; }
 
-        }
-        set
-        {
-            HeightId = value switch
-            {
-                ViewType.HeightMap1 => 0,
-                ViewType.HeightMap2 => 1,
-                ViewType.HeightMap3 => 2,
-                _ => -1,
-            };
-        }
-    }
-
-    public int _heightId = -1;
-    public int HeightId {
-        get { return _heightId; } set
-        {
-            if ( _heightId != value )
-            {
-                _heightId = value;
-                UpdateHeight();
-            }
-        }
-    }
 
     public float? MinHeight { get; private set; }
     public float? MaxHeight { get; private set; }
 
     private void UpdateHeight()
     {
+        if (PBCFile == null)
+        {
+            MinHeight = null;
+            MaxHeight = null;
+            return;
+        }
+
         for (var h = 0; h < PBCFile.Height; h++)
+        {
             for (var w = 0; w < PBCFile.Width; w++)
             {
                 var tileHeight = PBCFile.Tiles[h, w].HeightMap;
@@ -91,7 +67,7 @@ public class TileEditor : Control
                     }
                 }
             }
-
+        }
     }
 
     private Point offset;
@@ -99,6 +75,9 @@ public class TileEditor : Control
 
     public delegate void ZoomEventHandler(int zoom);
     public event ZoomEventHandler ZoomChanged;
+
+    public delegate void HeightMapQuadrantSelected(PBCFileReader.Quadrant quadrant);
+    public event HeightMapQuadrantSelected QuadrantSelected;
 
     public TileEditor()
     {
@@ -137,7 +116,7 @@ public class TileEditor : Control
                         int globalX = w * 2 + subX;
 
                         // Render HeightMap
-                        if (HeightId > -1 && MinHeight.HasValue && MaxHeight.HasValue)
+                        if (CurrentView == ViewType.HeightMap && MinHeight.HasValue && MaxHeight.HasValue)
                         {
                             //var heightInfo = tileHeight[subY, subX];
                             var heightInfo = tileHeight.Quadrants[subY, subX].Val2;
@@ -181,7 +160,7 @@ public class TileEditor : Control
     {
         base.OnMouseUp(e);
 
-        if (!ModifierKeys.HasFlag(Keys.Control) && TileBrush.HasValue && CurrentView == ViewType.Collision)
+        if (!ModifierKeys.HasFlag(Keys.Control) && TileBrush.HasValue)
         {
             int clickedX = (e.X - offset.X) / Zoom;
             int clickedY = (e.Y - offset.Y) / Zoom;
@@ -192,9 +171,17 @@ public class TileEditor : Control
 
             if (PBCFile != null && tileX >= 0 && tileX < PBCFile.Width && tileY >= 0 && tileY < PBCFile.Height && subX >= 0 && subY >= 0) 
             {
-                var tile = PBCFile[tileY, tileX];
-                tile.Type[subY, subX] = TileBrush.Value;
-                Invalidate();
+                if (CurrentView == ViewType.Collision)
+                {
+                    var tile = PBCFile[tileY, tileX];
+                    tile.Type[subY, subX] = TileBrush.Value;
+                    Invalidate();
+                }
+                else
+                {
+                    var tile = PBCFile[tileY, tileX];
+                    QuadrantSelected?.Invoke(tile.HeightMap.Quadrants[subY, subX]);
+                }
             }
         }
     }
@@ -228,9 +215,8 @@ public class TileEditor : Control
                 && tileY >= 0 
                 && tileY < PBCFile.Height && subX >= 0 && subY >= 0)
             {
-
                 var tile = PBCFile[tileY, tileX];
-                //HighlightedHeight = tile.GetHeightMap(HeightId)[subY, subX];
+                HighlightedHeight = tile.HeightMap.Quadrants[subY, subX].Val2;
                 Invalidate();
             }
 

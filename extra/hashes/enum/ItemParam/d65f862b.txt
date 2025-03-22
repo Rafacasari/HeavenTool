@@ -1,0 +1,7 @@
+None
+FluorLamp
+Candle
+EmissionOnly
+Monitor
+SpotLight
+Shade

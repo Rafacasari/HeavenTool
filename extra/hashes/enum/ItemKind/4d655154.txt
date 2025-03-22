@@ -1,0 +1,3 @@
+FtrUniqueUser
+FtrNoneUser
+FtrCommonUser

@@ -1,0 +1,9 @@
+Red
+Pink
+Invalid
+Yellow
+Green
+LightBlue
+Blue
+Purple
+Black

@@ -1,0 +1,4 @@
+None
+Hospital_1
+Restaurant_1
+Cafe_1

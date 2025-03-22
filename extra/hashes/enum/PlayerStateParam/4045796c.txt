@@ -1,0 +1,6 @@
+NoBgCheckNoGravity
+Normal
+OnlyFloor
+OnlyWallNoGravity_SitSpecial
+NoBgCheckUseGravity
+OnlyWallNoGravity

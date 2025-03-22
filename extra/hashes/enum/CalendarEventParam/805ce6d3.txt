@@ -1,0 +1,5 @@
+AllYear
+Only2020
+Only2021
+StopVer1_9
+Forever2021

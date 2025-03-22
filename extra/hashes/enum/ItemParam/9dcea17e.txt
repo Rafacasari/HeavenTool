@@ -1,0 +1,13 @@
+Wall_NoCol
+Floor
+Floor_Downer
+Floor_Upper
+Floor_DownerUpper
+Floor_DownerFront
+Floor_DownerLeft
+Floor_Gate
+Floor_DownerRight
+Rug
+Ceiling
+Floor_DownerCenter
+Floor_Corner

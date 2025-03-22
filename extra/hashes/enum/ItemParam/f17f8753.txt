@@ -1,0 +1,16 @@
+None
+Plant
+Doll
+Kitchen
+Pet
+MusicalInstrument
+SmallGoods
+Lighting
+AC
+Audio
+Appliance
+Clock
+TV
+Dresser
+Trash
+Food

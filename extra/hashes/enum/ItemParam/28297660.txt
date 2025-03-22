@@ -1,0 +1,15 @@
+Wall
+Floor
+Upper
+Clothes
+Others
+Creature
+Unnecessary
+Food
+Tool
+Desert
+RoomWall
+RoomFloor
+Ceiling_Rug
+None
+Ceiling

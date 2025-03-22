@@ -1,0 +1,9 @@
+Disable
+EnableToDemoStandSpeak
+IsDemo
+EnableToDemoAll
+EnableToDemoNetLock
+EnableToDemoSitSpeak
+EnableToDemoBedSpeak
+EnableToDemoSwimSpeak
+EnableToDemoSWalkSpeak

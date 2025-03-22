@@ -36,6 +36,9 @@ internal static class Program
                                         //TODO: Move associate to here, so user don't need to open program as admin
                                         break;
 
+                                    case "srsizetable":
+                                        ProgramAssociation.AssociateProgram(".srsizetable", "srsizetable", "ResourceSizeTable File");
+                                        break;
                                 }
                             }
                             return;
@@ -52,6 +55,9 @@ internal static class Program
                                         ProgramAssociation.DisassociateProgram(".bcsv", "BCSV");
                                         break;
 
+                                    case "srsizetable":
+                                        ProgramAssociation.DisassociateProgram(".srsizetable", "srsizetable");
+                                        break;
                                 }
                             }
                             return;
@@ -91,7 +97,7 @@ internal static class Program
                 bcsvEditor.LoadBCSVFile(path);
                 return bcsvEditor;
 
-            case ".resourcesize":
+            case ".srsizetable":
                 var rstbEditor = new RSTBEditor();
                 rstbEditor.LoadFile(path);
                 return rstbEditor;

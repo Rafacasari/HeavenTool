@@ -1,0 +1,8 @@
+None
+FtrAccess
+FtrSwitchOn
+RhythmSound
+SingSong
+PlayMusic
+StayOn
+Haniwa

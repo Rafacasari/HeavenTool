@@ -1,0 +1,5 @@
+AllYear
+Summer
+Winter
+Autumn
+Spring

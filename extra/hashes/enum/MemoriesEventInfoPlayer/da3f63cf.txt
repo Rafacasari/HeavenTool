@@ -1,0 +1,12 @@
+ItemId
+None
+NmlNpcId
+DreamId
+SpNpcId
+Level
+PopId
+MyDesignId
+MysteryTourFieldId
+KappeiTourId
+WherearenFacilityId
+ResortId

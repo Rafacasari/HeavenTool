@@ -1,0 +1,15 @@
+White
+Yellow
+Black
+LightBlue
+Beige
+Gray
+Green
+Blue
+Orange
+Brown
+Purple
+Red
+Pink
+Colorful
+None

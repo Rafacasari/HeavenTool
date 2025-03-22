@@ -1,0 +1,6 @@
+NoEffect
+Cheap
+Hifi
+Retro
+Phono
+MusicBox

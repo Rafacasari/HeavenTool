@@ -1,0 +1,2 @@
+DNE_NNW
+DNW_NNE

@@ -1,0 +1,5 @@
+ReadOnly
+HetHostOnly
+SpNpcOnly
+ManualSend
+NoCheck

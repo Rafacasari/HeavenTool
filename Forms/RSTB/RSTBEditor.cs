@@ -6,6 +6,7 @@ using HeavenTool.Utility.IO.Compression;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -34,6 +35,8 @@ public partial class RSTBEditor : Form
         statusBar.Visible = false;
 
         RefreshMenuButtons();
+
+        associateSrsizetableToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".srsizetable") == Application.ExecutablePath;
     }
 
     public ResourceTable LoadedFile { get; set; }
@@ -69,7 +72,8 @@ public partial class RSTBEditor : Form
     {
         LoadedFile = new ResourceTable(path);
 
-        if (LoadedFile == null || !LoadedFile.IsLoaded) {
+        if (LoadedFile == null || !LoadedFile.IsLoaded)
+        {
             MessageBox.Show("Failed to load this file!");
             return;
         }
@@ -111,7 +115,7 @@ public partial class RSTBEditor : Form
 
         statusBar.Visible = true;
         statusLabel.Text = $"Entries: {LoadedFile.Dictionary.Count} ({LoadedFile.UniqueEntries().Count}/{LoadedFile.NonUniqueEntries().Count})";
-        
+
         DrawingControl.ResumeDrawing(mainDataGridView);
     }
 
@@ -217,7 +221,7 @@ public partial class RSTBEditor : Form
 
             var allFiles = Directory.GetFiles(romFsPath, "*", SearchOption.AllDirectories);
             bool success = true;
-            
+
             foreach (var file in allFiles)
             {
                 var path = Path.GetRelativePath(romFsPath, file).Replace('\\', '/');
@@ -285,9 +289,9 @@ public partial class RSTBEditor : Form
 
                 if (statusBar.InvokeRequired)
                     statusBar.BeginInvoke(() => statusProgressBar.Value = quantity);
-                
+
                 else
-                    statusProgressBar.Value= quantity;
+                    statusProgressBar.Value = quantity;
             }
 
 
@@ -297,11 +301,11 @@ public partial class RSTBEditor : Form
                 foreach (var originalFile in allFiles)
                 {
                     if (IsDisposed || Disposing) break;
-                 
+
 
                     var path = Path.GetRelativePath(moddedRomFsPath, originalFile).Replace('\\', '/');
 
-                    if (path == "System/Resource/ResourceSizeTable.srsizetable" 
+                    if (path == "System/Resource/ResourceSizeTable.srsizetable"
                     || path == "System/Resource/ResourceSizeTable.rsizetable"
                     || path.EndsWith(".DS_Store"))
                     {
@@ -365,7 +369,7 @@ public partial class RSTBEditor : Form
                             row.DefaultCellStyle.BackColor = Color.Green;
                     }
                 });
-                
+
             });
         }
     }
@@ -418,5 +422,23 @@ public partial class RSTBEditor : Form
         mainDataGridView.Dispose();
 
         RefreshMenuButtons();
+    }
+
+    private void associateSrsizetableToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        var exePath = Application.ExecutablePath;
+        var arguments = $"--{(associateSrsizetableToolStripMenuItem.Checked ? "disassociate" : "associate")} srsizetable";
+
+
+        var process = Process.Start(new ProcessStartInfo
+        {
+            FileName = exePath,
+            Arguments = arguments,
+            Verb = "runas",
+            UseShellExecute = true
+        });
+
+        process.WaitForExit();
+        associateSrsizetableToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".srsizetable") == Application.ExecutablePath;
     }
 }

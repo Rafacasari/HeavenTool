@@ -1,0 +1,6 @@
+NotAppearInRain
+AlwaysAppear
+AppearInRain
+AppearInSnowGroundTerm
+AppearInCherryBlossomOpenUpTerm
+AppearInAutumnLeavesTerm

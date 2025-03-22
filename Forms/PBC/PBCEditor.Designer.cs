@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PBCEditor));
-            propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            propertyGrid = new System.Windows.Forms.PropertyGrid();
             saveButton = new System.Windows.Forms.Button();
             fileInfoBar = new System.Windows.Forms.StatusStrip();
             statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -41,9 +41,7 @@
             zoomMinusButton = new System.Windows.Forms.ToolStripMenuItem();
             viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             collisionMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            heightMap1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            heightMap2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            heightMap3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            heightMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             viewIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             gridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,25 +51,25 @@
             darkMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
-            // propertyGrid1
+            // propertyGrid
             // 
-            propertyGrid1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            propertyGrid1.BackColor = System.Drawing.Color.FromArgb(40, 40, 40);
-            propertyGrid1.CategoryForeColor = System.Drawing.Color.FromArgb(230, 230, 230);
-            propertyGrid1.CategorySplitterColor = System.Drawing.Color.FromArgb(40, 40, 40);
-            propertyGrid1.DisabledItemForeColor = System.Drawing.Color.FromArgb(127, 245, 245, 245);
-            propertyGrid1.HelpBackColor = System.Drawing.Color.FromArgb(30, 30, 30);
-            propertyGrid1.HelpBorderColor = System.Drawing.Color.FromArgb(60, 60, 60);
-            propertyGrid1.HelpForeColor = System.Drawing.Color.White;
-            propertyGrid1.HelpVisible = false;
-            propertyGrid1.LineColor = System.Drawing.Color.FromArgb(40, 40, 40);
-            propertyGrid1.Location = new System.Drawing.Point(531, 342);
-            propertyGrid1.Name = "propertyGrid1";
-            propertyGrid1.Size = new System.Drawing.Size(221, 146);
-            propertyGrid1.TabIndex = 2;
-            propertyGrid1.ViewBackColor = System.Drawing.Color.FromArgb(30, 30, 30);
-            propertyGrid1.ViewBorderColor = System.Drawing.Color.FromArgb(60, 60, 60);
-            propertyGrid1.ViewForeColor = System.Drawing.Color.WhiteSmoke;
+            propertyGrid.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            propertyGrid.BackColor = System.Drawing.Color.FromArgb(40, 40, 40);
+            propertyGrid.CategoryForeColor = System.Drawing.Color.FromArgb(230, 230, 230);
+            propertyGrid.CategorySplitterColor = System.Drawing.Color.FromArgb(40, 40, 40);
+            propertyGrid.DisabledItemForeColor = System.Drawing.Color.FromArgb(127, 245, 245, 245);
+            propertyGrid.HelpBackColor = System.Drawing.Color.FromArgb(30, 30, 30);
+            propertyGrid.HelpBorderColor = System.Drawing.Color.FromArgb(60, 60, 60);
+            propertyGrid.HelpForeColor = System.Drawing.Color.White;
+            propertyGrid.HelpVisible = false;
+            propertyGrid.LineColor = System.Drawing.Color.FromArgb(40, 40, 40);
+            propertyGrid.Location = new System.Drawing.Point(531, 342);
+            propertyGrid.Name = "propertyGrid";
+            propertyGrid.Size = new System.Drawing.Size(221, 146);
+            propertyGrid.TabIndex = 2;
+            propertyGrid.ViewBackColor = System.Drawing.Color.FromArgb(30, 30, 30);
+            propertyGrid.ViewBorderColor = System.Drawing.Color.FromArgb(60, 60, 60);
+            propertyGrid.ViewForeColor = System.Drawing.Color.WhiteSmoke;
             // 
             // saveButton
             // 
@@ -129,7 +127,7 @@
             // 
             saveToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
+            saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
@@ -145,7 +143,7 @@
             zoomPlusButton.ForeColor = System.Drawing.Color.White;
             zoomPlusButton.Name = "zoomPlusButton";
             zoomPlusButton.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Oemplus;
-            zoomPlusButton.Size = new System.Drawing.Size(172, 22);
+            zoomPlusButton.Size = new System.Drawing.Size(180, 22);
             zoomPlusButton.Text = "+";
             zoomPlusButton.Click += zoomPlusButton_Click;
             // 
@@ -154,13 +152,13 @@
             zoomMinusButton.ForeColor = System.Drawing.Color.White;
             zoomMinusButton.Name = "zoomMinusButton";
             zoomMinusButton.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.OemMinus;
-            zoomMinusButton.Size = new System.Drawing.Size(172, 22);
+            zoomMinusButton.Size = new System.Drawing.Size(180, 22);
             zoomMinusButton.Text = "-";
             zoomMinusButton.Click += zoomMinusButton_Click;
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { collisionMapToolStripMenuItem, heightMap1ToolStripMenuItem, heightMap2ToolStripMenuItem, heightMap3ToolStripMenuItem, toolStripSeparator1, viewIDToolStripMenuItem, gridToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { collisionMapToolStripMenuItem, heightMapToolStripMenuItem, toolStripSeparator1, viewIDToolStripMenuItem, gridToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             viewToolStripMenuItem.Text = "View";
@@ -169,44 +167,28 @@
             // 
             collisionMapToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             collisionMapToolStripMenuItem.Name = "collisionMapToolStripMenuItem";
-            collisionMapToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            collisionMapToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             collisionMapToolStripMenuItem.Text = "Collision Map";
             collisionMapToolStripMenuItem.Click += collisionMapToolStripMenuItem_Click;
             // 
-            // heightMap1ToolStripMenuItem
+            // heightMapToolStripMenuItem
             // 
-            heightMap1ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            heightMap1ToolStripMenuItem.Name = "heightMap1ToolStripMenuItem";
-            heightMap1ToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
-            heightMap1ToolStripMenuItem.Text = "Height Map 1";
-            heightMap1ToolStripMenuItem.Click += heightMap1ToolStripMenuItem_Click;
-            // 
-            // heightMap2ToolStripMenuItem
-            // 
-            heightMap2ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            heightMap2ToolStripMenuItem.Name = "heightMap2ToolStripMenuItem";
-            heightMap2ToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
-            heightMap2ToolStripMenuItem.Text = "Height Map 2";
-            heightMap2ToolStripMenuItem.Click += heightMap2ToolStripMenuItem_Click;
-            // 
-            // heightMap3ToolStripMenuItem
-            // 
-            heightMap3ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            heightMap3ToolStripMenuItem.Name = "heightMap3ToolStripMenuItem";
-            heightMap3ToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
-            heightMap3ToolStripMenuItem.Text = "Height Map 3";
-            heightMap3ToolStripMenuItem.Click += heightMap3ToolStripMenuItem_Click;
+            heightMapToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            heightMapToolStripMenuItem.Name = "heightMapToolStripMenuItem";
+            heightMapToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            heightMapToolStripMenuItem.Text = "Height Map";
+            heightMapToolStripMenuItem.Click += heightMapToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(144, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // viewIDToolStripMenuItem
             // 
             viewIDToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             viewIDToolStripMenuItem.Name = "viewIDToolStripMenuItem";
-            viewIDToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            viewIDToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             viewIDToolStripMenuItem.Text = "Show ID";
             viewIDToolStripMenuItem.Click += viewIDToolStripMenuItem_Click;
             // 
@@ -214,7 +196,7 @@
             // 
             gridToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             gridToolStripMenuItem.Name = "gridToolStripMenuItem";
-            gridToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            gridToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             gridToolStripMenuItem.Text = "Show Grid";
             gridToolStripMenuItem.Click += gridToolStripMenuItem_Click;
             // 
@@ -224,11 +206,11 @@
             pbcPreview.BackColor = System.Drawing.Color.Black;
             pbcPreview.CurrentView = Utility.FileTypes.PBC.ViewType.Collision;
             pbcPreview.DisplayGrid = true;
-            pbcPreview.HeightId = -1;
             pbcPreview.HighlightedHeight = null;
             pbcPreview.Location = new System.Drawing.Point(12, 27);
             pbcPreview.Name = "pbcPreview";
             pbcPreview.PBCFile = null;
+            pbcPreview.ShowType = true;
             pbcPreview.Size = new System.Drawing.Size(513, 497);
             pbcPreview.TabIndex = 6;
             pbcPreview.Text = "tileEditor1";
@@ -262,7 +244,7 @@
             Controls.Add(fileInfoBar);
             Controls.Add(darkMenuStrip1);
             Controls.Add(saveButton);
-            Controls.Add(propertyGrid1);
+            Controls.Add(propertyGrid);
             ForeColor = System.Drawing.Color.White;
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = darkMenuStrip1;
@@ -277,7 +259,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.PropertyGrid propertyGrid1;
+        private System.Windows.Forms.PropertyGrid propertyGrid;
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.StatusStrip fileInfoBar;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
@@ -287,9 +269,7 @@
         private System.Windows.Forms.ToolStripMenuItem zoomMinusButton;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem collisionMapToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem heightMap1ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem heightMap2ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem heightMap3ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem heightMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem viewIDToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gridToolStripMenuItem;

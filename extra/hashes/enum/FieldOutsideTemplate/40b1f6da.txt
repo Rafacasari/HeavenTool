@@ -1,0 +1,4 @@
+W_Stone
+W_Beach
+W_Promontory
+W_DownEnd

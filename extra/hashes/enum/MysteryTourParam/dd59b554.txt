@@ -1,0 +1,15 @@
+Normal
+StoneMaterial
+StoneCoin
+Bamboo
+TreeSisterFruit
+StoneGold
+Vegetable
+OneRoom
+StarPiece
+Sakura
+SpringBamboo
+SeaShell
+Mushroom
+Maple
+SnowCrystal

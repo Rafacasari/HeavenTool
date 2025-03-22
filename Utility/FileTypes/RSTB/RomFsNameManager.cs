@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -6,9 +7,7 @@ namespace HeavenTool.Utility.FileTypes.RSTB;
 
 public static class RomFsNameManager
 {
-    //private static Dictionary<string, uint> loadedNames;
     private static Dictionary<uint, string> uniqueHashes;
-    //private static List<string> nonUniqueHashes;
 
     public static Dictionary<uint, string> UniqueNames
     {
@@ -21,19 +20,6 @@ public static class RomFsNameManager
         }
     }
 
-    //// TODO: This may be useless?
-    //public static List<string> NamesWithDuplicatedHash
-    //{
-    //    get
-    //    {
-    //        if (!isInitialized)
-    //            Initialize();
-
-    //        return nonUniqueHashes;
-    //    }
-    //}
-
-    private const string FILE_LOCATION = "extra/romfs-files.txt";
 
     private static bool isInitialized;
 
@@ -44,12 +30,15 @@ public static class RomFsNameManager
 
         //loadedNames = new Dictionary<string, uint>();
 
-        // Create directory if don't exist
-        Directory.CreateDirectory("extra");
+        string extra = Path.Combine(AppContext.BaseDirectory, "extra");
+        string fileLocation = Path.Combine(extra, "romfs-files.txt");
 
-        if (File.Exists(FILE_LOCATION))
+        // Create directory if don't exist]
+        Directory.CreateDirectory(extra);
+
+        if (File.Exists(fileLocation))
         {
-            var lines = File.ReadAllLines(FILE_LOCATION);
+            var lines = File.ReadAllLines(fileLocation);
 
             uniqueHashes = [];
             //nonUniqueHashes = [];
@@ -60,31 +49,27 @@ public static class RomFsNameManager
 
                 if (!uniqueHashes.TryGetValue(hash, out string value))
                     uniqueHashes.Add(hash, line);
-                else
-                {
-                    if (value != "")
-                    {
-                        //nonUniqueHashes.Add(value);
-                        uniqueHashes[hash] = "";
-                    }
-
-                    //nonUniqueHashes.Add(line);
-                }
+                else if (value != "")
+                    uniqueHashes[hash] = "";
+                
             }
 
         }
         else
         {
             // Create file if it doesn't exist
-            File.WriteAllText(FILE_LOCATION, "");
+            File.WriteAllText(fileLocation, "");
         }
     }
 
     public static void Update(string[] names)
     {
-        Directory.CreateDirectory("extra");
+        string extra = Path.Combine(AppContext.BaseDirectory, "extra");
+        string fileLocation = Path.Combine(extra, "romfs-files.txt");
 
-        File.WriteAllLines(FILE_LOCATION, names);
+        Directory.CreateDirectory(extra);
+
+        File.WriteAllLines(fileLocation, names);
 
         // Reiniatialize so variables can be updated
         isInitialized = false;
@@ -104,20 +89,14 @@ public static class RomFsNameManager
 
     internal static void Add(string fileName)
     {
-        //var hash = fileName.ToCRC32();
+        string extra = Path.Combine(AppContext.BaseDirectory, "extra");
+        string fileLocation = Path.Combine(extra, "romfs-files.txt");
 
-        //if (!uniqueHashes.TryGetValue(hash, out string value))
-        //    uniqueHashes.Add(hash, fileName);
-        //else if (value != "")
-        //    uniqueHashes[hash] = "";
-
-        //saveNeeded = true;
-
-        var lines = File.ReadAllLines(FILE_LOCATION);
+        var lines = File.ReadAllLines(fileLocation);
         if (!lines.Contains(fileName))
         {
             lines = [.. lines, fileName];
-            File.WriteAllLines(FILE_LOCATION, lines);
+            File.WriteAllLines(fileLocation, lines);
         }
         
     }

@@ -1,0 +1,7 @@
+River
+Pond
+RiverCliffTop
+BrackishWater
+Sea
+SeaBeachBridge
+Anywhere

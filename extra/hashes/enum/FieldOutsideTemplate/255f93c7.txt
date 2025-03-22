@@ -1,0 +1,6 @@
+E_Stone
+E_DownEnd
+E_Promontory
+E_UpEnd_Entry
+E_Beach
+E_River

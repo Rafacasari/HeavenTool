@@ -1,0 +1,4 @@
+None
+Cold
+Hot
+NoEffect

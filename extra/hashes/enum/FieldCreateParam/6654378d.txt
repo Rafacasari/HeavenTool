@@ -1,0 +1,11 @@
+Default
+MainField
+PlayerHouse
+NpcHouse
+MysteryTourIsland
+PhotoStudioHouse
+PhotoStudioIsland
+WherearenMainIsland
+WherearenNpcGarden
+WherearenRoom
+SeaDemo

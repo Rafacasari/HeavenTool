@@ -1,0 +1,14 @@
+None
+MatureTreeOak
+TreeOakStump
+MatureTreeCedar
+TreeCedarStump
+MatureTreePalm
+TreePalmStump
+Bush
+Vegetable
+RedPinkFlower
+YellowFlower
+WhitishFlower
+BluePurpleBlackFlower
+Stone

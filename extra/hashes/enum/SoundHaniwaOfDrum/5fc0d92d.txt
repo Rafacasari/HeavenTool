@@ -1,0 +1,4 @@
+BassDrum
+SnareDrum
+HiHat
+CrashCymbal
