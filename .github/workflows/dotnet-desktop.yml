@@ -42,13 +42,13 @@ jobs:
         run: |
           $projectPath = "Heaven Tool.csproj"
           if (Test-Path $projectPath) {
-              $content = Get-Content $projectPath -Raw
-              if ($content -match '<Version>([^<]+)</Version>') {
-                  $version = $matches[1]
+              [xml]$projXml = Get-Content $projectPath
+              $version = $projXml.Project.PropertyGroup.Version
+              if (-not [string]::IsNullOrEmpty($version)) {
                   echo "version=$version" >> $env:GITHUB_OUTPUT
               }
               else {
-                  Write-Error "Version not found in the project file."
+                  Write-Error "Version element not found or empty in $projectPath"
               }
           }
           else {
