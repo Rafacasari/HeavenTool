@@ -39,22 +39,23 @@ jobs:
 
       - name: Extract version from project file
         id: get_version
+        shell: pwsh
         run: |
           $projectPath = "Heaven Tool.csproj"
-          if (Test-Path $projectPath) {
-              [xml]$projXml = Get-Content $projectPath
-              $version = $projXml.Project.PropertyGroup.Version
-              if (-not [string]::IsNullOrEmpty($version)) {
-                  echo "version=$version" >> $env:GITHUB_OUTPUT
-              }
-              else {
-                  Write-Error "Version element not found or empty in $projectPath"
-              }
-          }
-          else {
+          if (-Not (Test-Path $projectPath)) {
               Write-Error "Project file not found: $projectPath"
+              exit 1
           }
-        shell: pwsh
+          [xml]$projXml = Get-Content $projectPath
+          $versionNode = $projXml.SelectSingleNode("//Version")
+          if ($versionNode -and $versionNode.InnerText) {
+              $version = $versionNode.InnerText.Trim()
+              Write-Output "Found version: $version"
+              echo "version=$version" >> $env:GITHUB_OUTPUT
+          } else {
+              Write-Error "Version element not found or empty in $projectPath"
+          }
+
 
   release:
     needs: build
