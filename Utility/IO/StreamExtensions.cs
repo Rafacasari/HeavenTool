@@ -32,4 +32,16 @@ public static class StreamExtensions
         stream.Read(copy, 0, copy.Length);
         return copy;
     }
+
+    /// <summary>
+    /// Export stream to a file
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="fileName"></param>
+    public static void ExportToFile(this Stream stream, string fileName)
+    {
+        using var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Write);
+        stream.Position = 0;
+        stream.CopyTo(fileStream);
+    }
 }

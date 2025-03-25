@@ -1,6 +1,7 @@
 ﻿using HeavenTool.Forms.Pack;
 using HeavenTool.Forms.RSTB;
 using HeavenTool.Forms.SARC;
+using HeavenTool.Utility.IO;
 using HeavenTool.Utility.IO.Compression;
 using System;
 using System.IO;
@@ -71,15 +72,24 @@ namespace HeavenTool
             {
                 using (var fileStream = File.OpenRead(openFileDialog.FileName))
                 {
-                    MemoryStream memoryStream = new();
+                    //MemoryStream memoryStream = new();
 
-
-                    if (!Yaz0CompressionAlgorithm.TryToDecompress(fileStream, out byte[] decompressedBytes))
+                    byte[] decompressedBytes = null;
+                    try
+                    {
+                        decompressedBytes = Yaz0CompressionAlgorithm.Decompress(fileStream).ToArray();
+                    }
+                    catch
                     {
                         MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
                     }
+                    //if (!Yaz0CompressionAlgorithm.TryToDecompress(fileStream, out byte[] decompressedBytes))
+                    //{
+                    //    MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //    return;
+                    //}
 
+                    if (decompressedBytes == null) return;
 
                     var saveFileDialog = new SaveFileDialog() { 
                         FileName = openFileDialog.FileName,

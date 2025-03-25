@@ -76,6 +76,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="Forms\Components\DarkToolstripRenderer.cs" />
@@ -106,6 +107,7 @@
     <Content Include="extra\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Folder Include="Libraries\" />
     <Folder Include="Utility\FileTypes\BCSV\Hashing\" />
     <Folder Include="Utility\FileTypes\BCSV\Types\" />
   </ItemGroup>
@@ -115,6 +117,11 @@
     <PackageReference Include="NintendoTools" Version="2.24.1" />
     <PackageReference Include="YamlConvert" Version="3.1.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SARCExt">
+      <HintPath>Libraries\SARCExt.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">

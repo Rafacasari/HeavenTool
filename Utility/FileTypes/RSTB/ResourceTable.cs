@@ -132,11 +132,6 @@ public class ResourceTable : IDisposable
     }
 
     /// <summary>
-    /// Yaz0 Compressor Algorithm
-    /// </summary>
-    private readonly Yaz0CompressionAlgorithm Compressor = new(true);
-
-    /// <summary>
     /// RSTB or RSTC
     /// </summary>
     public string HEADER { get; private set; }
@@ -206,12 +201,21 @@ public class ResourceTable : IDisposable
 
             if (!isDecompressed)
             {
-                if (!Yaz0CompressionAlgorithm.TryToDecompress(fileStream, out byte[] decompressedBytes))
+                byte[] decompressedBytes = null;
+                try
+                {
+                    decompressedBytes = Yaz0CompressionAlgorithm.Decompress(fileStream).ToArray();
+                }
+                catch
                 {
                     MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
                 }
-
+                //if (!Yaz0CompressionAlgorithm.TryToDecompress(fileStream, out byte[] decompressedBytes))
+                //{
+                //    MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //    return;
+                //}
+                if (decompressedBytes == null) return;
                 memoryStream = new MemoryStream(decompressedBytes);
             }
             else
@@ -300,16 +304,12 @@ public class ResourceTable : IDisposable
     /// <param name="filePath">File Location</param>
     public void SaveTo(string filePath)
     {
-        //var orderableDictionary = Dictionary.OrderBy(x => x.Key).GroupBy(x => x.Value.CRCHash);
-
-        //var nonUniqueEntries = orderableDictionary.Where(x => x.Count() > 1).SelectMany(x => x.Select(y => y.Value)).ToList();
-        //var uniqueEntries = orderableDictionary.Where(x => x.Count() == 1).SelectMany(x => x.Select(y => y.Value)).ToList();
-
         UpdateUniques();
+
         try
         {
-            var uniqueEntries = Dictionary.Where(x => !x.Value.IsCollided).ToList();
-            var nonUniqueEntries = Dictionary.Where(x => x.Value.IsCollided).ToList();
+            var uniqueEntries = Dictionary.Where(x => !x.Value.IsCollided).OrderBy(x => x.Value.CRCHash);
+            var nonUniqueEntries = Dictionary.Where(x => x.Value.IsCollided).OrderBy(x => x.Key);
 
             using var memoryStream = new MemoryStream();
             using var writer = new BinaryWriter(memoryStream);
@@ -317,8 +317,10 @@ public class ResourceTable : IDisposable
             // Write header
             writer.Write(Encoding.ASCII.GetBytes(HEADER));
 
-            writer.Write((uint) uniqueEntries.Count);
-            writer.Write((uint) nonUniqueEntries.Count);
+         
+
+            writer.Write((uint) uniqueEntries.Count());
+            writer.Write((uint) nonUniqueEntries.Count());
 
             foreach (var (_, entry) in uniqueEntries)
                 entry.Write(writer, IsRSTC);
@@ -332,9 +334,9 @@ public class ResourceTable : IDisposable
             memoryStream.Read(array, 0, array.Length);
 
             var wantToCompress = MessageBox.Show("Do you want to compress the file?", "Compress to Yaz0?", MessageBoxButtons.YesNo);
-            var result = wantToCompress == DialogResult.Yes ? Compressor.Compress(array) : array;
+            var result = wantToCompress == DialogResult.Yes ? Yaz0CompressionAlgorithm.Compress(array) : new MemoryStream(array);
 
-            File.WriteAllBytes(filePath, result);
+            result.ExportToFile(filePath);
         }
         catch (Exception ex) { 
             MessageBox.Show(ex.Message, "Failed to save!", MessageBoxButtons.OK, MessageBoxIcon.Error);

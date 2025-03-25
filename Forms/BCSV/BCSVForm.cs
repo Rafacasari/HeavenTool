@@ -21,7 +21,6 @@ namespace HeavenTool;
 
 public partial class BCSVForm : Form, ISearchable
 {
-    // TODO: Remove references to this and use BCSVHashing directly
     public static Dictionary<uint, string> CRCHashes => BCSVHashing.CRCHashes;
     public static Dictionary<uint, string> MurmurHashes => BCSVHashing.MurmurHashes;
 
