@@ -43,17 +43,20 @@
             openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            addNewEntriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             updateFromModdedRomFs = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             closeFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            associateSrsizetableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             devToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             checkIfFileSizesAreMatchingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             updateHashListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             statusBar = new Components.DarkStatusStrip();
             statusProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            associateSrsizetableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            compareDifferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)mainDataGridView).BeginInit();
             TopMenu.SuspendLayout();
             statusBar.SuspendLayout();
@@ -152,7 +155,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, updateFromModdedRomFs, toolStripSeparator2, closeFileToolStripMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, addNewEntriesToolStripMenuItem, updateFromModdedRomFs, toolStripSeparator2, closeFileToolStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             fileToolStripMenuItem.Text = "File";
@@ -185,6 +188,14 @@
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new System.Drawing.Size(242, 6);
             // 
+            // addNewEntriesToolStripMenuItem
+            // 
+            addNewEntriesToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            addNewEntriesToolStripMenuItem.Name = "addNewEntriesToolStripMenuItem";
+            addNewEntriesToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
+            addNewEntriesToolStripMenuItem.Text = "Add new entries";
+            addNewEntriesToolStripMenuItem.Click += addNewEntriesToolStripMenuItem_Click;
+            // 
             // updateFromModdedRomFs
             // 
             updateFromModdedRomFs.ForeColor = System.Drawing.Color.White;
@@ -212,10 +223,27 @@
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { associateSrsizetableToolStripMenuItem });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { searchToolStripMenuItem, associateSrsizetableToolStripMenuItem, compareDifferenceToolStripMenuItem });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             optionsToolStripMenuItem.Text = "Options";
+            // 
+            // searchToolStripMenuItem
+            // 
+            searchToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            searchToolStripMenuItem.Name = "searchToolStripMenuItem";
+            searchToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F;
+            searchToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            searchToolStripMenuItem.Text = "Search";
+            searchToolStripMenuItem.Click += searchToolStripMenuItem_Click;
+            // 
+            // associateSrsizetableToolStripMenuItem
+            // 
+            associateSrsizetableToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            associateSrsizetableToolStripMenuItem.Name = "associateSrsizetableToolStripMenuItem";
+            associateSrsizetableToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            associateSrsizetableToolStripMenuItem.Text = "Associate srsizetable";
+            associateSrsizetableToolStripMenuItem.Click += associateSrsizetableToolStripMenuItem_Click;
             // 
             // devToolStripMenuItem
             // 
@@ -242,6 +270,8 @@
             // 
             // statusBar
             // 
+            statusBar.AllowDrop = true;
+            statusBar.AllowMerge = false;
             statusBar.BackColor = System.Drawing.Color.Transparent;
             statusBar.ForeColor = System.Drawing.Color.White;
             statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { statusProgressBar, statusLabel });
@@ -267,13 +297,13 @@
             statusLabel.Size = new System.Drawing.Size(16, 17);
             statusLabel.Text = "...";
             // 
-            // associateSrsizetableToolStripMenuItem
+            // compareDifferenceToolStripMenuItem
             // 
-            associateSrsizetableToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            associateSrsizetableToolStripMenuItem.Name = "associateSrsizetableToolStripMenuItem";
-            associateSrsizetableToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            associateSrsizetableToolStripMenuItem.Text = "Associate srsizetable";
-            associateSrsizetableToolStripMenuItem.Click += associateSrsizetableToolStripMenuItem_Click;
+            compareDifferenceToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            compareDifferenceToolStripMenuItem.Name = "compareDifferenceToolStripMenuItem";
+            compareDifferenceToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            compareDifferenceToolStripMenuItem.Text = "Compare Difference";
+            compareDifferenceToolStripMenuItem.Click += compareDifferenceToolStripMenuItem_Click;
             // 
             // RSTBEditor
             // 
@@ -318,5 +348,8 @@
         private System.Windows.Forms.ToolStripProgressBar statusProgressBar;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
         private System.Windows.Forms.ToolStripMenuItem associateSrsizetableToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addNewEntriesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem compareDifferenceToolStripMenuItem;
     }
 }

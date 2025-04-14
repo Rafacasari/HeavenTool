@@ -141,7 +141,7 @@ public class ResourceTable : IDisposable
     /// </summary>
     public Dictionary<string, ResourceTableEntry> Dictionary { get; private set; }
 
-    public List<ResourceTableEntry> Entries { get; private set; }
+    //public List<ResourceTableEntry> Entries { get; private set; }
 
     ///// <summary>
     ///// Get <b>ALL</b> entries, use <see cref="UniqueEntries"/> to get unique entries or <see cref="RepeatedHashesEntries"/> for repeated hashes
