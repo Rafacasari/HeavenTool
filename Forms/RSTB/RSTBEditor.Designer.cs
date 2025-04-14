@@ -194,7 +194,7 @@
             addNewEntriesToolStripMenuItem.Name = "addNewEntriesToolStripMenuItem";
             addNewEntriesToolStripMenuItem.Size = new System.Drawing.Size(245, 30);
             addNewEntriesToolStripMenuItem.Text = "Add new entries";
-            addNewEntriesToolStripMenuItem.Click += addNewEntriesToolStripMenuItem_Click;
+            addNewEntriesToolStripMenuItem.Click += AddNewEntriesToolStripMenuItem_Click;
             // 
             // updateFromModdedRomFs
             // 
@@ -235,7 +235,7 @@
             searchToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F;
             searchToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             searchToolStripMenuItem.Text = "Search";
-            searchToolStripMenuItem.Click += searchToolStripMenuItem_Click;
+            searchToolStripMenuItem.Click += SearchToolStripMenuItem_Click;
             // 
             // associateSrsizetableToolStripMenuItem
             // 
@@ -243,7 +243,7 @@
             associateSrsizetableToolStripMenuItem.Name = "associateSrsizetableToolStripMenuItem";
             associateSrsizetableToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             associateSrsizetableToolStripMenuItem.Text = "Associate srsizetable";
-            associateSrsizetableToolStripMenuItem.Click += associateSrsizetableToolStripMenuItem_Click;
+            associateSrsizetableToolStripMenuItem.Click += AssociateSrsizetableToolStripMenuItem_Click;
             // 
             // devToolStripMenuItem
             // 
@@ -303,7 +303,7 @@
             compareDifferenceToolStripMenuItem.Name = "compareDifferenceToolStripMenuItem";
             compareDifferenceToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             compareDifferenceToolStripMenuItem.Text = "Compare Difference";
-            compareDifferenceToolStripMenuItem.Click += compareDifferenceToolStripMenuItem_Click;
+            compareDifferenceToolStripMenuItem.Click += CompareDifferenceToolStripMenuItem_Click;
             // 
             // RSTBEditor
             // 

@@ -32,12 +32,13 @@ public class ResourceTable : IDisposable
         /// <param name="name"></param>
         /// <param name="fileSize"></param>
         /// <param name="isDuplicated"></param>
-        public ResourceTableEntry(string name, uint fileSize, bool isDuplicated)
+        public ResourceTableEntry(string name, uint fileSize, uint? dlc, bool isDuplicated)
         {
             CRCHash = name.ToCRC32();
             _fileName = name;
             FileSize = fileSize;
             IsCollided = isDuplicated;
+            DLC = dlc;
         }
 
 
@@ -98,7 +99,7 @@ public class ResourceTable : IDisposable
         /// <summary>
         /// Only present on RSTC files, seems to be a DLC number since it's only 1 when it's a file from Happy Home Paradise DLC
         /// </summary>
-        public uint DLC;
+        public uint? DLC { get; set; }
 
         /// <summary>
         /// Write entry to binary
@@ -127,7 +128,7 @@ public class ResourceTable : IDisposable
 
             writer.Write(FileSize);
 
-            if (isRSTC) writer.Write(DLC);
+            if (isRSTC) writer.Write(DLC ?? 0);
         }
     }
 
@@ -152,13 +153,13 @@ public class ResourceTable : IDisposable
     /// <para>Used when the fileName CRC32 is <b>unique</b>.</para>
     /// Entries in that list does <b>NOT</b> contain the fileName parameter assigned, the CRC should be decrypted using the RomFs folder
     /// </summary>
-    public Dictionary<string, ResourceTableEntry> UniqueEntries() => Dictionary.Where(x => !x.Value.IsCollided).ToDictionary(x => x.Key, x => x.Value);
+    public Dictionary<string, ResourceTableEntry> UniqueEntries => Dictionary.Where(x => !x.Value.IsCollided).ToDictionary(x => x.Key, x => x.Value);
     
 
     /// <summary>
     /// If have two (or more) file names that have the same hash both are put here
     /// </summary>
-    public Dictionary<string, ResourceTableEntry> NonUniqueEntries() => Dictionary.Where(x => x.Value.IsCollided).ToDictionary(x => x.Key, x => x.Value);
+    public Dictionary<string, ResourceTableEntry> NonUniqueEntries => Dictionary.Where(x => x.Value.IsCollided).ToDictionary(x => x.Key, x => x.Value);
     
 
     public bool IsRSTC => HEADER == "RSTC";
@@ -261,7 +262,7 @@ public class ResourceTable : IDisposable
                 var fileName = reader.ReadString(128, Encoding.ASCII);
                 var fileSize = reader.ReadUInt32();
 
-                var entry = new ResourceTableEntry(fileName, fileSize, true);
+                var entry = new ResourceTableEntry(fileName, fileSize, null, true);
 
                 if (IsRSTC) entry.DLC = reader.ReadUInt32();
 
@@ -270,6 +271,9 @@ public class ResourceTable : IDisposable
                     if (!Dictionary.TryAdd(entry.FileName, entry)) throw new Exception($"Failed to add {entry.FileName} to Dictionary, probably a duplicated entry.");
                 }
             }
+
+            reader.Close();
+            reader.Dispose();
         }
 
         IsLoaded = true;

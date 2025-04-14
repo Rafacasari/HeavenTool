@@ -16,29 +16,61 @@ namespace HeavenTool.Forms.RSTB;
 
 public partial class RSTBEditor : Form, ISearchable
 {
+    private string OriginalText { get; }
+
     private SearchBox searchBox;
     public RSTBEditor()
     {
         InitializeComponent();
 
         Text = $"Heaven Tool | {Program.VERSION} | RSTB Editor";
-
-        // TODO: Use .CellTemplate instead. And make template for every needed type for both BCSV and RSTB (uint, hash, etc)
-        // That way we don't need to parse user value every time to check if it is valid
+        OriginalText = Text;
 
         mainDataGridView.Columns["fileName"].ValueType = typeof(string);
         mainDataGridView.Columns["fileSize"].ValueType = typeof(uint);
         mainDataGridView.Columns["DLC"].ValueType = typeof(uint);
         mainDataGridView.ShowCellToolTips = false;
 
+        mainDataGridView.VirtualMode = true;
+        mainDataGridView.CellValueNeeded += MainDataGridView_CellValueNeeded;
+
         statusProgressBar.Visible = false;
         statusBar.Visible = false;
 
         RefreshMenuButtons();
 
+        DoubleBuffered = true;
         associateSrsizetableToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".srsizetable") == Application.ExecutablePath;
     }
 
+    private void MainDataGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.RowIndex >= LoadedFile.Dictionary.Count)
+            return;
+
+        var entry = LoadedFile.Dictionary.ElementAt(e.RowIndex).Value;
+
+        switch (mainDataGridView.Columns[e.ColumnIndex].Name)
+        {
+            case "fileName":
+                e.Value = entry.FileName;
+                break;
+
+            case "fileSize":
+                e.Value = entry.FileSize;
+                break;
+
+            case "DLC":
+                e.Value = entry.DLC.HasValue ? entry.DLC.Value.ToString() : "";
+                break;
+
+            case "Diff":
+                e.Value = DiffDictionary.TryGetValue(e.RowIndex, out long value) ? value : 0;
+                break;
+        }
+    }
+
+    public Dictionary<int, long> DiffDictionary = [];
     public ResourceTable LoadedFile { get; set; }
 
     private void RefreshMenuButtons()
@@ -52,7 +84,7 @@ public partial class RSTBEditor : Form, ISearchable
     {
         mainDataGridView.Rows.Clear();
 
-        var openFileDialog = new OpenFileDialog
+        using var openFileDialog = new OpenFileDialog
         {
             Title = "Select a .srsizetable file",
             Filter = "RSTB (*.srsizetable)|*.srsizetable",
@@ -62,10 +94,7 @@ public partial class RSTBEditor : Form, ISearchable
         };
 
         if (openFileDialog.ShowDialog() == DialogResult.OK)
-        {
-            var filePath = openFileDialog.FileName;
-            LoadFile(filePath);
-        }
+            LoadFile(openFileDialog.FileName);    
     }
 
     public void LoadFile(string path)
@@ -79,44 +108,22 @@ public partial class RSTBEditor : Form, ISearchable
         }
 
         PopulateGridView();
-
         RefreshMenuButtons();
     }
 
     private void PopulateGridView()
     {
-        mainDataGridView.Rows.Clear();
-        if (LoadedFile?.IsLoaded != true) return;
-
-        DrawingControl.SuspendDrawing(mainDataGridView);
+        if (LoadedFile?.IsLoaded != true)
+        {
+            mainDataGridView.RowCount = 0;
+            return;
+        }
 
         var uniqueEntries = LoadedFile.Dictionary.Values.Where(x => !x.IsCollided).ToList();
         var nonUniqueEntries = LoadedFile.Dictionary.Values.Where(x => x.IsCollided).ToList();
+        mainDataGridView.RowCount = LoadedFile.Dictionary.Count;
 
-        foreach (var entry in uniqueEntries)
-        {
-            var values = new List<object>() { entry.FileName, entry.FileSize };
-
-            if (LoadedFile.IsRSTC)
-                values.Add(entry.DLC);
-
-            mainDataGridView.Rows.Add([.. values]);
-        }
-
-        foreach (var entry in nonUniqueEntries)
-        {
-            List<object> values = [entry.FileName, entry.FileSize];
-
-            if (LoadedFile.HEADER == "RSTC")
-                values.Add(entry.DLC);
-
-            var row = mainDataGridView.Rows.Add([.. values]);
-        }
-
-        statusBar.Visible = true;
-        statusLabel.Text = $"Entries: {LoadedFile.Dictionary.Count} ({LoadedFile.UniqueEntries().Count}/{LoadedFile.NonUniqueEntries().Count})";
-
-        DrawingControl.ResumeDrawing(mainDataGridView);
+        Text = $"{OriginalText}: {LoadedFile.Dictionary.Count} ({LoadedFile.UniqueEntries.Count}/{LoadedFile.NonUniqueEntries.Count})";
     }
 
     private void UpdateHashesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -124,7 +131,7 @@ public partial class RSTBEditor : Form, ISearchable
         var choose = MessageBox.Show("This action need the entire RomFs dump! (Including game-updates and DLC)\nIf you don't have all these files CANCEL the operation.", "Attention", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
         if (choose == DialogResult.Cancel) return;
 
-        var openFolderDialog = new FolderBrowserDialog()
+        using var openFolderDialog = new FolderBrowserDialog()
         {
             ShowNewFolderButton = false,
             Description = "Select a RomFs directory",
@@ -162,7 +169,7 @@ public partial class RSTBEditor : Form, ISearchable
     {
         if (LoadedFile == null) return;
 
-        var saveFileDialog = new SaveFileDialog
+        using var saveFileDialog = new SaveFileDialog
         {
             Filter = "RSTB/RSTC (*.srsizetable)|*.srsizetable",
             FilterIndex = 1,
@@ -209,7 +216,7 @@ public partial class RSTBEditor : Form, ISearchable
     {
         if (LoadedFile == null || !LoadedFile.IsLoaded) return;
 
-        var folderBrowserDialog = new FolderBrowserDialog()
+        using var folderBrowserDialog = new FolderBrowserDialog()
         {
             Description = "Select your RomFs"
         };
@@ -232,9 +239,10 @@ public partial class RSTBEditor : Form, ISearchable
                     var fileSize = GetFileSize(file, true);
                     if (fileSize != result.FileSize)
                     {
-                        Console.WriteLine($"Opsss! {path} have a different size!\nOriginal size: {result.FileSize}\nOur size: {fileSize}");
+                        Console.WriteLine(  $"Opsss! {path} have a different size!\n" +
+                                            $"Original size: {result.FileSize}\n" +
+                                            $"Our size: {fileSize}");
                         success = false;
-                        //break;
                     }
                 }
                 else
@@ -251,7 +259,7 @@ public partial class RSTBEditor : Form, ISearchable
     {
         if (LoadedFile == null || !LoadedFile.IsLoaded) return;
 
-        var folderBrowserDialog = new FolderBrowserDialog()
+        using var folderBrowserDialog = new FolderBrowserDialog()
         {
             Description = "Select your RomFs"
         };
@@ -324,7 +332,7 @@ public partial class RSTBEditor : Form, ISearchable
 
                     else if (!LoadedFile.Dictionary.ContainsKey(path) && fileSize >= 0)
                     {
-                        LoadedFile.AddEntry(new ResourceTable.ResourceTableEntry(path, (uint) fileSize, false));
+                        LoadedFile.AddEntry(new ResourceTable.ResourceTableEntry(path, (uint) fileSize, 0, false));
 
                         addedFiles.Add(path);
                     }
@@ -351,19 +359,19 @@ public partial class RSTBEditor : Form, ISearchable
                     "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
-
+   
             PopulateGridView();
 
-            foreach (DataGridViewRow row in mainDataGridView.Rows)
-            {
-                var name = row.Cells[0].Value.ToString();
+            //foreach (DataGridViewRow row in mainDataGridView.Rows)
+            //{
+            //    var name = row.Cells[0].Value.ToString();
 
-                if (changedFiles.Contains(name))
-                    row.DefaultCellStyle.BackColor = Color.Yellow;
+            //    if (changedFiles.Contains(name))
+            //        row.DefaultCellStyle.BackColor = Color.Yellow;
 
-                if (addedFiles.Contains(name))
-                    row.DefaultCellStyle.BackColor = Color.Green;
-            }
+            //    if (addedFiles.Contains(name))
+            //        row.DefaultCellStyle.BackColor = Color.Green;
+            //}
         }
     }
 
@@ -372,7 +380,7 @@ public partial class RSTBEditor : Form, ISearchable
         var choose = MessageBox.Show("This action need the entire RomFs dump! (Including game-updates and DLC)\nIf you don't have all these files CANCEL the operation.", "Attention", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
         if (choose == DialogResult.Cancel) return;
 
-        var openFolderDialog = new FolderBrowserDialog()
+        using var openFolderDialog = new FolderBrowserDialog()
         {
             ShowNewFolderButton = false,
             Description = "Select a RomFs directory",
@@ -411,12 +419,16 @@ public partial class RSTBEditor : Form, ISearchable
         LoadedFile = null;
 
         mainDataGridView.Rows.Clear();
-        mainDataGridView.Dispose();
+
+        if (mainDataGridView.Columns.Contains("Diff"))
+            mainDataGridView.Columns.Remove("Diff");
+
+        Text = OriginalText;
 
         RefreshMenuButtons();
     }
 
-    private void associateSrsizetableToolStripMenuItem_Click(object sender, EventArgs e)
+    private void AssociateSrsizetableToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var exePath = Application.ExecutablePath;
         var arguments = $"--{(associateSrsizetableToolStripMenuItem.Checked ? "disassociate" : "associate")} srsizetable";
@@ -434,7 +446,7 @@ public partial class RSTBEditor : Form, ISearchable
         associateSrsizetableToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".srsizetable") == Application.ExecutablePath;
     }
 
-    private void addNewEntriesToolStripMenuItem_Click(object sender, EventArgs e)
+    private void AddNewEntriesToolStripMenuItem_Click(object sender, EventArgs e)
     {
         addNewEntriesToolStripMenuItem.Checked = !addNewEntriesToolStripMenuItem.Checked;
     }
@@ -569,7 +581,7 @@ public partial class RSTBEditor : Form, ISearchable
         }
     }
 
-    private void searchToolStripMenuItem_Click(object sender, EventArgs e)
+    private void SearchToolStripMenuItem_Click(object sender, EventArgs e)
     {
         // Create SearchBox Window if needed
         searchBox ??= new SearchBox(this)
@@ -610,9 +622,9 @@ public partial class RSTBEditor : Form, ISearchable
         }
     }
 
-    private async void compareDifferenceToolStripMenuItem_Click(object sender, EventArgs e)
+    private async void CompareDifferenceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var openFolderDialog = new FolderBrowserDialog()
+        using var openFolderDialog = new FolderBrowserDialog()
         {
             ShowNewFolderButton = false,
             Description = "Select a RomFs directory",
@@ -664,21 +676,24 @@ public partial class RSTBEditor : Form, ISearchable
                         }
                     }
 
-                    row.Cells["Diff"].Value = (long)-1;
+                    DiffDictionary[row.Index] = -1;
 
                     if (row.Cells["fileSize"].Value is uint fileSize)
                     {
                         if (zstdSize >= 0)
-                            row.Cells["Diff"].Value = fileSize - zstdSize;
+                            DiffDictionary[row.Index] = fileSize - zstdSize;
+      
                         else if (File.Exists(actualPath) && !actualPath.EndsWith(".zs"))
                         {
-                            var roundSize = (new FileInfo(actualPath).Length + 31) & -32;
-                            row.Cells["Diff"].Value = fileSize - roundSize;
+                            var roundSize = (new FileInfo(actualPath).Length + 31) & -32; 
+                            DiffDictionary[row.Index] = fileSize - roundSize;
                         }
                     }
                 });
                
             }
+
+            mainDataGridView.Invalidate();
 
             statusBar.Visible = false;
             statusProgressBar.Visible = false;
