@@ -266,99 +266,11 @@ public partial class RSTBEditor : Form, ISearchable
 
         if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
         {
-            var moddedRomFsPath = folderBrowserDialog.SelectedPath;
-
-            var allFiles = Directory.GetFiles(moddedRomFsPath, "*", SearchOption.AllDirectories);
-
-            List<string> changedFiles = [];
-            List<string> addedFiles = [];
-            int skippedFiles = 0;
-            int removedFiles = 0;
-
-            TopMenu.Enabled = false;
-
-            statusLabel.Text = $"";
-            statusBar.Visible = true;
-            statusProgressBar.Visible = true;
-            statusProgressBar.Maximum = allFiles.Length;
-            statusProgressBar.Value = 0;
-
-            var progress = new Progress<(int Index, string FileName)>(value =>
-            {
-                statusLabel.Text = $"Getting file size... {value.FileName} ({value.Index}/{allFiles.Length})";
-                statusProgressBar.Value = value.Index;
-            });
-
-            await Task.Run(() =>
-            {
-                int currentPosition = 1;
-
-                foreach (var originalFile in allFiles)
-                {
-                    if (IsDisposed || Disposing) break;
-
-                    var path = Path.GetRelativePath(moddedRomFsPath, originalFile).Replace('\\', '/');
-                    if (path == "System/Resource/ResourceSizeTable.srsizetable" || path == "System/Resource/ResourceSizeTable.rsizetable")
-                    {
-                        skippedFiles++;
-                        continue;
-                    }
-
-                    if (path.EndsWith(".byml") && path != "EventFlow/Info/EventFlowInfoProduct.byml")
-                        continue;
-                    
-
-                    (progress as IProgress<(int, string)>).Report((currentPosition, path));
-
-                    if (path.EndsWith(".zs"))
-                        path = path[..^3];
-
-                    var fileSize = GetFileSize(originalFile);
-
-                    if (fileSize < 0)
-                    {
-                        // remove unsupported file from rstb
-                        if (fileSize == -2)
-                            Console.WriteLine("Unsupported: {0}", path);
-
-                        LoadedFile.Dictionary.Remove(path);
-                        removedFiles++;
-                    }
-                    else if (LoadedFile.Dictionary.TryGetValue(path, out var result) && fileSize >= 0 && fileSize != result.FileSize)
-                    {
-                        result.FileSize = (uint) fileSize;
-                        changedFiles.Add(path);
-                    }
-
-                    else if (!LoadedFile.Dictionary.ContainsKey(path) && fileSize >= 0)
-                    {
-                        LoadedFile.AddEntry(new ResourceTable.ResourceTableEntry(path, (uint) fileSize, 0, false));
-
-                        addedFiles.Add(path);
-                    }
-
-                    currentPosition++;
-                }
-
-                if (IsDisposed || Disposing) return;
-
-            });
+            CreateUpdatedRSTBFromModdedRomFs(LoadedFile, folderBrowserDialog.SelectedPath);
 
             TopMenu.Enabled = true;
             statusBar.Visible = false;
             statusProgressBar.Visible = false;
-
-            if (changedFiles.Count > 0 || addedFiles.Count > 0)
-            {
-                MessageBox.Show($"Successfully updated table values!" +
-                                (changedFiles.Count > 0 ? $"\nUpdated {changedFiles.Count} entries." : "") +
-                                (addedFiles.Count > 0 ? $"\nAdded {addedFiles.Count} entries." : "") +
-                                (skippedFiles > 0 ? $"\nSkipped {skippedFiles} entries." : "") +
-                                (removedFiles > 0 ? $"\nRemoved {removedFiles} entries." : "") +
-                                "\n\nYou need to manually save your file in File > Save as...",
-                    "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-
    
             PopulateGridView();
 
@@ -372,6 +284,99 @@ public partial class RSTBEditor : Form, ISearchable
             //    if (addedFiles.Contains(name))
             //        row.DefaultCellStyle.BackColor = Color.Green;
             //}
+        }
+    }
+
+    public async void CreateUpdatedRSTBFromModdedRomFs(ResourceTable rstb, string moddedRomFsPath, bool showResults = true)
+    {
+        var allFiles = Directory.GetFiles(moddedRomFsPath, "*", SearchOption.AllDirectories);
+
+        List<string> changedFiles = [];
+        List<string> addedFiles = [];
+        int skippedFiles = 0;
+        int removedFiles = 0;
+
+        TopMenu.Enabled = false;
+
+        statusLabel.Text = $"";
+        statusBar.Visible = true;
+        statusProgressBar.Visible = true;
+        statusProgressBar.Maximum = allFiles.Length;
+        statusProgressBar.Value = 0;
+
+        var progress = new Progress<(int Index, string FileName)>(value =>
+        {
+            statusLabel.Text = $"Getting file size... {value.FileName} ({value.Index}/{allFiles.Length})";
+            statusProgressBar.Value = value.Index;
+        });
+
+        await Task.Run(() =>
+        {
+            int currentPosition = 1;
+
+            foreach (var originalFile in allFiles)
+            {
+                if (IsDisposed || Disposing) break;
+
+                var path = Path.GetRelativePath(moddedRomFsPath, originalFile).Replace('\\', '/');
+                if (path == "System/Resource/ResourceSizeTable.srsizetable" || path == "System/Resource/ResourceSizeTable.rsizetable")
+                {
+                    skippedFiles++;
+                    continue;
+                }
+
+                if (path.EndsWith(".byml") && path != "EventFlow/Info/EventFlowInfoProduct.byml")
+                    continue;
+
+
+                (progress as IProgress<(int, string)>).Report((currentPosition, path));
+
+                if (path.EndsWith(".zs"))
+                    path = path[..^3];
+
+                var fileSize = GetFileSize(originalFile);
+
+                if (fileSize < 0)
+                {
+                    // remove unsupported file from rstb
+                    if (fileSize == -2)
+                        Console.WriteLine("Unsupported: {0}", path);
+
+                    rstb.Dictionary.Remove(path);
+                    removedFiles++;
+                }
+                else if (rstb.Dictionary.TryGetValue(path, out var result) && fileSize >= 0 && fileSize != result.FileSize)
+                {
+                    result.FileSize = (uint)fileSize;
+                    changedFiles.Add(path);
+                }
+
+                else if (!rstb.Dictionary.ContainsKey(path) && fileSize >= 0)
+                {
+                    rstb.AddEntry(new ResourceTable.ResourceTableEntry(path, (uint)fileSize, 0, false));
+
+                    addedFiles.Add(path);
+                }
+
+                currentPosition++;
+            }
+
+            if (IsDisposed || Disposing) return;
+
+        });
+
+        if (showResults)
+        {
+            if (changedFiles.Count > 0 || addedFiles.Count > 0)
+            {
+                MessageBox.Show($"Successfully updated table values!" +
+                                (changedFiles.Count > 0 ? $"\nUpdated {changedFiles.Count} entries." : "") +
+                                (addedFiles.Count > 0 ? $"\nAdded {addedFiles.Count} entries." : "") +
+                                (skippedFiles > 0 ? $"\nSkipped {skippedFiles} entries." : "") +
+                                (removedFiles > 0 ? $"\nRemoved {removedFiles} entries." : "") +
+                                "\n\nYou need to manually save your file in File > Save as...",
+                    "Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 

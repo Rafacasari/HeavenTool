@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Heaven Tool": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\Ryan\\Documents\\GitHub\\ACNH-Tutorial-Skip\\RSTB_OG\\ResourceSizeTableTest.srsizetable C:\\Users\\Ryan\\AppData\\Roaming\\Ryujinx\\mods\\contents\\01006f8002326000\\romfs"
+    }
+  }
+}
