@@ -306,7 +306,7 @@ public class ResourceTable : IDisposable
     /// Save the file
     /// </summary>
     /// <param name="filePath">File Location</param>
-    public void SaveTo(string filePath)
+    public void SaveTo(string filePath, bool showPrompt = true)
     {
         UpdateUniques();
 
@@ -337,7 +337,9 @@ public class ResourceTable : IDisposable
             memoryStream.Position = 0;
             memoryStream.Read(array, 0, array.Length);
 
-            var wantToCompress = MessageBox.Show("Do you want to compress the file?", "Compress to Yaz0?", MessageBoxButtons.YesNo);
+            var wantToCompress = DialogResult.Yes;
+            if (showPrompt)
+                wantToCompress = MessageBox.Show("Do you want to compress the file?", "Compress to Yaz0?", MessageBoxButtons.YesNo);
             var result = wantToCompress == DialogResult.Yes ? Yaz0CompressionAlgorithm.Compress(array) : new MemoryStream(array);
 
             result.ExportToFile(filePath);

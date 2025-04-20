@@ -1,4 +1,5 @@
 ﻿using HeavenTool.Forms.RSTB;
+using HeavenTool.Utility.FileTypes.RSTB;
 using HeavenTool.Utility.IO;
 using Microsoft.Win32.SafeHandles;
 using System;
@@ -103,10 +104,24 @@ internal static class Program
                 return bcsvEditor;
 
             case ".srsizetable":
-                var rstbEditor = new RSTBEditor();
-                rstbEditor.LoadFile(path);
-                return rstbEditor;
-
+                if (originalArguments.Length >= 2)
+                {
+                    var rstbEditor = new RSTBEditor();
+                    rstbEditor.LoadFile(path);
+                    rstbEditor.CreateUpdatedRSTBFromModdedRomFs(rstbEditor.LoadedFile, originalArguments[1], false);
+                    string outPath = path;
+                    if (originalArguments.Length >= 3)
+                        outPath = originalArguments[2];
+                    rstbEditor.LoadedFile.SaveTo(outPath, false);
+                    Environment.Exit(0);
+                    return null;
+                }
+                else
+                {
+                    var rstbEditor = new RSTBEditor();
+                    rstbEditor.LoadFile(path);
+                    return rstbEditor;
+                }
             default: 
                 return null;
         }
