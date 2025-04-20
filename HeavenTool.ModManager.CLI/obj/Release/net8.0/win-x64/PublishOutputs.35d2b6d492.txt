@@ -1,3 +1,0 @@
-C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager.CLI\bin\Release\net8.0\publish\win-x64\HeavenTool.ModManager.pdb
-C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager.CLI\bin\Release\net8.0\publish\win-x64\HeavenTool.IO.pdb
-C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager.CLI\bin\Release\net8.0\publish\win-x64\HeavenTool.ModManager.CLI.exe
