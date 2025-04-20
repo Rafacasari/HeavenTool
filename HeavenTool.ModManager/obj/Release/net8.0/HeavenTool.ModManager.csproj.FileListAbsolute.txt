@@ -1,0 +1,15 @@
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\bin\Release\net8.0\HeavenTool.ModManager.deps.json
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\bin\Release\net8.0\HeavenTool.ModManager.dll
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\bin\Release\net8.0\HeavenTool.ModManager.pdb
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\bin\Release\net8.0\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\bin\Release\net8.0\HeavenTool.IO.pdb
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\HeavenTool.ModManager.csproj.AssemblyReference.cache
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\HeavenTool.ModManager.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\HeavenTool.ModManager.AssemblyInfoInputs.cache
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\HeavenTool.ModManager.AssemblyInfo.cs
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\HeavenTool.ModManager.csproj.CoreCompileInputs.cache
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\HeavenTo.0EB3F76E.Up2Date
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\HeavenTool.ModManager.dll
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\refint\HeavenTool.ModManager.dll
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\HeavenTool.ModManager.pdb
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.ModManager\obj\Release\net8.0\ref\HeavenTool.ModManager.dll

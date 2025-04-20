@@ -1,0 +1,37 @@
+C:\Users\Rafa\source\repos\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.deps.json
+C:\Users\Rafa\source\repos\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.pdb
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.csproj.AssemblyReference.cache
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.AssemblyInfoInputs.cache
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.AssemblyInfo.cs
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.csproj.CoreCompileInputs.cache
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\refint\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.pdb
+C:\Users\Rafa\source\repos\HeavenTool.IO\obj\Debug\net8.0\ref\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.deps.json
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.pdb
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.csproj.AssemblyReference.cache
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.AssemblyInfoInputs.cache
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.AssemblyInfo.cs
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.csproj.CoreCompileInputs.cache
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\refint\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.pdb
+C:\Users\Rafa\source\repos\HeavenToolAvalonia\HeavenTool.IO\obj\Debug\net8.0\ref\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.deps.json
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\bin\Debug\net8.0\HeavenTool.IO.pdb
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.csproj.AssemblyReference.cache
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.AssemblyInfoInputs.cache
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.AssemblyInfo.cs
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.csproj.CoreCompileInputs.cache
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.sourcelink.json
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\refint\HeavenTool.IO.dll
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\HeavenTool.IO.pdb
+C:\Users\Rafa\source\repos\Heaven Tool\HeavenTool.IO\obj\Debug\net8.0\ref\HeavenTool.IO.dll

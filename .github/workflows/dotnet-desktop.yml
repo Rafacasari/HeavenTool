@@ -43,7 +43,7 @@ jobs:
         id: get_version
         shell: pwsh
         run: |
-          $projectPath = "Heaven Tool.csproj"
+          $projectPath = "HeavenTool.WinForms\HeavenTool.WinForms.csproj"
           if (-Not (Test-Path $projectPath)) {
               Write-Error "Project file not found: $projectPath"
               exit 1

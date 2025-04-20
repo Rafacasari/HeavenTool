@@ -1,0 +1,222 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "HeavenTool.ModManager.CLI/1.0.0": {
+        "dependencies": {
+          "HeavenTool.ModManager": "1.0.0"
+        },
+        "runtime": {
+          "HeavenTool.ModManager.CLI.dll": {}
+        }
+      },
+      "AuroraLib.Compression/1.5.0": {
+        "dependencies": {
+          "AuroraLib.Core": "1.6.2"
+        },
+        "runtime": {
+          "lib/net8.0/AuroraLib.Compression.dll": {
+            "assemblyVersion": "1.5.0.0",
+            "fileVersion": "1.5.0.0"
+          }
+        }
+      },
+      "AuroraLib.Core/1.6.2": {
+        "runtime": {
+          "lib/net8.0/AuroraLib.Core.dll": {
+            "assemblyVersion": "1.6.2.0",
+            "fileVersion": "1.6.2.0"
+          }
+        }
+      },
+      "Crc32.NET/1.2.0": {
+        "dependencies": {
+          "NETStandard.Library": "2.0.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Crc32.NET.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.2.0.5"
+          }
+        }
+      },
+      "JeremyEspresso.MurmurHash/0.0.1": {
+        "runtime": {
+          "lib/net7.0/MurmurHash.dll": {
+            "assemblyVersion": "0.0.1.0",
+            "fileVersion": "0.0.1.0"
+          }
+        }
+      },
+      "Microsoft.NETCore.Platforms/1.1.0": {},
+      "NETStandard.Library/2.0.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0"
+        }
+      },
+      "Newtonsoft.Json/13.0.3": {
+        "runtime": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.0.3.27908"
+          }
+        }
+      },
+      "NintendoTools/2.27.0": {
+        "dependencies": {
+          "AuroraLib.Compression": "1.5.0",
+          "Crc32.NET": "1.2.0",
+          "Newtonsoft.Json": "13.0.3",
+          "System.Text.Encoding.CodePages": "9.0.4",
+          "ZstdSharp.Port": "0.8.5"
+        },
+        "runtime": {
+          "lib/net8.0/NintendoTools.dll": {
+            "assemblyVersion": "2.27.0.0",
+            "fileVersion": "2.27.0.0"
+          }
+        }
+      },
+      "System.Text.Encoding.CodePages/9.0.4": {
+        "runtime": {
+          "lib/net8.0/System.Text.Encoding.CodePages.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net8.0/System.Text.Encoding.CodePages.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "ZstdSharp.Port/0.8.5": {
+        "runtime": {
+          "lib/net8.0/ZstdSharp.dll": {
+            "assemblyVersion": "0.8.5.0",
+            "fileVersion": "0.8.5.0"
+          }
+        }
+      },
+      "HeavenTool.IO/1.0.0": {
+        "dependencies": {
+          "Crc32.NET": "1.2.0",
+          "JeremyEspresso.MurmurHash": "0.0.1",
+          "NintendoTools": "2.27.0"
+        },
+        "runtime": {
+          "HeavenTool.IO.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "HeavenTool.ModManager/1.0.0": {
+        "dependencies": {
+          "HeavenTool.IO": "1.0.0",
+          "NintendoTools": "2.27.0"
+        },
+        "runtime": {
+          "HeavenTool.ModManager.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "HeavenTool.ModManager.CLI/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AuroraLib.Compression/1.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GO/sgIBLQkORt8Xx8h1q/aQghkymV7JYA3/hp3LqQZFPBy8xjFPHGv2W1SEwlCApjdwSE55cFJhMPi+JwZOQjQ==",
+      "path": "auroralib.compression/1.5.0",
+      "hashPath": "auroralib.compression.1.5.0.nupkg.sha512"
+    },
+    "AuroraLib.Core/1.6.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-908LYFKCgxjIwunp/01cVB2cvwJ3XQgKyoCjWy65y1ZakPF4LHbE1FpDWSB5UHnpKbtA0EBxNaNNyoSoD9XlJg==",
+      "path": "auroralib.core/1.6.2",
+      "hashPath": "auroralib.core.1.6.2.nupkg.sha512"
+    },
+    "Crc32.NET/1.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-wNW/huzolu8MNKUnwCVKxjfAlCFpeI8AZVfF46iAWJ1+P6bTU1AZct7VAkDDEjgeeTJCVTkGZaD6jSd/fOiUkA==",
+      "path": "crc32.net/1.2.0",
+      "hashPath": "crc32.net.1.2.0.nupkg.sha512"
+    },
+    "JeremyEspresso.MurmurHash/0.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-oHiDR9q6m3Y4vS2JMR0b8YJl73T5ApBU6qPjl7LQR1EJuDGMTohC1JkT7gUMA6XIs+yGVXJ3Q5ET9mEBnlpZGQ==",
+      "path": "jeremyespresso.murmurhash/0.0.1",
+      "hashPath": "jeremyespresso.murmurhash.0.0.1.nupkg.sha512"
+    },
+    "Microsoft.NETCore.Platforms/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
+      "path": "microsoft.netcore.platforms/1.1.0",
+      "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
+    },
+    "NETStandard.Library/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7jnbRU+L08FXKMxqUflxEXtVymWvNOrS8yHgu9s6EM8Anr6T/wIX4nZ08j/u3Asz+tCufp3YVwFSEvFTPYmBPA==",
+      "path": "netstandard.library/2.0.0",
+      "hashPath": "netstandard.library.2.0.0.nupkg.sha512"
+    },
+    "Newtonsoft.Json/13.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
+      "path": "newtonsoft.json/13.0.3",
+      "hashPath": "newtonsoft.json.13.0.3.nupkg.sha512"
+    },
+    "NintendoTools/2.27.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+UeGq2v0E9XgWBimZduIeZsGcNoZAKrK18wR/sBNs8ixoyg/siti/JBlz9QwitZmW09OUhkXb/dbC/btHb6cmA==",
+      "path": "nintendotools/2.27.0",
+      "hashPath": "nintendotools.2.27.0.nupkg.sha512"
+    },
+    "System.Text.Encoding.CodePages/9.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2lmgWFN1nRaLqIQvbPeL/N0h2SFftmRyckEM9kHO3eRDniN+07nPDepC1HEPgeD+Nzihyi0r8VGTErj6WTO9KQ==",
+      "path": "system.text.encoding.codepages/9.0.4",
+      "hashPath": "system.text.encoding.codepages.9.0.4.nupkg.sha512"
+    },
+    "ZstdSharp.Port/0.8.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TR4j17WeVSEb3ncgL2NqlXEqcy04I+Kk9CaebNDplUeL8XOgjkZ7fP4Wg4grBdPLIqsV86p2QaXTkZoRMVOsew==",
+      "path": "zstdsharp.port/0.8.5",
+      "hashPath": "zstdsharp.port.0.8.5.nupkg.sha512"
+    },
+    "HeavenTool.IO/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HeavenTool.ModManager/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
