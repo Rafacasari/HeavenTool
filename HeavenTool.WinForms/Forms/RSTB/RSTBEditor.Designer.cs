@@ -35,9 +35,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RSTBEditor));
             dataGrid = new System.Windows.Forms.DataGridView();
-            fileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            fileSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            DLC = new System.Windows.Forms.DataGridViewTextBoxColumn();
             TopMenu = new Components.DarkMenuStrip();
             fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,6 +53,9 @@
             statusBar = new Components.DarkStatusStrip();
             statusProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            FileSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            DLC = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)dataGrid).BeginInit();
             TopMenu.SuspendLayout();
             statusBar.SuspendLayout();
@@ -83,7 +83,7 @@
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dataGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dataGrid.ColumnHeadersHeight = 25;
-            dataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { fileName, fileSize, DLC });
+            dataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { FileName, FileSize, DLC });
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
@@ -117,29 +117,6 @@
             dataGrid.StandardTab = true;
             dataGrid.TabIndex = 5;
             dataGrid.CellFormatting += mainDataGridView_CellFormatting;
-            // 
-            // fileName
-            // 
-            fileName.HeaderText = "File Name";
-            fileName.Name = "fileName";
-            fileName.ReadOnly = true;
-            fileName.Width = 350;
-            // 
-            // fileSize
-            // 
-            fileSize.HeaderText = "Size";
-            fileSize.Name = "fileSize";
-            fileSize.ReadOnly = true;
-            fileSize.ToolTipText = "File size in bytes";
-            fileSize.Width = 80;
-            // 
-            // DLC
-            // 
-            DLC.HeaderText = "DLC";
-            DLC.Name = "DLC";
-            DLC.ReadOnly = true;
-            DLC.ToolTipText = "DLC Number";
-            DLC.Width = 80;
             // 
             // TopMenu
             // 
@@ -297,6 +274,29 @@
             statusLabel.Size = new System.Drawing.Size(16, 17);
             statusLabel.Text = "...";
             // 
+            // FileName
+            // 
+            FileName.HeaderText = "File Name";
+            FileName.Name = "FileName";
+            FileName.ReadOnly = true;
+            FileName.Width = 350;
+            // 
+            // FileSize
+            // 
+            FileSize.HeaderText = "Size";
+            FileSize.Name = "FileSize";
+            FileSize.ReadOnly = true;
+            FileSize.ToolTipText = "File size in bytes";
+            FileSize.Width = 80;
+            // 
+            // DLC
+            // 
+            DLC.HeaderText = "DLC";
+            DLC.Name = "DLC";
+            DLC.ReadOnly = true;
+            DLC.ToolTipText = "DLC Number";
+            DLC.Width = 80;
+            // 
             // RSTBEditor
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -327,9 +327,6 @@
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem updateFromModdedRomFs;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn fileName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn fileSize;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DLC;
         private System.Windows.Forms.ToolStripMenuItem saveAsButton;
         private System.Windows.Forms.ToolStripMenuItem devToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem updateHashListToolStripMenuItem;
@@ -342,5 +339,8 @@
         private System.Windows.Forms.ToolStripMenuItem addNewEntriesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem compareDifferenceToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn FileName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn FileSize;
+        private System.Windows.Forms.DataGridViewTextBoxColumn DLC;
     }
 }

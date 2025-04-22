@@ -332,9 +332,9 @@ public class BinaryCSV : IDisposable
                             try
                             {
                                 string stringValue = entryValue?.ToString()?.Trim() ?? "";
-
                                 var bytes = Encoding.UTF8.GetBytes(stringValue);
-                                Array.Resize(ref bytes, (int)field.Size);
+                                Array.Resize(ref bytes, field.Size);
+                                bytes[^1] = 0;
                                 writer.Write(bytes);
                             }
                             catch (Exception ex)
