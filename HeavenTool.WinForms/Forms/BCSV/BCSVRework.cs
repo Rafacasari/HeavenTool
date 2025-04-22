@@ -451,6 +451,15 @@ public partial class BCSVRework : Form, ISearchable
         ReloadInfo();
     }
 
+    public void UnloadFile()
+    {
+        ClearDataGrid();
+        LoadedFile.Dispose();
+        LoadedFile = null;
+
+        ReloadInfo();
+    }
+
     BCSVDirectorySearch directorySearchWindow;
     private void SearchOnFilesToolStripMenuItem_Click(object sender, EventArgs e)
     {
@@ -468,11 +477,7 @@ public partial class BCSVRework : Form, ISearchable
         var result = MessageBox.Show("Do you really want to close this file?\nUnsaved changes will be lost!", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         if (result == DialogResult.Yes)
         {
-            ClearDataGrid();
-            LoadedFile.Dispose();
-            LoadedFile = null;
-
-            ReloadInfo();
+           UnloadFile();
         }
     }
 
@@ -749,8 +754,11 @@ public partial class BCSVRework : Form, ISearchable
         if (LoadedFile != null)
         {
             var result = MessageBox.Show("Do you really want to close this file?\nUnsaved changes will be lost!", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result != DialogResult.Yes)
+            if (result == DialogResult.Yes)
             {
+                UnloadFile();
+            }
+            else { 
                 e.Cancel = true;
             }
         }

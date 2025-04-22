@@ -362,7 +362,6 @@ public class BinaryCSV : IDisposable
             {
                 Fields = [];
                 Entries = [];
-                //Cache = null;
             }
 
             // Indicate that the instance has been disposed.

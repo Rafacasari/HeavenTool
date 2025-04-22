@@ -66,7 +66,7 @@ namespace HeavenTool
             bcsvEditorButton.TabIndex = 0;
             bcsvEditorButton.Text = "Open BCSV Editor";
             bcsvEditorButton.UseVisualStyleBackColor = false;
-            bcsvEditorButton.Click += bcsvEditorButton_Click;
+            bcsvEditorButton.Click += BcsvEditorButton_Click;
             // 
             // menuStrip1
             // 
@@ -176,7 +176,7 @@ namespace HeavenTool
             rstbEditorButton.TabIndex = 8;
             rstbEditorButton.Text = "Open RSTB Editor";
             rstbEditorButton.UseVisualStyleBackColor = false;
-            rstbEditorButton.Click += rstbEditorButton_Click;
+            rstbEditorButton.Click += RstbEditorButton_Click;
             // 
             // sarcEditorButton
             // 
@@ -192,7 +192,7 @@ namespace HeavenTool
             sarcEditorButton.TabIndex = 9;
             sarcEditorButton.Text = "Open SARC Editor";
             sarcEditorButton.UseVisualStyleBackColor = false;
-            sarcEditorButton.Click += sarcEditorButton_Click;
+            sarcEditorButton.Click += SarcEditorButton_Click;
             // 
             // itemParamHelperButton
             // 
@@ -208,7 +208,7 @@ namespace HeavenTool
             itemParamHelperButton.TabIndex = 10;
             itemParamHelperButton.Text = "Open ItemParam Helper";
             itemParamHelperButton.UseVisualStyleBackColor = false;
-            itemParamHelperButton.Click += itemParamHelperButton_Click;
+            itemParamHelperButton.Click += ItemParamHelperButton_Click;
             // 
             // bcsvReworkButton
             // 
@@ -224,7 +224,7 @@ namespace HeavenTool
             bcsvReworkButton.TabIndex = 11;
             bcsvReworkButton.Text = "New BCSV Editor";
             bcsvReworkButton.UseVisualStyleBackColor = false;
-            bcsvReworkButton.Click += button1_Click;
+            bcsvReworkButton.Click += BcsvReworkButton_Click;
             // 
             // exportUsedHashesToolStripMenuItem
             // 

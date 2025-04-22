@@ -25,42 +25,45 @@ public partial class HeavenMain : Form
     }
 
     // Forms
-    public static BCSVForm bcsvEditor = new();
-    public static BCSVRework bcsvRework = new();
-    public static RSTBEditor rstbEditor = new();
-    public static SarcEditor sarcEditor = new();
-    public static ItemIDHelper itemIDHelper = new();
-
-    private void bcsvEditorButton_Click(object sender, EventArgs e)
+  
+    private void BcsvEditorButton_Click(object sender, EventArgs e)
     {
-        if (bcsvEditor.IsDisposed) bcsvEditor = new();
+        var bcsvEditor = new BCSVForm();
 
         bcsvEditor.Show();
         bcsvEditor.BringToFront();
     }
 
-    private void rstbEditorButton_Click(object sender, EventArgs e)
+    private void RstbEditorButton_Click(object sender, EventArgs e)
     {
-        if (rstbEditor.IsDisposed) rstbEditor = new();
+        var rstbEditor = new RSTBEditor();
 
         rstbEditor.Show();
         rstbEditor.BringToFront();
-    }
+    }   
 
-    private void sarcEditorButton_Click(object sender, EventArgs e)
+    private void SarcEditorButton_Click(object sender, EventArgs e)
     {
-        if (sarcEditor.IsDisposed) sarcEditor = new();
+        var sarcEditor = new SarcEditor();
 
         sarcEditor.Show();
         sarcEditor.BringToFront();
     }
 
-    private void itemParamHelperButton_Click(object sender, EventArgs e)
+    private void ItemParamHelperButton_Click(object sender, EventArgs e)
     {
-        if (itemIDHelper.IsDisposed) itemIDHelper = new();
+        var itemIDHelper = new ItemIDHelper();
 
         itemIDHelper.Show();
         itemIDHelper.BringToFront();
+    }
+
+    private void BcsvReworkButton_Click(object sender, EventArgs e)
+    {
+        var bcsvRework = new BCSVRework();
+
+        bcsvRework.Show();
+        bcsvRework.BringToFront();
     }
 
     private void yaz0DecompressToolStripMenuItem_Click(object sender, EventArgs e)
@@ -95,14 +98,6 @@ public partial class HeavenMain : Form
                 File.WriteAllBytes(savePath, decompressedBytes);
             }
         }
-    }
-
-    private void button1_Click(object sender, EventArgs e)
-    {
-        if (bcsvRework.IsDisposed) bcsvRework = new();
-
-        bcsvRework.Show();
-        bcsvRework.BringToFront();
     }
 
     private void ExportLabelsToolStripMenuItem_Click(object sender, EventArgs e)
