@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using HeavenTool.Utility.FileTypes.PBC;
+using HeavenTool.IO.FileFormats.PBC;
 
 namespace HeavenTool.Forms.PBC;
 

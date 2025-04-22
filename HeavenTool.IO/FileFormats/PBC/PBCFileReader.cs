@@ -1,10 +1,5 @@
 ﻿// Big thanks to https://github.com/McSpazzy/PBC
-using HeavenTool.Utility.IO;
-using System;
-using System.IO;
-using System.Linq;
-
-namespace HeavenTool.Utility.FileTypes.PBC;
+namespace HeavenTool.IO.FileFormats.PBC;
 
 /// <summary>
 /// A class to read PBC files
@@ -36,12 +31,13 @@ public partial class PBCFileReader
     {
         public Quadrant[,] Quadrants;
 
-        public HeightMap(BinaryReader reader) {
+        public HeightMap(BinaryReader reader)
+        {
 
             Quadrants = new Quadrant[2, 2];
 
             Quadrants[0, 1] = new Quadrant(reader);
-            Quadrants[0, 0] = new Quadrant(reader);           
+            Quadrants[0, 0] = new Quadrant(reader);
             Quadrants[1, 0] = new Quadrant(reader);
             Quadrants[1, 1] = new Quadrant(reader);
 
@@ -71,10 +67,10 @@ public partial class PBCFileReader
             // Read Collision Map
             Type = new TileType[2, 2];
 
-            Type[0, 1] = (TileType) reader.ReadByte();
-            Type[0, 0] = (TileType) reader.ReadByte();
-            Type[1, 0] = (TileType) reader.ReadByte();
-            Type[1, 1] = (TileType) reader.ReadByte();
+            Type[0, 1] = (TileType)reader.ReadByte();
+            Type[0, 0] = (TileType)reader.ReadByte();
+            Type[1, 0] = (TileType)reader.ReadByte();
+            Type[1, 1] = (TileType)reader.ReadByte();
         }
 
 
@@ -82,10 +78,10 @@ public partial class PBCFileReader
         {
             HeightMap.Write(writer);
 
-            writer.Write((byte) Type[0, 1]);
-            writer.Write((byte) Type[0, 0]);
-            writer.Write((byte) Type[1, 0]);
-            writer.Write((byte) Type[1, 1]);
+            writer.Write((byte)Type[0, 1]);
+            writer.Write((byte)Type[0, 0]);
+            writer.Write((byte)Type[1, 0]);
+            writer.Write((byte)Type[1, 1]);
         }
     }
 
@@ -125,8 +121,8 @@ public partial class PBCFileReader
     {
         using var stream = new MemoryStream(buffer);
         using var reader = new BinaryFileReader(stream);
-        
-        if (!MagicMatches(reader.ReadBytes(4))) 
+
+        if (!MagicMatches(reader.ReadBytes(4)))
             throw new Exception("This is not a PBC file!");
 
         Width = reader.ReadInt32();
@@ -140,7 +136,7 @@ public partial class PBCFileReader
         for (var h = 0; h < Height; h++)
             for (var w = 0; w < Width; w++)
                 Tiles[h, w] = new Tile(reader);
-    }   
+    }
 
     public byte[] SaveAsBytes()
     {

@@ -16,6 +16,7 @@ using HeavenTool.Forms.Search;
 using System.Text.Json;
 using HeavenTool.Forms.Components;
 using HeavenTool.Utility.FileTypes.BCSV.Exporting;
+using HeavenTool.IO;
 
 namespace HeavenTool;
 
@@ -209,7 +210,7 @@ public partial class BCSVForm : Form, ISearchable
         if (e.Control is TextBox txtControl)
         {
             // We have info about this hash, show auto-complete
-            if (parsedSuccessfully && BCSVHashing.EnumHashes.TryGetValue(enumHash, out List<BCSV_CRC32Value> value))
+            if (parsedSuccessfully && BCSVHashing.EnumHashes.TryGetValue(enumHash, out var value))
             {
                 var source = new AutoCompleteStringCollection();
                 source.AddRange(value.Select(x => x.ToString()).ToArray());

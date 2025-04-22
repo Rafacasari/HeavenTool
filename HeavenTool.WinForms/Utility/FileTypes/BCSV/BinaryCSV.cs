@@ -1,4 +1,5 @@
-﻿using HeavenTool.Utility.IO;
+﻿using HeavenTool.IO;
+using HeavenTool.Utility.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -225,7 +226,7 @@ public class BinaryCSV : IDisposable
 
                 // Since we don't have all headers translated, it's good to keep this right here.
                 // It will jump to the specific position of each entry.
-                reader.SeekBegin(entryPosition + currentField.Offset);
+                reader.Position = entryPosition + currentField.Offset;
 
                 object value = 0;
                 switch (currentField.DataType)
@@ -282,7 +283,7 @@ public class BinaryCSV : IDisposable
 
             // Go to next entry
             // Same from above applies here, seems we don't need to seek every time but it's better to prevent issues
-            reader.SeekBegin(entryPosition + EntrySize);
+            reader.Position = entryPosition + EntrySize;
         }
 
         fileStream.Close();

@@ -1,16 +1,14 @@
-﻿using HeavenTool.Utility.IO;
-using HeavenTool.Utility.IO.Compression;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.Text;
+using HeavenTool.IO.Compression;
+using NintendoTools.Compression.Yaz0;
 
-namespace HeavenTool.Utility.FileTypes.RSTB;
+namespace HeavenTool.IO.FileFormats.ResourceSizeTable;
 
-public class ResourceTable : IDisposable
+public class ResourceSizeTable : IDisposable
 {
+    public static readonly Yaz0Decompressor Decompressor = new();
+    public static readonly Yaz0Compressor Compressor = new();
+
     public class ResourceTableEntry
     {
         /// <summary>
@@ -142,25 +140,29 @@ public class ResourceTable : IDisposable
     /// </summary>
     public Dictionary<string, ResourceTableEntry> Dictionary { get; private set; }
 
-    //public List<ResourceTableEntry> Entries { get; private set; }
+    /// <summary>
+    /// Returns <see cref="Dictionary.Count"/>
+    /// </summary>
+    public int Length => Dictionary.Count;
 
-    ///// <summary>
-    ///// Get <b>ALL</b> entries, use <see cref="UniqueEntries"/> to get unique entries or <see cref="RepeatedHashesEntries"/> for repeated hashes
-    ///// </summary>
-    //public List<ResourceTableEntry> Entries { get; private set; }
+    public ResourceTableEntry this[int index]
+    {
+        get => Dictionary.ElementAt(index).Value;
+        set => Dictionary[Dictionary.ElementAt(index).Key] = value;
+    }
 
     /// <summary>
     /// <para>Used when the fileName CRC32 is <b>unique</b>.</para>
     /// Entries in that list does <b>NOT</b> contain the fileName parameter assigned, the CRC should be decrypted using the RomFs folder
     /// </summary>
     public Dictionary<string, ResourceTableEntry> UniqueEntries => Dictionary.Where(x => !x.Value.IsCollided).ToDictionary(x => x.Key, x => x.Value);
-    
+
 
     /// <summary>
     /// If have two (or more) file names that have the same hash both are put here
     /// </summary>
     public Dictionary<string, ResourceTableEntry> NonUniqueEntries => Dictionary.Where(x => x.Value.IsCollided).ToDictionary(x => x.Key, x => x.Value);
-    
+
 
     public bool IsRSTC => HEADER == "RSTC";
 
@@ -174,9 +176,8 @@ public class ResourceTable : IDisposable
     {
         if (entry == null) return;
 
-        if (!string.IsNullOrEmpty(entry.FileName))
-            RomFsNameManager.Add(entry.FileName);
-        else throw new Exception("FileName is not defined!");
+        if (string.IsNullOrEmpty(entry.FileName))
+            throw new Exception("FileName is not defined!");
 
         if (Dictionary.Values.Any(x => x.CRCHash == entry.CRCHash))
         {
@@ -189,91 +190,64 @@ public class ResourceTable : IDisposable
         Dictionary.TryAdd(entry.FileName, entry);
     }
 
-    public ResourceTable(string path)
+    public ResourceSizeTable(byte[] bytes)
     {
-        using (var fileStream = File.OpenRead(path))
+        using var compressedStream = new MemoryStream(bytes);
+        using var uncompressedStream = new MemoryStream();
+
+        if (Yaz0Decompressor.CanDecompressStatic(compressedStream))
+            Decompressor.Decompress(compressedStream, uncompressedStream);
+        else 
+            compressedStream.CopyTo(uncompressedStream);
+
+
+        // Start actual reading of our RSTB file
+        using var reader = new BinaryFileReader(uncompressedStream);
+
+        HEADER = reader.ReadString(4, Encoding.ASCII);
+        if (HEADER != "RSTB" && HEADER != "RSTC")
         {
-            var fileHeader = fileStream.ReadString(4, Encoding.ASCII);
-            var isDecompressed = fileHeader == "RSTB" || fileHeader == "RSTC";
+            ConsoleUtilities.WriteLine($"This is not a valid RSTB/RSTC file! ({HEADER})", ConsoleColor.Red);
 
-            fileStream.Position = 0;
+            Dispose();
+            return;
+        }
 
-            MemoryStream memoryStream = new();
+        var uniqueEntriesCount = reader.ReadUInt32();
+        var repeatedEntriesCount = reader.ReadUInt32();
 
-            if (!isDecompressed)
+        Dictionary = [];
+
+        for (int i = 0; i < uniqueEntriesCount; i++)
+        {
+            var hash = reader.ReadUInt32();
+            var fileSize = reader.ReadUInt32();
+
+            var entry = new ResourceTableEntry(hash, fileSize, false);
+
+            if (IsRSTC) entry.DLC = reader.ReadUInt32();
+
+            // If the hash is not found, we gonna throw an error and this should prevent the file from loading
+            if (entry.FileName != null)
             {
-                byte[] decompressedBytes = null;
-                try
-                {
-                    decompressedBytes = Yaz0CompressionAlgorithm.Decompress(fileStream).ToArray();
-                }
-                catch
-                {
-                    MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                //if (!Yaz0CompressionAlgorithm.TryToDecompress(fileStream, out byte[] decompressedBytes))
-                //{
-                //    MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //    return;
-                //}
-                if (decompressedBytes == null) return;
-                memoryStream = new MemoryStream(decompressedBytes);
+                if (!Dictionary.TryAdd(entry.FileName, entry)) throw new Exception($"Failed to add {entry.FileName} to Dictionary, probably a duplicated entry.");
             }
-            else
+            else throw new Exception($"Hash {entry.CRCHash:x} not found!");
+        }
+
+        for (int i = 0; i < repeatedEntriesCount; i++)
+        {
+            var fileName = reader.ReadString(128, Encoding.ASCII);
+            var fileSize = reader.ReadUInt32();
+
+            var entry = new ResourceTableEntry(fileName, fileSize, null, true);
+
+            if (IsRSTC) entry.DLC = reader.ReadUInt32();
+
+            if (entry.FileName != null)
             {
-                // File is not compressed, copy fileStream to our memoryStream
-                fileStream.CopyTo(memoryStream);
+                if (!Dictionary.TryAdd(entry.FileName, entry)) throw new Exception($"Failed to add {entry.FileName} to Dictionary, probably a duplicated entry.");
             }
-
-            // Start actual reading of our RSTB file
-            using var reader = new BinaryFileReader(memoryStream);
-
-            HEADER = reader.ReadString(4, Encoding.ASCII);
-            if (HEADER != "RSTB" && HEADER != "RSTC")
-            {
-                MessageBox.Show($"This is not a valid RSTB/RSTC file! ({HEADER})", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            var uniqueEntriesCount = reader.ReadUInt32();
-            var repeatedEntriesCount = reader.ReadUInt32();
-
-            Dictionary = [];
-
-            for (int i = 0; i < uniqueEntriesCount; i++)
-            {
-                var hash = reader.ReadUInt32();
-                var fileSize = reader.ReadUInt32();
-
-                var entry = new ResourceTableEntry(hash, fileSize, false);
-
-                if (IsRSTC) entry.DLC = reader.ReadUInt32();
-
-                // If the hash is not found, we gonna throw an error and this should prevent the file from loading
-                if (entry.FileName != null)
-                {
-                    if (!Dictionary.TryAdd(entry.FileName, entry)) throw new Exception($"Failed to add {entry.FileName} to Dictionary, probably a duplicated entry.");
-                }
-                else throw new Exception($"Hash {entry.CRCHash:x} not found!");
-            }
-
-            for (int i = 0; i < repeatedEntriesCount; i++)
-            {
-                var fileName = reader.ReadString(128, Encoding.ASCII);
-                var fileSize = reader.ReadUInt32();
-
-                var entry = new ResourceTableEntry(fileName, fileSize, null, true);
-
-                if (IsRSTC) entry.DLC = reader.ReadUInt32();
-
-                if (entry.FileName != null)
-                {
-                    if (!Dictionary.TryAdd(entry.FileName, entry)) throw new Exception($"Failed to add {entry.FileName} to Dictionary, probably a duplicated entry.");
-                }
-            }
-
-            reader.Close();
-            reader.Dispose();
         }
 
         IsLoaded = true;
@@ -291,14 +265,14 @@ public class ResourceTable : IDisposable
         // Group by CRC hash
         var groups = Dictionary.GroupBy(x => x.Value.CRCHash);
 
-        foreach(var group in groups)
+        foreach (var group in groups)
         {
             // If this group have more than 1 child, so it is a duplicated entry
             var count = group.Count();
 
-            foreach(var (_, entry) in group)
+            foreach (var (_, entry) in group)
                 entry.IsCollided = count > 1;
-            
+
         }
     }
 
@@ -306,7 +280,7 @@ public class ResourceTable : IDisposable
     /// Save the file
     /// </summary>
     /// <param name="filePath">File Location</param>
-    public void SaveTo(string filePath, bool showPrompt = true)
+    public byte[] Save()
     {
         UpdateUniques();
 
@@ -321,10 +295,8 @@ public class ResourceTable : IDisposable
             // Write header
             writer.Write(Encoding.ASCII.GetBytes(HEADER));
 
-         
-
-            writer.Write((uint) uniqueEntries.Count());
-            writer.Write((uint) nonUniqueEntries.Count());
+            writer.Write(uniqueEntries.Count());
+            writer.Write(nonUniqueEntries.Count());
 
             foreach (var (_, entry) in uniqueEntries)
                 entry.Write(writer, IsRSTC);
@@ -337,16 +309,66 @@ public class ResourceTable : IDisposable
             memoryStream.Position = 0;
             memoryStream.Read(array, 0, array.Length);
 
-            var wantToCompress = DialogResult.Yes;
-            if (showPrompt)
-                wantToCompress = MessageBox.Show("Do you want to compress the file?", "Compress to Yaz0?", MessageBoxButtons.YesNo);
-            var result = wantToCompress == DialogResult.Yes ? Yaz0CompressionAlgorithm.Compress(array) : new MemoryStream(array);
 
-            result.ExportToFile(filePath);
+            using var compressedStream = new MemoryStream();
+            Compressor.Compress(memoryStream, compressedStream);
+
+            return compressedStream.ToArray();
         }
-        catch (Exception ex) { 
-            MessageBox.Show(ex.Message, "Failed to save!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        catch (Exception ex)
+        {
+            ConsoleUtilities.WriteLine($"Failed to save ResourceSizeTable file: \n{ex.Message}", ConsoleColor.Red);
+            return null;
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="entireFileName"></param>
+    /// <param name="romfsName"></param>
+    /// <returns>
+    /// <para><b>File Size</b> with proper padding</para>
+    /// <para>or <b>-1</b> if unsupported Zstd file</para>
+    /// <para>or <b>-2</b> if unsupported file</para>
+    /// </returns>
+    /// <exception cref="OverflowException">Throws when file size exceeds the <see cref="uint.MaxValue"/></exception>
+    public static long GetFileSize(string entireFileName, string romfsName)
+    {
+        // If it's a zstd file
+        if (entireFileName.EndsWith(".zs")
+            && !romfsName.StartsWith("Layout/")
+            && !romfsName.StartsWith("Message/")
+            && !romfsName.StartsWith("Model/Layout_"))
+            return -1;
+
+        long size;
+        if (entireFileName.EndsWith(".zs"))
+        {
+            var decompressed = ZstdCompressionAlgorithm.Decompress(entireFileName);
+            size = decompressed.Length;
+        }
+        else size = new FileInfo(entireFileName).Length;
+
+        // Round up to the next number divisible by 32
+        size = size + 31 & -32;
+
+        if (romfsName.StartsWith("Layout/"))
+            size += 8192;
+        else if (romfsName.StartsWith("Model/Layout_"))
+            size += 9264;
+        else if (romfsName.StartsWith("Message/"))
+            size += 512;
+        else if (entireFileName.EndsWith(".bars"))
+            size += 712;
+        else if (entireFileName.EndsWith(".bcsv") || entireFileName.EndsWith(".bfevfl") || entireFileName.EndsWith(".byml"))
+            size += 416;
+        else return -2; // unsupported file
+
+        if (size > uint.MaxValue)
+            throw new OverflowException($"{entireFileName} is too big!");
+
+        return size;
     }
 
     public void Dispose()

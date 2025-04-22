@@ -204,7 +204,7 @@
             // 
             pbcPreview.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             pbcPreview.BackColor = System.Drawing.Color.Black;
-            pbcPreview.CurrentView = Utility.FileTypes.PBC.ViewType.Collision;
+            pbcPreview.CurrentView = HeavenTool.IO.FileFormats.PBC.ViewType.Collision;
             pbcPreview.DisplayGrid = true;
             pbcPreview.HighlightedHeight = null;
             pbcPreview.Location = new System.Drawing.Point(12, 27);

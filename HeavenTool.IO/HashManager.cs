@@ -18,8 +18,8 @@ public static class HashManager
         Console.WriteLine("[BCSV] Initializing Hashes...");
         isInitialized = true;
 
-        string crcHashes = Path.Combine(AppContext.BaseDirectory, "extra", "hashes");
-        string murmurHashes = Path.Combine(AppContext.BaseDirectory, "extra", "murmur3-hashes");
+        string crcHashes = Path.Combine("extra", "hashes");
+        string murmurHashes = Path.Combine("extra", "murmur3-hashes");
 
         // Create directory if they don't exist
         Directory.CreateDirectory(crcHashes);
@@ -115,6 +115,6 @@ public class BCSV_CRC32Value(uint val)
 
     public override string ToString()
     {
-        return HashManager.CRCHashes.TryGetValue(Value, out string? value) ? value : Value.ToString("x");
+        return HashManager.CRCHashes.TryGetValue(Value, out string value) ? value : Value.ToString("x");
     }
 }

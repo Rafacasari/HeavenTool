@@ -20,16 +20,37 @@ public class BinaryCSV : IDisposable
     /// <summary>
     /// List of <see cref="BCSVEntry"/>
     /// </summary>
-    public object[,] Entries { get; set; }
+    public List<object[]> Entries { get; set; }
 
-    public int Length => Entries.GetLength(0);
+    public int Length => Entries.Count;
 
     internal byte HasExtendedHeader { get; private set; }
     internal byte UnknownField { get; private set; }
 
     internal ushort HeaderVersion { get; private set; }
-    //internal string HeaderMagic { get; private set; } = "VSCB";
+
     internal readonly byte[] MAGIC = "VSCB"u8.ToArray();
+
+    public object this[int row, int column]
+    {
+        get => Entries[row][column];
+        set => Entries[row][column] = value;
+    }
+
+    public BinaryCSV(int entrySize, Field[] fields, List<object[]> entries, byte hasExtendedHeader, byte unknownField, ushort version)
+    {
+        EntrySize = entrySize;
+        Fields = fields;
+        Entries = [.. entries];
+
+        HasExtendedHeader = hasExtendedHeader;
+        UnknownField = unknownField;
+
+        HeaderVersion = version;
+    }
+
+    public static BinaryCSV CopyFileWithoutEntries(BinaryCSV fileToCopy) => new(fileToCopy.EntrySize, fileToCopy.Fields, [], fileToCopy.HasExtendedHeader, fileToCopy.UnknownField, fileToCopy.HeaderVersion);
+
 
     public BinaryCSV(byte[] bytes)
     {
@@ -149,9 +170,11 @@ public class BinaryCSV : IDisposable
         }
 
         // Get Type for each field
-        Entries = new object[entryCount, fieldCount];
+        Entries = [];
+
         for (int i = 0; i < entryCount; i++)
         {
+            var newEntry = new object[Fields.Length];
             var entryPosition = reader.ReadUInt32(); // should be the same as reader.Position if we did everything correctly
 
             for (ushort fieldId = 0; fieldId < Fields.Length; fieldId++)
@@ -210,10 +233,11 @@ public class BinaryCSV : IDisposable
                         value = reader.ReadString(currentField.Size, Encoding.UTF8);
                         break;
                 }
-
-                Entries[i, fieldId] = value;
+                newEntry[fieldId] = value;
+                //Entries[i][fieldId] = value;
             }
 
+            Entries.Add(newEntry);
             // Go to the next entry, important if we don't know the header
             reader.Position = entryPosition + EntrySize;
             //reader.SeekBegin(entryPosition + EntrySize);
@@ -221,7 +245,6 @@ public class BinaryCSV : IDisposable
 
         reader.Close();
         fileStream.Close();
-       
     }
 
 
@@ -230,7 +253,7 @@ public class BinaryCSV : IDisposable
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream);
 
-        writer.Write(Entries.GetLength(0));
+        writer.Write(Entries.Count);
         writer.Write(EntrySize);
         writer.Write((ushort)Fields.Length);
 
@@ -254,7 +277,7 @@ public class BinaryCSV : IDisposable
             writer.Write(field.Offset);
         }
 
-        for (int currentEntry = 0; currentEntry < Entries.GetLength(0); currentEntry++)
+        for (int currentEntry = 0; currentEntry < Entries.Count; currentEntry++)
         {
 
             int pos = (int) writer.BaseStream.Position;
@@ -265,7 +288,7 @@ public class BinaryCSV : IDisposable
                 var field = Fields[fieldId];
                 writer.Seek(pos + field.Offset, SeekOrigin.Begin);
 
-                var entryValue = Entries[currentEntry, fieldId];
+                var entryValue = Entries[currentEntry][fieldId];
                 switch (field.DataType)
                 {
                     case DataType.U8Array:
@@ -338,7 +361,7 @@ public class BinaryCSV : IDisposable
             if (disposing)
             {
                 Fields = [];
-                Entries = new object[0, 0];
+                Entries = [];
                 //Cache = null;
             }
 

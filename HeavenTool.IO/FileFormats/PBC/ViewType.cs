@@ -1,4 +1,4 @@
-﻿namespace HeavenTool.Utility.FileTypes.PBC;
+﻿namespace HeavenTool.IO.FileFormats.PBC;
 
 public enum ViewType
 {

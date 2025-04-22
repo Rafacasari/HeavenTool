@@ -105,13 +105,18 @@ internal static class Program
             case ".srsizetable":
                 if (originalArguments.Length >= 2)
                 {
+                    // TODO: This can be optimized to not use an window.
+                    // See HeavenTools.ModManager FileMerger.CreateResourceSizeTable() for reference
+
                     var rstbEditor = new RSTBEditor();
                     rstbEditor.LoadFile(path);
                     rstbEditor.CreateUpdatedRSTBFromModdedRomFs(rstbEditor.LoadedFile, originalArguments[1], false);
                     string outPath = path;
                     if (originalArguments.Length >= 3)
                         outPath = originalArguments[2];
-                    rstbEditor.LoadedFile.SaveTo(outPath, false);
+
+                    var bytes = rstbEditor.LoadedFile.Save();
+                    File.WriteAllBytes(outPath, bytes);
                     Environment.Exit(0);
                     return null;
                 }

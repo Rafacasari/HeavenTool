@@ -1,11 +1,11 @@
 ﻿using HeavenTool.Forms.Pack;
 using HeavenTool.Forms.RSTB;
 using HeavenTool.Forms.SARC;
+using HeavenTool.IO;
+using HeavenTool.IO.Compression;
 using HeavenTool.Utility;
 using HeavenTool.Utility.FileTypes.BCSV;
 using HeavenTool.Utility.FileTypes.BCSV.Exporting;
-using HeavenTool.Utility.IO;
-using HeavenTool.Utility.IO.Compression;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,7 +21,7 @@ public partial class HeavenMain : Form
     {
         InitializeComponent();
 
-        Text = $"Heaven Tool | {Program.VERSION}";
+        Text = $"Heaven Tool {Program.VERSION}";
     }
 
     // Forms
@@ -76,37 +76,23 @@ public partial class HeavenMain : Form
             && !string.IsNullOrEmpty(openFileDialog.FileName)
             && File.Exists(openFileDialog.FileName))
         {
-            using (var fileStream = File.OpenRead(openFileDialog.FileName))
+            using var fileStream = File.OpenRead(openFileDialog.FileName);
+            //MemoryStream memoryStream = new();
+
+            byte[] decompressedBytes = Yaz0CompressionAlgorithm.Decompress(fileStream)?.ToArray();
+
+
+            if (decompressedBytes == null) return;
+
+            var saveFileDialog = new SaveFileDialog()
             {
-                //MemoryStream memoryStream = new();
+                FileName = openFileDialog.FileName,
+            };
 
-                byte[] decompressedBytes = null;
-                try
-                {
-                    decompressedBytes = Yaz0CompressionAlgorithm.Decompress(fileStream).ToArray();
-                }
-                catch
-                {
-                    MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                //if (!Yaz0CompressionAlgorithm.TryToDecompress(fileStream, out byte[] decompressedBytes))
-                //{
-                //    MessageBox.Show("Failed to decompress Yaz0", "Failed to open", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //    return;
-                //}
-
-                if (decompressedBytes == null) return;
-
-                var saveFileDialog = new SaveFileDialog()
-                {
-                    FileName = openFileDialog.FileName,
-                };
-
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    var savePath = saveFileDialog.FileName;
-                    File.WriteAllBytes(savePath, decompressedBytes);
-                }
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var savePath = saveFileDialog.FileName;
+                File.WriteAllBytes(savePath, decompressedBytes);
             }
         }
     }

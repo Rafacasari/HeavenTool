@@ -11,7 +11,7 @@
     <Product>Heaven Tool</Product>
     <Description>A GUI editor to deal with ACNH game files.</Description>
     <Authors>Rafacasari</Authors>
-    <Version>1.6.1</Version>
+    <Version>1.7</Version>
     <Copyright>Copyright © 2024 – 2025 Rafacasari</Copyright>
     <ApplicationIcon>Resources\leaf.ico</ApplicationIcon>
     <PackageProjectUrl>https://github.com/rafacasari/heaventoolacnh</PackageProjectUrl>
@@ -111,15 +111,16 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Folder Include="Libraries\" />
-    <Folder Include="Utility\FileTypes\BCSV\Hashing\" />
-    <Folder Include="Utility\FileTypes\BCSV\Types\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="NintendoTools" Version="2.24.1" />
+    <PackageReference Include="NintendoTools" Version="2.27.0" />
     <PackageReference Include="YamlConvert" Version="3.1.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HeavenTool.IO\HeavenTool.IO.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SARCExt">

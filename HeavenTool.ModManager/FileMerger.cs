@@ -1,5 +1,5 @@
 ﻿using HeavenTool.IO;
-using HeavenTool.IO.FileFormats;
+using HeavenTool.IO.FileFormats.ResourceSizeTable;
 using HeavenTool.ModManager.FileTypes;
 using NintendoTools.Compression.Yaz0;
 using NintendoTools.Compression.Zstd;

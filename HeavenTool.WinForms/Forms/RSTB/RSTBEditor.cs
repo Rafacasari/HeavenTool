@@ -1,8 +1,9 @@
 ﻿using HeavenTool.Forms.Search;
+using HeavenTool.IO;
+using HeavenTool.IO.FileFormats.ResourceSizeTable;
 using HeavenTool.Properties;
-using HeavenTool.Utility.FileTypes.RSTB;
 using HeavenTool.Utility.IO;
-using HeavenTool.Utility.IO.Compression;
+using NintendoTools.Compression.Zstd;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,37 +27,39 @@ public partial class RSTBEditor : Form, ISearchable
         Text = $"Heaven Tool | {Program.VERSION} | RSTB Editor";
         OriginalText = Text;
 
-        mainDataGridView.Columns["fileName"].ValueType = typeof(string);
-        mainDataGridView.Columns["fileSize"].ValueType = typeof(uint);
-        mainDataGridView.Columns["DLC"].ValueType = typeof(uint);
-        mainDataGridView.ShowCellToolTips = false;
+        dataGrid.Columns["FileName"].ValueType = typeof(string);
+        dataGrid.Columns["FileSize"].ValueType = typeof(uint);
+        dataGrid.Columns["DLC"].ValueType = typeof(uint);
+        dataGrid.ShowCellToolTips = false;
 
-        mainDataGridView.VirtualMode = true;
-        mainDataGridView.CellValueNeeded += MainDataGridView_CellValueNeeded;
+        dataGrid.VirtualMode = true;
+        dataGrid.CellValueNeeded += DataGrid_CellValueNeeded;
 
         statusProgressBar.Visible = false;
         statusBar.Visible = false;
 
-        RefreshMenuButtons();
+        RefreshData();
 
         DoubleBuffered = true;
-        associateSrsizetableToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".srsizetable") == Application.ExecutablePath;
+        associateRstbToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".srsizetable") == Application.ExecutablePath;
     }
 
-    private void MainDataGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
+    private void DataGrid_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
     {
-        if (e.RowIndex < 0 || e.RowIndex >= LoadedFile.Dictionary.Count)
+        if (LoadedFile == null) return;
+
+        if (e.RowIndex < 0 || e.RowIndex >= LoadedFile.Length)
             return;
 
-        var entry = LoadedFile.Dictionary.ElementAt(e.RowIndex).Value;
+        var entry = LoadedFile[e.RowIndex];
 
-        switch (mainDataGridView.Columns[e.ColumnIndex].Name)
+        switch (dataGrid.Columns[e.ColumnIndex].Name)
         {
-            case "fileName":
+            case "FileName":
                 e.Value = entry.FileName;
                 break;
 
-            case "fileSize":
+            case "FileSize":
                 e.Value = entry.FileSize;
                 break;
 
@@ -71,19 +74,10 @@ public partial class RSTBEditor : Form, ISearchable
     }
 
     public Dictionary<int, long> DiffDictionary = [];
-    public ResourceTable LoadedFile { get; set; }
-
-    private void RefreshMenuButtons()
-    {
-        saveAsToolStripMenuItem.Enabled = LoadedFile?.IsLoaded == true;
-        updateFromModdedRomFs.Enabled = LoadedFile?.IsLoaded == true;
-        closeFileToolStripMenuItem.Enabled = LoadedFile?.IsLoaded == true;
-    }
+    public ResourceSizeTable LoadedFile { get; set; }
 
     private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        mainDataGridView.Rows.Clear();
-
         using var openFileDialog = new OpenFileDialog
         {
             Title = "Select a .srsizetable file",
@@ -99,7 +93,10 @@ public partial class RSTBEditor : Form, ISearchable
 
     public void LoadFile(string path)
     {
-        LoadedFile = new ResourceTable(path);
+        if (!File.Exists(path)) return;
+
+        using var file = File.OpenRead(path);
+        LoadedFile = new ResourceSizeTable(file.ToArray());
 
         if (LoadedFile == null || !LoadedFile.IsLoaded)
         {
@@ -107,23 +104,26 @@ public partial class RSTBEditor : Form, ISearchable
             return;
         }
 
-        PopulateGridView();
-        RefreshMenuButtons();
+        RefreshData();
     }
 
-    private void PopulateGridView()
+    private void RefreshData()
     {
+        saveAsButton.Enabled = LoadedFile?.IsLoaded == true;
+        updateFromModdedRomFs.Enabled = LoadedFile?.IsLoaded == true;
+        closeFileButton.Enabled = LoadedFile?.IsLoaded == true;
+
         if (LoadedFile?.IsLoaded != true)
         {
-            mainDataGridView.RowCount = 0;
+            dataGrid.RowCount = 0;
             return;
         }
 
         var uniqueEntries = LoadedFile.Dictionary.Values.Where(x => !x.IsCollided).ToList();
         var nonUniqueEntries = LoadedFile.Dictionary.Values.Where(x => x.IsCollided).ToList();
-        mainDataGridView.RowCount = LoadedFile.Dictionary.Count;
+        dataGrid.RowCount = LoadedFile.Length;
 
-        Text = $"{OriginalText}: {LoadedFile.Dictionary.Count} ({LoadedFile.UniqueEntries.Count}/{LoadedFile.NonUniqueEntries.Count})";
+        Text = $"{OriginalText}: {LoadedFile.Length} ({LoadedFile.UniqueEntries.Count}/{LoadedFile.NonUniqueEntries.Count})";
     }
 
     private void UpdateHashesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -161,7 +161,7 @@ public partial class RSTBEditor : Form, ISearchable
             }).Where(x => x != null).ToArray();
 
             // Save
-            RomFsNameManager.Update(files);
+            //RomFsNameManager.Update(files);
         }
     }
 
@@ -178,80 +178,8 @@ public partial class RSTBEditor : Form, ISearchable
         };
 
         if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            LoadedFile.SaveTo(saveFileDialog.FileName);
-    }
-
-    internal static long GetFileSize(string fileName, bool isFileCheck = false)
-    {
-        long size;
-
-        // If it's a zstd file
-        if (fileName.EndsWith(".zs") && !fileName.StartsWith("Layout/"))
         {
-            if (!isFileCheck) return -1;
-
-            var decompressed = ZstdCompressionAlgorithm.Decompress(fileName);
-            size = decompressed.Length;
-        }
-        else size = new FileInfo(fileName).Length;
-
-        // Round up to the next number divisible by 32
-        size = (size + 31) & -32;
-
-        if (fileName.StartsWith("Layout/"))
-            size += 8192;
-        else if (fileName.EndsWith(".bars"))
-            size += 712;
-        else if (fileName.EndsWith(".bcsv") || fileName.EndsWith(".bfevfl") || fileName.EndsWith(".byml"))
-            size += 416;
-        else if (!isFileCheck) return -2; // unsupported file
-
-        if (size > uint.MaxValue)
-            throw new Exception($"{fileName} is too big!");
-
-        return size;
-    }
-
-    private void CheckIfFileSizesAreMatchingToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (LoadedFile == null || !LoadedFile.IsLoaded) return;
-
-        using var folderBrowserDialog = new FolderBrowserDialog()
-        {
-            Description = "Select your RomFs"
-        };
-
-        if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-        {
-            var romFsPath = folderBrowserDialog.SelectedPath;
-
-            var allFiles = Directory.GetFiles(romFsPath, "*", SearchOption.AllDirectories);
-            bool success = true;
-
-            foreach (var file in allFiles)
-            {
-                var path = Path.GetRelativePath(romFsPath, file).Replace('\\', '/');
-
-                if (path.StartsWith("Model/UnitIcon") || path.StartsWith("Model/Layout_MessageCard_") || path.StartsWith("Swkbd/") || path.StartsWith("System/") || path.EndsWith("srsizetable") || path.EndsWith(".bdli.zs") || path.EndsWith(".bwav") || path.EndsWith(".ad1") || path.EndsWith(".a") || path.EndsWith(".byml") || path.EndsWith(".xml")) continue;
-
-                if (LoadedFile.Dictionary.TryGetValue(path, out var result))
-                {
-                    var fileSize = GetFileSize(file, true);
-                    if (fileSize != result.FileSize)
-                    {
-                        Console.WriteLine($"Opsss! {path} have a different size!\n" +
-                                            $"Original size: {result.FileSize}\n" +
-                                            $"Our size: {fileSize}");
-                        success = false;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"{path} is not present on the file.");
-                }
-            }
-
-            if (success) MessageBox.Show("Success validated all entries!");
+            File.WriteAllBytes(saveFileDialog.FileName, LoadedFile.Save());
         }
     }
 
@@ -272,11 +200,11 @@ public partial class RSTBEditor : Form, ISearchable
             statusBar.Visible = false;
             statusProgressBar.Visible = false;
 
-            PopulateGridView();
+            RefreshData();
         }
     }
 
-    public async void CreateUpdatedRSTBFromModdedRomFs(ResourceTable rstb, string moddedRomFsPath, bool showResults = true)
+    public async void CreateUpdatedRSTBFromModdedRomFs(ResourceSizeTable rstb, string moddedRomFsPath, bool showResults = true)
     {
         var allFiles = Directory.GetFiles(moddedRomFsPath, "*", SearchOption.AllDirectories);
 
@@ -307,6 +235,7 @@ public partial class RSTBEditor : Form, ISearchable
             {
                 if (IsDisposed || Disposing) break;
 
+                // TODO: Update this based on HeavenTool.ModManager
                 var path = Path.GetRelativePath(moddedRomFsPath, originalFile).Replace('\\', '/');
                 if (path == "System/Resource/ResourceSizeTable.srsizetable" || path == "System/Resource/ResourceSizeTable.rsizetable")
                 {
@@ -323,7 +252,7 @@ public partial class RSTBEditor : Form, ISearchable
                 if (path.EndsWith(".zs"))
                     path = path[..^3];
 
-                var fileSize = GetFileSize(originalFile);
+                var fileSize = ResourceSizeTable.GetFileSize(originalFile, path);
 
                 if (fileSize < 0)
                 {
@@ -342,7 +271,7 @@ public partial class RSTBEditor : Form, ISearchable
 
                 else if (!rstb.Dictionary.ContainsKey(path) && fileSize >= 0)
                 {
-                    rstb.AddEntry(new ResourceTable.ResourceTableEntry(path, (uint)fileSize, 0, false));
+                    rstb.AddEntry(new ResourceSizeTable.ResourceTableEntry(path, (uint)fileSize, 0, false));
 
                     addedFiles.Add(path);
                 }
@@ -403,7 +332,7 @@ public partial class RSTBEditor : Form, ISearchable
             }).Where(x => x != null).ToArray();
 
             // Save
-            RomFsNameManager.Update(files);
+            // RomFsNameManager.Update(files);
         }
     }
 
@@ -412,20 +341,18 @@ public partial class RSTBEditor : Form, ISearchable
         LoadedFile.Dispose();
         LoadedFile = null;
 
-        mainDataGridView.Rows.Clear();
-
-        if (mainDataGridView.Columns.Contains("Diff"))
-            mainDataGridView.Columns.Remove("Diff");
+        if (dataGrid.Columns.Contains("Diff"))
+            dataGrid.Columns.Remove("Diff");
 
         Text = OriginalText;
 
-        RefreshMenuButtons();
+        RefreshData();
     }
 
     private void AssociateSrsizetableToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var exePath = Application.ExecutablePath;
-        var arguments = $"--{(associateSrsizetableToolStripMenuItem.Checked ? "disassociate" : "associate")} srsizetable";
+        var arguments = $"--{(associateRstbToolStripMenuItem.Checked ? "disassociate" : "associate")} srsizetable";
 
 
         var process = Process.Start(new ProcessStartInfo
@@ -437,7 +364,7 @@ public partial class RSTBEditor : Form, ISearchable
         });
 
         process.WaitForExit();
-        associateSrsizetableToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".srsizetable") == Application.ExecutablePath;
+        associateRstbToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".srsizetable") == Application.ExecutablePath;
     }
 
     private void AddNewEntriesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -483,7 +410,7 @@ public partial class RSTBEditor : Form, ISearchable
 
         if (searchCache == null || searchCache.Length == 0)
         {
-            var rows = mainDataGridView.Rows.Cast<DataGridViewRow>();
+            var rows = dataGrid.Rows.Cast<DataGridViewRow>();
             var cells = rows.SelectMany(x => x.Cells.Cast<DataGridViewCell>())
                 .Where(cell =>
                 {
@@ -547,8 +474,8 @@ public partial class RSTBEditor : Form, ISearchable
 
             var current = searchCache[currentSearchIndex];
 
-            mainDataGridView.FirstDisplayedScrollingColumnIndex = current.ColumnIndex;
-            mainDataGridView.FirstDisplayedScrollingRowIndex = current.RowIndex;
+            dataGrid.FirstDisplayedScrollingColumnIndex = current.ColumnIndex;
+            dataGrid.FirstDisplayedScrollingRowIndex = current.RowIndex;
 
             lastSearchCell = current;
 
@@ -631,29 +558,29 @@ public partial class RSTBEditor : Form, ISearchable
 
             if (selectedPath == null || !Directory.Exists(selectedPath)) return;
 
-            if (!mainDataGridView.Columns.Contains("Diff"))
+            if (!dataGrid.Columns.Contains("Diff"))
             {
-                mainDataGridView.Columns.Add("Diff", "Diff");
-                mainDataGridView.Columns["Diff"].ValueType = typeof(long);
+                dataGrid.Columns.Add("Diff", "Diff");
+                dataGrid.Columns["Diff"].ValueType = typeof(long);
             }
 
             var progress = new Progress<(int Index, string FileName)>(value =>
             {
-                statusLabel.Text = $"Loading: {value.FileName} ({value.Index}/{mainDataGridView.RowCount})";
+                statusLabel.Text = $"Loading: {value.FileName} ({value.Index}/{dataGrid.RowCount})";
                 statusProgressBar.Value = value.Index;
             });
 
             statusBar.Visible = true;
             statusProgressBar.Visible = true;
-            statusProgressBar.Maximum = mainDataGridView.RowCount;
+            statusProgressBar.Maximum = dataGrid.RowCount;
             statusProgressBar.Value = 0;
 
             int zstdFiles = 0;
-            foreach (DataGridViewRow row in mainDataGridView.Rows)
+            foreach (DataGridViewRow row in dataGrid.Rows)
             {
                 await Task.Run(() =>
                 {
-                    var fileName = row.Cells["fileName"].Value.ToString();
+                    var fileName = row.Cells["FileName"].Value.ToString();
                     var actualPath = Path.Combine(selectedPath, fileName);
                     long zstdSize = -1;
 
@@ -664,7 +591,11 @@ public partial class RSTBEditor : Form, ISearchable
                         actualPath += ".zs";
                         if (zstdFiles < 5000)
                         {
-                            zstdSize = ZstdCompressionAlgorithm.Decompress(actualPath).Length;
+                            var decompressor = new ZstdDecompressor();
+                            using var file = File.OpenRead(actualPath);
+                            using var decompressedStream = new MemoryStream();
+                            decompressor.Decompress(file, decompressedStream);
+                            zstdSize = decompressedStream.Length;
                             zstdSize = (zstdSize + 31) & -32;
                             zstdFiles++;
                         }
@@ -672,7 +603,7 @@ public partial class RSTBEditor : Form, ISearchable
 
                     DiffDictionary[row.Index] = -1;
 
-                    if (row.Cells["fileSize"].Value is uint fileSize)
+                    if (row.Cells["FileSize"].Value is uint fileSize)
                     {
                         if (zstdSize >= 0)
                             DiffDictionary[row.Index] = fileSize - zstdSize;
@@ -687,7 +618,7 @@ public partial class RSTBEditor : Form, ISearchable
 
             }
 
-            mainDataGridView.Invalidate();
+            dataGrid.Invalidate();
 
             statusBar.Visible = false;
             statusProgressBar.Visible = false;
@@ -696,7 +627,6 @@ public partial class RSTBEditor : Form, ISearchable
 
     private void mainDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
     {
-        Console.WriteLine("Test");
-        e.CellStyle.BackColor = Color.Red;
+        
     }
 }

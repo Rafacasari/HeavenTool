@@ -1,4 +1,4 @@
-﻿namespace HeavenTool.IO;
+﻿namespace HeavenTool.IO.FileFormats.ResourceSizeTable;
 
 public static class RomFsNameManager
 {
@@ -8,16 +8,17 @@ public static class RomFsNameManager
 
     private static void Initialize()
     {
-        if (_isInitialized) return;
+        if (_isInitialized)
+            return;
+
         _isInitialized = true;
 
-        string fileLocation = "romfs-files.txt";
+        string fileLocation = Path.Combine("extra", "romfs-files.txt");
+        Hashes = [];
 
         if (File.Exists(fileLocation))
         {
             var lines = File.ReadAllLines(fileLocation);
-
-            Hashes = [];
 
             foreach (var line in lines)
             {
@@ -29,7 +30,6 @@ public static class RomFsNameManager
                     Hashes[hash] = "";
 
             }
-
         }
         else
         {
