@@ -54,7 +54,8 @@ namespace HeavenTool
             duplicateRowToolStripMenuItem = new ToolStripMenuItem();
             deleteRowsToolStripMenuItem = new ToolStripMenuItem();
             compareRowsToolStripMenuItem = new ToolStripMenuItem();
-            sortByRowIdToolStripMenuItem = new ToolStripMenuItem();
+            viewToolStripMenuItem = new ToolStripMenuItem();
+            viewColumnsMenuItem = new ToolStripMenuItem();
             devToolStripMenuItem = new ToolStripMenuItem();
             associateBcsvToolStripMenuItem = new ToolStripMenuItem();
             toolsToolStripMenuItem = new ToolStripMenuItem();
@@ -87,7 +88,7 @@ namespace HeavenTool
             // 
             topMenuStrip.BackColor = System.Drawing.Color.Transparent;
             topMenuStrip.ForeColor = System.Drawing.Color.White;
-            topMenuStrip.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, editToolStripMenuItem, devToolStripMenuItem, toolsToolStripMenuItem });
+            topMenuStrip.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, editToolStripMenuItem, viewToolStripMenuItem, devToolStripMenuItem, toolsToolStripMenuItem });
             topMenuStrip.Location = new System.Drawing.Point(0, 0);
             topMenuStrip.Name = "topMenuStrip";
             topMenuStrip.Size = new System.Drawing.Size(684, 24);
@@ -178,7 +179,7 @@ namespace HeavenTool
             // 
             // editToolStripMenuItem
             // 
-            editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { searchToolStripMenuItem, newEntryToolStripMenuItem, duplicateRowToolStripMenuItem, deleteRowsToolStripMenuItem, compareRowsToolStripMenuItem, sortByRowIdToolStripMenuItem });
+            editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { searchToolStripMenuItem, newEntryToolStripMenuItem, duplicateRowToolStripMenuItem, deleteRowsToolStripMenuItem, compareRowsToolStripMenuItem });
             editToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             editToolStripMenuItem.Name = "editToolStripMenuItem";
             editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
@@ -245,15 +246,19 @@ namespace HeavenTool
             compareRowsToolStripMenuItem.ToolTipText = "Compare selected rows in a new window (read-only)";
             compareRowsToolStripMenuItem.Click += CompareRowsToolStripMenuItem_Click;
             // 
-            // sortByRowIdToolStripMenuItem
+            // viewToolStripMenuItem
             // 
-            sortByRowIdToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            sortByRowIdToolStripMenuItem.Image = Properties.Resources.sort;
-            sortByRowIdToolStripMenuItem.ImageScaling = ToolStripItemImageScaling.None;
-            sortByRowIdToolStripMenuItem.Name = "sortByRowIdToolStripMenuItem";
-            sortByRowIdToolStripMenuItem.Size = new System.Drawing.Size(213, 30);
-            sortByRowIdToolStripMenuItem.Text = "Sort by Row Id";
-            sortByRowIdToolStripMenuItem.Click += sortByRowIdToolStripMenuItem_Click;
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { viewColumnsMenuItem });
+            viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            viewToolStripMenuItem.Text = "View";
+            // 
+            // viewColumnsMenuItem
+            // 
+            viewColumnsMenuItem.ForeColor = System.Drawing.Color.White;
+            viewColumnsMenuItem.Name = "viewColumnsMenuItem";
+            viewColumnsMenuItem.Size = new System.Drawing.Size(180, 22);
+            viewColumnsMenuItem.Text = "View Columns";
             // 
             // devToolStripMenuItem
             // 
@@ -558,7 +563,8 @@ namespace HeavenTool
         private ToolStripMenuItem murmurHashToolStripMenuItem;
         private ToolStripMenuItem int32ToolStripMenuItem;
         private Label dragInfo;
-        private ToolStripMenuItem sortByRowIdToolStripMenuItem;
+        private ToolStripMenuItem viewToolStripMenuItem;
+        private ToolStripMenuItem viewColumnsMenuItem;
     }
 }
 

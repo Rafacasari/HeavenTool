@@ -264,7 +264,7 @@
             // 
             updateHashListToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             updateHashListToolStripMenuItem.Name = "updateHashListToolStripMenuItem";
-            updateHashListToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            updateHashListToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             updateHashListToolStripMenuItem.Text = "Update Hash List";
             updateHashListToolStripMenuItem.Click += UpdateHashListToolStripMenuItem_Click;
             // 

@@ -1,14 +1,13 @@
 ﻿using System.Windows.Forms;
 
-namespace HeavenTool.DataTable
-{
-    internal class IndexRow : DataGridViewRow
-    {
-        public int OriginalIndex;
+namespace HeavenTool.DataTable;
 
-        public IndexRow(): base()
-        {
-            OriginalIndex = Index;
-        }
+internal class IndexRow : DataGridViewRow
+{
+    public int OriginalIndex;
+
+    public IndexRow(): base()
+    {
+        OriginalIndex = Index;
     }
 }

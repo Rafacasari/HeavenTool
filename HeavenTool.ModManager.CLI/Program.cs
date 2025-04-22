@@ -34,7 +34,6 @@ namespace HeavenTool.ModManager.CLI
             ConsoleUtilities.WriteLine("Do you want to merge these mods? [y/n]", ConsoleColor.Gray);
                
             if (!ConsoleUtilities.YesOrNo()) return;
-  
 
             Console.WriteLine("Saving to output folder");
             var outputDirectory = Directory.CreateDirectory(outputPath);
