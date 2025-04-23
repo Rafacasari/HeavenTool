@@ -3,7 +3,7 @@ using HeavenTool.Forms.RSTB;
 using HeavenTool.Forms.SARC;
 using HeavenTool.IO;
 using HeavenTool.IO.Compression;
-using HeavenTool.Utility.FileTypes.BCSV;
+using HeavenTool.IO.FileFormats.BCSV;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -58,7 +58,7 @@ public partial class HeavenMain : Form
 
     private void BcsvReworkButton_Click(object sender, EventArgs e)
     {
-        var bcsvRework = new BCSVRework();
+        var bcsvRework = new BCSVForm();
 
         bcsvRework.Show();
         bcsvRework.BringToFront();
@@ -118,14 +118,16 @@ public partial class HeavenMain : Form
 
                     var outputFile = Path.Combine(outputDirectory, $"{Path.GetFileNameWithoutExtension(file)}-values.txt");
 
-                    var bcsvFile = new BinaryCSV(file);
+                    using var stream = File.OpenRead(file);
+                    var bcsvFile = new BinaryCSV(stream.ToArray());
                     var list = new List<string>();
 
                     if (bcsvFile.Fields.Any(x => x.GetTranslatedNameOrHash().StartsWith("Label string")))
                     {
                         var fieldId = bcsvFile.Fields.First(x => x.GetTranslatedNameOrHash().StartsWith("Label string"));
-                        foreach (var entry in bcsvFile.Entries)
-                            list.Add(entry[fieldId.HEX].ToString());
+
+                        for (int i = 0; i < bcsvFile.Entries.Count; i++)
+                            list.Add(bcsvFile[i, fieldId].ToString());
 
                         File.WriteAllLines(outputFile, list);
                     }
@@ -154,8 +156,10 @@ public partial class HeavenMain : Form
                 {
                     if (Path.GetExtension(file) != ".bcsv") continue;
 
-                    var bcsvFile = new BinaryCSV(file);
-                    var hashedFields = bcsvFile.Fields.Where(x => x.DataType == BCSVDataType.HashedCsc32).ToList();
+                    using var stream = File.OpenRead(file);
+                    var bcsvFile = new BinaryCSV(stream.ToArray());
+
+                    var hashedFields = bcsvFile.Fields.Where(x => x.DataType == DataType.CRC32).ToList();
                     if (bcsvFile.Entries.Count > 0 && hashedFields.Count > 0)
                     {
                         var directoryPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file));
@@ -166,12 +170,13 @@ public partial class HeavenMain : Form
                             var outputFile = Path.Combine(directoryPath, $"{field.HEX}.txt");
                             var parsedList = new List<uint>();
                             var registers = new List<string>();
+                            var fieldIndex = Array.IndexOf(bcsvFile.Fields, field);
 
                             foreach (var entry in bcsvFile.Entries)
                             {
-                                if (entry[field.HEX] is uint fieldHash && !parsedList.Contains(fieldHash))
+                                if (entry[fieldIndex] is uint fieldHash && !parsedList.Contains(fieldHash))
                                 {
-                                    if (BCSVHashing.CRCHashes.TryGetValue(fieldHash, out string value))
+                                    if (HashManager.CRCHashes.TryGetValue(fieldHash, out string value))
                                         registers.Add(value);
 
 
@@ -207,20 +212,20 @@ public partial class HeavenMain : Form
                 if (Path.GetExtension(file) != ".bcsv")
                     continue;
 
-                var bcsvFile = new BinaryCSV(file);
+                using var stream = File.OpenRead(file);
+                var bcsvFile = new BinaryCSV(stream.ToArray());
 
                 foreach (var item in bcsvFile.Fields)
-                    if (BCSVHashing.CRCHashes.TryGetValue(item.Hash, out string hashName) && !usedHashesHeaders.Contains(hashName))
+                    if (HashManager.CRCHashes.TryGetValue(item.Hash, out string hashName) && !usedHashesHeaders.Contains(hashName))
                         usedHashesHeaders.Add(hashName);
 
 
                 foreach (var entry in bcsvFile.Entries)
                     foreach (var entryField in entry)
-                        if (entryField.Value is uint hashValue && (hashValue > 100000))
+                        if (entryField is uint hashValue && (hashValue > 100000))
                         {
-                            if (BCSVHashing.CRCHashes.TryGetValue(hashValue, out string hashName) && !usedHashesValues.Contains(hashName))
+                            if (HashManager.CRCHashes.TryGetValue(hashValue, out string hashName) && !usedHashesValues.Contains(hashName))
                                 usedHashesValues.Add(hashName);
-
                         }
 
 

@@ -7,24 +7,19 @@ using System.Text;
 using System.Windows.Forms;
 using HeavenTool.Forms;
 using System.Diagnostics;
-using HeavenTool.DataTable;
-using HeavenTool.Utility.FileTypes.BCSV;
-using System.Globalization;
-using HeavenTool.Utility.IO;
 using HeavenTool.Forms.Search;
-using System.Text.Json;
 using HeavenTool.Forms.Components;
+using HeavenTool.IO.FileFormats.BCSV;
+using ProgramAssociation = HeavenTool.Utility.IO.ProgramAssociation;
 using HeavenTool.IO;
+using HeavenTool.Forms.BCSV.Controls;
 
 namespace HeavenTool;
 
 public partial class BCSVForm : Form, ISearchable
 {
-    public static Dictionary<uint, string> CRCHashes => BCSVHashing.CRCHashes;
-    public static Dictionary<uint, string> MurmurHashes => BCSVHashing.MurmurHashes;
-
-    private static readonly string OriginalFormName = "Heaven Tool - BCSV Editor";
-
+    private static readonly string originalFormName = "Heaven Tool - New BCSV Editor";
+    private BinaryCSV LoadedFile { get; set; }
     public BCSVForm()
     {
         InitializeComponent();
@@ -34,31 +29,303 @@ public partial class BCSVForm : Form, ISearchable
         dragInfo.AutoSize = false;
 
         // Initialize Hashes
-        BCSVHashing.InitializeHashes();
+        HashManager.InitializeHashes();
         ReloadInfo();
-
-        KnownHashValueManager.Load();
 
         validHeaderContextMenu.Renderer = new ToolStripProfessionalRenderer(new DarkColorTable());
 
         // Fixes a visual glitch when scrolling too fast
         DrawingControl.SetDoubleBuffered(mainDataGridView);
 
-        mainDataGridView.RowTemplate = new IndexRow();
-        mainDataGridView.Rows.CollectionChanged += Rows_CollectionChanged;
+        mainDataGridView.VirtualMode = true;
+        mainDataGridView.CellValueNeeded += MainDataGridView_CellValueNeeded;
+        mainDataGridView.CellFormatting += MainDataGridView_CellFormatting;
+        mainDataGridView.CellValuePushed += MainDataGridView_CellValuePushed;
+
+        mainDataGridView.CellBeginEdit += MainDataGridView_CellBeginEdit;
+        mainDataGridView.CellEndEdit += MainDataGridView_CellEndEdit;
+        mainDataGridView.SelectionChanged += MainDataGridView_SelectionChanged;
+
+        mainDataGridView.ColumnHeaderMouseClick += MainDataGridView_ColumnHeaderMouseClick;
+
+        mainDataGridView.EditMode = DataGridViewEditMode.EditOnF2;
 
         versionNumberLabel.Text = Program.VERSION;
-        Text = OriginalFormName;
+        Text = originalFormName;
 
-        associatebcsvWithThisProgramToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
+        associateBcsvToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
+
+        viewColumnsMenuItem.DropDown.AutoClose = false;
+        viewColumnsMenuItem.DropDownItemClicked += ViewColumnsMenuItem_DropDownItemClicked;
+
+        foreach (var dataType in Enum.GetValues<DataType>())
+        {
+            viewAsToolStripMenuItem.DropDown.Items.Add(new ToolStripMenuItem(dataType.ToString(), null, new EventHandler((_, _) =>
+            {
+                if (LoadedFile == null ||
+                  lastSelectedColumn == -1 ||
+                  lastSelectedColumn >= mainDataGridView.ColumnCount ||
+                  mainDataGridView.Columns[lastSelectedColumn] is not IndexableDataGridColumn indexableDataGridColumn ||
+                  indexableDataGridColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
+
+                var column = LoadedFile.Fields[indexableDataGridColumn.HeaderIndex];
+
+                HashManager.AddOrEditForcedType(column.HEX, dataType);
+
+                MessageBox.Show("Re-open your file to update values!");
+            }))
+            {
+                ForeColor = Color.White
+            });
+        }
     }
 
-    private void Rows_CollectionChanged(object sender, System.ComponentModel.CollectionChangeEventArgs e)
+    private void ViewColumnsMenuItem_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
     {
-        // We need this cause DataGrid changes the RowIndex when user use the OrderBy feature (bruh)
-        if (e.Action == System.ComponentModel.CollectionChangeAction.Add && e.Element is IndexRow indexRow)
-            indexRow.OriginalIndex = indexRow.Index;
+        if (e.ClickedItem == null || e.ClickedItem is not ToolStripMenuItem menuItem) return;
+        if (menuItem.CommandParameter == null || menuItem.CommandParameter is not string columnName) return;
 
+        if (mainDataGridView.Columns.Contains(columnName))
+        {
+            mainDataGridView.Columns[columnName].Visible = !mainDataGridView.Columns[columnName].Visible;
+            menuItem.Checked = mainDataGridView.Columns[columnName].Visible;
+        }    
+    }
+
+    public void ChangedRowCount(int count)
+    {
+        // reset ordering column (remove icon)
+        ResetOrdering();
+
+        reorderableIndexDictionary = [];
+
+        for (int i = 0; i < count; i++)
+            reorderableIndexDictionary.Add(i);
+
+        mainDataGridView.RowCount = count;
+        mainDataGridView.Invalidate();
+    }
+
+    bool waitingForNextSelection = false;
+    private void MainDataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+    {
+        mainDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        waitingForNextSelection = true;
+    }
+
+    private void MainDataGridView_SelectionChanged(object sender, EventArgs e)
+    {
+        if (waitingForNextSelection)
+        {
+            waitingForNextSelection = false;
+
+            mainDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            mainDataGridView.ClearSelection();
+            mainDataGridView.CurrentCell = selectedCellOnEdit;
+
+            foreach (DataGridViewCell dataGridViewCell in mainDataGridView.SelectedCells)
+                dataGridViewCell.Selected = false;
+
+            foreach (DataGridViewRow current in selectedRowsOnEdit)
+                current.Selected = true;
+
+            selectedRowsOnEdit = null;
+            selectedCellOnEdit = null;
+        }
+
+        if (mainDataGridView.SelectedRows.Count > 1)
+            compareRowsToolStripMenuItem.Enabled = true;
+        else
+            compareRowsToolStripMenuItem.Enabled = false;
+
+        ReloadInfo();
+    }
+
+    private DataGridViewCell selectedCellOnEdit;
+    private DataGridViewSelectedRowCollection selectedRowsOnEdit;
+    private void MainDataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+    {
+        selectedCellOnEdit = mainDataGridView[e.ColumnIndex, e.RowIndex];
+        selectedRowsOnEdit = mainDataGridView.SelectedRows;
+        var currentCell = mainDataGridView.CurrentCell.ColumnIndex;
+
+        mainDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
+
+        foreach (DataGridViewRow current in selectedRowsOnEdit) 
+        {
+            mainDataGridView[currentCell, current.Index].Selected = true;
+        }
+    }
+
+    internal static string GetFormattedValue(object[] values, int index, Field field)
+    {
+        if (field == null || values == null || index < 0 || index > values.Length)
+            return "Invalid";
+
+        var val = values[index];
+
+        switch (field.DataType)
+        {
+            case DataType.CRC32:
+                {
+                    if (val is not uint hashValue) return "Invalid";
+
+                    var containsKey = HashManager.CRCHashes.ContainsKey(hashValue);
+                    return containsKey ? HashManager.CRCHashes[hashValue] : hashValue.ToString("x");
+                }
+
+            case DataType.MMH3:
+                {
+                    if (val is not uint hashValue) return "Invalid";
+
+                    var containsKey = HashManager.MurmurHashes.ContainsKey(hashValue);
+                    return containsKey ? HashManager.MurmurHashes[hashValue] : hashValue.ToString("x");
+                }
+
+            default:
+                return val.ToString();
+        }
+    }
+
+    private void MainDataGridView_CellValuePushed(object sender, DataGridViewCellValueEventArgs e)
+    {
+        if (LoadedFile == null) return;
+
+        if (reorderableIndexDictionary.Count < e.RowIndex) return;
+        var originalIndex = reorderableIndexDictionary[e.RowIndex];
+
+        if (LoadedFile.Length < originalIndex)
+            return;
+       
+        var column = mainDataGridView.Columns[e.ColumnIndex];
+
+        if (column == null || column is not IndexableDataGridColumn indexableColumn) return;
+
+        LoadedFile.Entries[originalIndex][indexableColumn.HeaderIndex] = e.Value;
+
+        var selectedCells = mainDataGridView.SelectedCells;
+        if (selectedCells.Count > 0)
+        {
+            foreach (DataGridViewCell selectedCell in selectedCells)
+            {
+                if (reorderableIndexDictionary.Count < selectedCell.RowIndex) return;
+                var selectedIndex = reorderableIndexDictionary[selectedCell.RowIndex];
+
+                if (selectedCell.ColumnIndex == e.ColumnIndex && selectedCell.RowIndex != e.RowIndex)
+                    LoadedFile.Entries[selectedIndex][indexableColumn.HeaderIndex] = e.Value;
+            }
+        }
+    }
+
+    private void MainDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (LoadedFile == null) return;
+
+        if (reorderableIndexDictionary.Count < e.RowIndex) return;
+        var originalIndex = reorderableIndexDictionary[e.RowIndex];
+
+        if (LoadedFile.Length < originalIndex)
+            return;
+
+        var column = mainDataGridView.Columns[e.ColumnIndex];
+        if (column == null || column is not IndexableDataGridColumn indexableColumn) return;
+      
+
+        var entry = LoadedFile.Entries[originalIndex];
+        var field = LoadedFile.Fields[indexableColumn.HeaderIndex];
+
+        var formattedValue = GetFormattedValue(entry, e.ColumnIndex, field);
+
+        if (formattedValue == "Invalid")
+            e.CellStyle.BackColor = Color.Red;
+
+        e.Value = formattedValue;
+        e.FormattingApplied = true;
+        
+    }
+
+    private List<int> reorderableIndexDictionary = [];
+    public void OrderByAscending(int columnIndex)
+    {
+        if (LoadedFile == null) return;
+
+        var column = mainDataGridView.Columns[columnIndex];
+        if (column == null || column is not IndexableDataGridColumn indexableColumn) return;
+
+        if (columnIndex < 0 || indexableColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
+
+        reorderableIndexDictionary.Sort(delegate (int x, int y)
+        {
+            var entryX = LoadedFile.Entries[x][indexableColumn.HeaderIndex];
+            var entryY = LoadedFile.Entries[y][indexableColumn.HeaderIndex];
+
+            return CompareObjects(entryX, entryY);
+        });
+    }
+
+    public void OrderByDescending(int columnIndex)
+    {
+        if (LoadedFile == null) return;
+
+        var column = mainDataGridView.Columns[columnIndex];
+        if (column == null || column is not IndexableDataGridColumn indexableColumn) return;
+
+        if (columnIndex < 0 || indexableColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
+
+        reorderableIndexDictionary.Sort(delegate (int x, int y)
+        {
+            var entryX = LoadedFile.Entries[x][indexableColumn.HeaderIndex];
+            var entryY = LoadedFile.Entries[y][indexableColumn.HeaderIndex];
+
+            return CompareObjects(entryY, entryX);
+        });
+    }
+
+    private static int CompareObjects(object entryX, object entryY)
+    {
+        // Checking both may be useless
+        if (entryX is uint xUint && entryY is uint yUint)
+            return xUint.CompareTo(yUint);
+
+        else if (entryX is int xInt && entryY is int yInt)
+            return xInt.CompareTo(yInt);
+
+        else if (entryX is short xShort && entryY is short yShort)
+            return xShort.CompareTo(yShort);
+
+        else if (entryX is ushort xUshort && entryY is ushort yUshort)
+            return xUshort.CompareTo(yUshort);
+
+        else if (entryX is string xString && entryY is string yString)
+            return xString.CompareTo(yString);
+
+        else if (entryX is float xFloat && entryY is float yFloat)
+            return xFloat.CompareTo(yFloat);
+
+        else if (entryX is byte xByte && entryY is byte yByte)
+            return xByte.CompareTo(yByte);
+
+        else if (entryX is sbyte xSbyte && entryY is sbyte ySbyte)
+            return xSbyte.CompareTo(ySbyte);
+
+        else return entryX.ToString().CompareTo(entryY.ToString());
+    }
+
+    private void MainDataGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.RowIndex >= LoadedFile.Length) return;
+
+        if (reorderableIndexDictionary.Count == 0 || e.RowIndex >= reorderableIndexDictionary.Count) return;
+        //Console.WriteLine($"Cell value needed {e.RowIndex}");
+        var column = mainDataGridView.Columns[e.ColumnIndex];
+        var originalIndex = reorderableIndexDictionary[e.RowIndex];
+
+        if (column == null) return; 
+        if (column is not IndexableDataGridColumn indexableColumn) return;
+
+        var entry = LoadedFile.Entries[originalIndex];
+
+        e.Value = entry[indexableColumn.HeaderIndex];
     }
 
     private void ReloadInfo()
@@ -77,7 +344,7 @@ public partial class BCSVForm : Form, ISearchable
         }
 
         var infos = new List<string> {
-            $"CRC32 Hashes: {BCSVHashing.CRCHashes.Count} | Murmur Hashes: {BCSVHashing.MurmurHashes.Count}"
+            $"CRC32 Hashes: {HashManager.CRCHashes.Count} | Murmur Hashes: {HashManager.MurmurHashes.Count}"
         };
 
         if (mainDataGridView.Columns.Count > 0)
@@ -85,6 +352,9 @@ public partial class BCSVForm : Form, ISearchable
 
         if (mainDataGridView.Columns.Count > 0)
             infos.Add("Rows: " + mainDataGridView.Rows.Count);
+
+        if (mainDataGridView.CurrentCell != null)
+            infos.Add("Selected RowId: " + mainDataGridView.CurrentCell.RowIndex);
 
         infoLabel.Text = string.Join(" | ", infos);
 
@@ -100,10 +370,10 @@ public partial class BCSVForm : Form, ISearchable
 
     private void ClearDataGrid()
     {
-        Text = OriginalFormName;
+        Text = originalFormName;
         mainDataGridView.ClearSelection();
-        mainDataGridView.Rows.Clear();
         mainDataGridView.Columns.Clear();
+        ChangedRowCount(0);
         mainDataGridView.Refresh();
 
         ReloadInfo();
@@ -114,7 +384,6 @@ public partial class BCSVForm : Form, ISearchable
         openBCSVFile.ShowDialog(this);
     }
 
-    private BinaryCSV LoadedFile;
     private void OpenBCSVFile_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
     {
         var path = openBCSVFile.FileName;
@@ -144,89 +413,74 @@ public partial class BCSVForm : Form, ISearchable
         ClearSearchCache();
         ClearDataGrid();
 
-        LoadedFile = new BinaryCSV(path);
+        using (var reader = File.OpenRead(path))
+        LoadedFile = new BinaryCSV(reader.ToArray());
 
         if (LoadedFile == null) return;
 
-        Text = $"{OriginalFormName}: {Path.GetFileName(path)}";
+        Text = $"{originalFormName}: {Path.GetFileName(path)}";
 
-        DrawingControl.SuspendDrawing(mainDataGridView);
-
-        foreach (var fieldHeader in LoadedFile.Fields)
+        viewColumnsMenuItem.DropDownItems.Clear();
+        for (int fieldIndex = 0; fieldIndex < LoadedFile.Fields.Length; fieldIndex++)
         {
-            var columnName = fieldHeader.GetTranslatedNameOrHash();
-            if (!fieldHeader.IsMissingHash())
+            Field fieldHeader = LoadedFile.Fields[fieldIndex];
+
+
+            DataGridViewCell cellTemplate = fieldHeader.DataType switch
             {
-                if (columnName.Contains('.'))
-                    columnName = columnName.Split('.')[0];
-                else if (columnName.Contains(' '))
-                    columnName = columnName.Split(' ')[0];
-            }
+                DataType.CRC32 => new CRC32DataGridCell(),
+                _ => new DataGridViewTextBoxCell(),
+            };
+            var translatedName = fieldHeader.GetTranslatedNameOrNull();
 
-            int columnId = mainDataGridView.Columns.Add(fieldHeader.Hash.ToString("x"), columnName);
+            string tooltip = (translatedName != null ? $"Name: {translatedName}\n" : "") +
+                $"Hash: {fieldHeader.HEX}\n" +
+                $"Type: {fieldHeader.DataType}\n" +
+                $"Size: {fieldHeader.Size}";
 
+            int columnId = mainDataGridView.Columns.Add(new IndexableDataGridColumn(fieldIndex)
+            {
+                Name = fieldHeader.Hash.ToString("x"),
+                HeaderText = fieldHeader.DisplayName,
+                ValueType = fieldHeader.DataType.ToType(), 
+                CellTemplate = cellTemplate,
+                SortMode = DataGridViewColumnSortMode.Automatic,
+                ToolTipText = tooltip
+            });
 
-            var toolTip = $"0x{fieldHeader.Hash:x}{(fieldHeader.IsMissingHash() ? "" : $"\nName: {fieldHeader.GetTranslatedNameOrNull()}")}\nType: {fieldHeader.DataType}\nSize: {fieldHeader.Size}";
+            var column = mainDataGridView.Columns[columnId];
 
-            if (fieldHeader.IsMissingHash())
+            viewColumnsMenuItem.DropDownItems.Add(new ToolStripMenuItem()
+            {
+                Text = fieldHeader.DisplayName,
+                ForeColor = Color.White,
+                CommandParameter = column.Name,
+                Checked = column.Visible
+            });
+
+            if (fieldHeader.IsMissingHash)
             {
                 if (fieldHeader.Size == 4)
-                {
-                    mainDataGridView.Columns[columnId].HeaderCell.Style.BackColor = Color.PaleVioletRed;
-                    toolTip += "\nUnknown hash (Value may be wrong, right click and try different possibilities)";
-                }
+                    column.HeaderCell.Style.BackColor = Color.PaleVioletRed;
                 else
-                {
-                    mainDataGridView.Columns[columnId].HeaderCell.Style.BackColor = Color.Orange;
-                    toolTip += "\nUnknown hash";
-                }
+                    column.HeaderCell.Style.BackColor = Color.Orange;        
             }
-
-            if (fieldHeader.Size == 8)
-                mainDataGridView.Columns[columnId].HeaderCell.Style.BackColor = Color.Red;
-
-            mainDataGridView.Columns[columnId].ToolTipText = toolTip;
         }
 
-        if (LoadedFile.Entries != null)
-        {
-            foreach (var entry in LoadedFile.Entries)
-                mainDataGridView.Rows.Add([.. entry.Values]);
-        }
-
-        DrawingControl.ResumeDrawing(mainDataGridView);
+        ChangedRowCount( LoadedFile.Length);
 
         ReloadInfo();
     }
 
-    private void MainDataGridView_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+    public void UnloadFile()
     {
-        var hashedName = mainDataGridView.CurrentCell.OwningColumn.Name;
+        ClearDataGrid();
+        LoadedFile.Dispose();
+        LoadedFile = null;
 
-        bool parsedSuccessfully = uint.TryParse(hashedName, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out uint enumHash);
+        ReloadInfo();
 
-        if (e.Control is TextBox txtControl)
-        {
-            // We have info about this hash, show auto-complete
-            if (parsedSuccessfully && BCSVHashing.EnumHashes.TryGetValue(enumHash, out var value))
-            {
-                var source = new AutoCompleteStringCollection();
-                source.AddRange(value.Select(x => x.ToString()).ToArray());
-
-                txtControl.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-                txtControl.AutoCompleteCustomSource = source;
-                txtControl.AutoCompleteSource = AutoCompleteSource.CustomSource;
-
-            }
-
-            // We don't have info about this hash, remove auto-complete
-            else
-            {
-                txtControl.AutoCompleteMode = AutoCompleteMode.None;
-            }
-
-        }
-
+        lastSelectedColumn = -1;
     }
 
     BCSVDirectorySearch directorySearchWindow;
@@ -239,327 +493,6 @@ public partial class BCSVForm : Form, ISearchable
         directorySearchWindow.BringToFront();
     }
 
-    bool ignoreNextChangeEvent = false;
-    private void MainDataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-    {
-        if (ignoreNextChangeEvent)
-        {
-            ignoreNextChangeEvent = false;
-            return;
-        }
-
-        if (LoadedFile == null || mainDataGridView.Rows[e.RowIndex] is not IndexRow indexRow) return;
-
-        var field = LoadedFile.Fields[e.ColumnIndex];
-        var oldFieldValue = LoadedFile.Entries[indexRow.OriginalIndex][field.HEX];
-
-        var newValue = indexRow.Cells[e.ColumnIndex].Value;
-
-        object formattedValue = null;
-        bool invalidValue = false;
-        string specificError = "";
-
-        switch (field.DataType)
-        {
-            case BCSVDataType.String:
-                {
-                    newValue ??= "";
-                    var bytes = Encoding.UTF8.GetBytes(newValue.ToString());
-                    if (bytes.Length <= field.Size)
-                        formattedValue = newValue.ToString();
-                    else
-                    {
-                        specificError = $"Your string exceeded the max bytes size! ({bytes.Length}/{field.Size})\nBe aware that using special characters or japanese letters can consume more bytes!";
-                        invalidValue = true;
-                    }
-                    break;
-                }
-
-            case BCSVDataType.HashedCsc32:
-                {
-                    if (newValue == null || string.IsNullOrEmpty(newValue.ToString()))
-                    {
-                        formattedValue = (uint)0;
-                    }
-                    else
-                    {
-                        uint hash = newValue.ToString().ToCRC32();
-
-                        if (!BCSVHashing.CRCHashes.ContainsKey(hash))
-                        {
-                            specificError = "This hash was not found on your hashlist. If you're sure that this value is correct, then put it on your /hashes/ folder and re-open the program.";
-                            invalidValue = true;
-                        }
-                        else formattedValue = hash;
-                    }
-                    break;
-                }
-
-            case BCSVDataType.Murmur3:
-                {
-                    if (newValue == null || string.IsNullOrEmpty(newValue.ToString()))
-                    {
-                        formattedValue = (uint)0;
-                    }
-                    else
-                    {
-                        uint hash = newValue.ToString().ToMurmur();
-
-                        if (!BCSVHashing.MurmurHashes.ContainsKey(hash))
-                        {
-                            specificError = "This hash was not found on your hashlist. If you're sure that this value is correct, then put it on your /hashes/ folder and re-open the program.";
-                            invalidValue = true;
-                        }
-                        else formattedValue = hash;
-                    }
-                    break;
-                }
-
-
-            case BCSVDataType.U8:
-                {
-                    newValue ??= default(byte);
-                    if (byte.TryParse(newValue.ToString(), out var value))
-                        formattedValue = value;
-                    else invalidValue = true;
-                    break;
-                }
-
-            case BCSVDataType.S8:
-                {
-                    newValue ??= default(sbyte);
-                    if (sbyte.TryParse(newValue.ToString(), out var value))
-                        formattedValue = value;
-                    else invalidValue = true;
-                    break;
-                }
-
-            case BCSVDataType.MultipleU8:
-                {
-                    var failedToReadBytes = false;
-                    var bytes = newValue.ToString().Split(' ').Select(x =>
-                    {
-                        if (byte.TryParse(x, out var value))
-                            return value;
-                        else failedToReadBytes = true;
-
-                        return (byte)0;
-                    }).ToArray();
-
-                    if (!failedToReadBytes)
-                        formattedValue = bytes;
-                    else invalidValue = true;
-
-                    break;
-                }
-
-            case BCSVDataType.MultipleS8:
-                {
-                    var failedToReadBytes = false;
-                    var bytes = newValue.ToString().Split(' ').Select(x =>
-                    {
-                        if (sbyte.TryParse(x, out var value))
-                            return value;
-                        else failedToReadBytes = true;
-
-                        return (sbyte)0;
-                    }).ToArray();
-
-                    if (!failedToReadBytes)
-                        formattedValue = bytes;
-                    else invalidValue = true;
-
-                    break;
-                }
-
-            case BCSVDataType.Int16:
-                {
-                    newValue ??= default(short);
-                    if (short.TryParse(newValue.ToString(), out var value))
-                        formattedValue = value;
-                    else invalidValue = true;
-
-                    break;
-                }
-
-            case BCSVDataType.UInt16:
-                {
-                    newValue ??= default(ushort);
-                    if (ushort.TryParse(newValue.ToString(), out var value))
-                        formattedValue = value;
-                    else invalidValue = true;
-
-                    break;
-                }
-
-            case BCSVDataType.Float32:
-                {
-                    newValue ??= default(float);
-                    if (float.TryParse(newValue.ToString(), out var value))
-                        formattedValue = value;
-                    else invalidValue = true;
-                    break;
-                }
-
-            case BCSVDataType.Int32:
-                {
-                    newValue ??= default(int);
-
-                    if (int.TryParse(newValue.ToString(), out var value))
-                        formattedValue = value;
-                    else invalidValue = true;
-                }
-                break;
-
-            case BCSVDataType.UInt32:
-                {
-                    newValue ??= default(uint);
-                    if (uint.TryParse(newValue.ToString(), out var value))
-                        formattedValue = value;
-                    else invalidValue = true;
-
-                    break;
-                }
-        }
-
-        // value is null or invalid, rollback to previous value and message an error
-        if (formattedValue == null || invalidValue)
-        {
-            // value is null 
-            if (string.IsNullOrEmpty(specificError))
-                MessageBox.Show("Your value is null or invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            else
-                MessageBox.Show(specificError, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-
-
-            if (indexRow.Cells[e.ColumnIndex].Value != oldFieldValue)
-            {
-                ignoreNextChangeEvent = true;
-                indexRow.Cells[e.ColumnIndex].Value = oldFieldValue;
-            }
-
-        }
-        else
-        {
-            // Assign the formatted value to the loaded bcsv file
-            LoadedFile.Entries[indexRow.OriginalIndex][field.HEX] = formattedValue;
-
-            // We have to set this again otherwise types will mismatch eventually (cause the field is read as a string while un-edited values are numbers)
-            if (indexRow.Cells[e.ColumnIndex].Value != formattedValue)
-            {
-                ignoreNextChangeEvent = true;
-                indexRow.Cells[e.ColumnIndex].Value = formattedValue;
-            }
-        }
-    }
-
-    private void MainDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-    {
-        try
-        {
-            var field = LoadedFile.Fields[e.ColumnIndex];
-            var originalField = mainDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
-            var originalValue = e.Value;
-            //e.FormattingApplied = true;
-
-            switch (field.DataType)
-            {
-                case BCSVDataType.String:
-                    e.Value = originalValue.ToString();
-                    break;
-
-                case BCSVDataType.MultipleU8:
-                    {
-                        if (originalValue is byte[] bytesValue)
-                        {
-                            if (bytesValue.Length == 0)
-                                e.Value = "";
-                            else
-                                e.Value = string.Join(" ", bytesValue);
-                        }
-                        else
-                            e.Value = originalValue != null ? originalValue.ToString() : "";
-
-                        break;
-                    }
-
-
-                case BCSVDataType.MultipleS8:
-                    {
-                        if (originalValue is sbyte[] bytesValue)
-                        {
-                            if (bytesValue.Length == 0)
-                                e.Value = "";
-                            else
-                                e.Value = string.Join(" ", bytesValue);
-                        }
-                        else
-                            e.Value = originalValue != null ? originalValue.ToString() : "";
-
-                        break;
-                    }
-
-                case BCSVDataType.HashedCsc32:
-                    {
-                        if (originalValue is uint hashValue)
-                        {
-                            if (hashValue == 0)
-                                e.Value = "";
-                            else
-                            {
-                                var containsKey = CRCHashes.ContainsKey(hashValue);
-                                e.Value = containsKey ? CRCHashes[hashValue] : hashValue.ToString("x");
-                                if (!containsKey)
-                                {
-                                    originalField.ToolTipText = "Unknown Hash";
-                                    e.CellStyle.BackColor = Color.LightCyan;
-                                }
-                                else originalField.ToolTipText = $"Hash: {hashValue:x}";
-
-                            }
-                        }
-                        else
-                            e.Value = originalValue != null ? originalValue.ToString() : "";
-
-                        break;
-                    }
-
-                case BCSVDataType.Murmur3:
-                    {
-                        if (originalValue is uint hashValue)
-                        {
-                            if (hashValue == 0)
-                                e.Value = "";
-                            else
-                            {
-                                var containsKey = BCSVHashing.MurmurHashes.ContainsKey(hashValue);
-                                e.Value = containsKey ? BCSVHashing.MurmurHashes[hashValue] : hashValue.ToString("x");
-                                if (!containsKey)
-                                {
-                                    originalField.ToolTipText = "Unknown Hash";
-                                    e.CellStyle.BackColor = Color.LightCyan;
-                                }
-                                else originalField.ToolTipText = $"Hash: {hashValue:x}";
-
-                            }
-                        }
-                        else
-                            e.Value = originalValue != null ? originalValue.ToString() : "";
-
-                        break;
-                    }
-
-            }
-
-            if (e.Value != originalValue)
-                e.FormattingApplied = true;
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error in row: {e.RowIndex} | Column {e.ColumnIndex}:\n{ex}");
-        }
-    }
-
     private void UnloadFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         // Seems theres a memory leak on DataGridView
@@ -567,11 +500,7 @@ public partial class BCSVForm : Form, ISearchable
         var result = MessageBox.Show("Do you really want to close this file?\nUnsaved changes will be lost!", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         if (result == DialogResult.Yes)
         {
-            ClearDataGrid();
-            LoadedFile.Dispose();
-            LoadedFile = null;
-
-            ReloadInfo();
+           UnloadFile();
         }
     }
 
@@ -579,31 +508,31 @@ public partial class BCSVForm : Form, ISearchable
     {
         if (LoadedFile == null) return;
 
-        if (LoadedFile.Entries.Count == 0)
+        if (LoadedFile.Length == 0)
         {
-            // There is no entry to copy, create using default values
-            var newEntry = new BCSVEntry(LoadedFile.Fields.ToDictionary(pair => pair.HEX, value => value.GetFieldDefaultValue()));
+            var values = new object[LoadedFile.Fields.Length];
 
-            LoadedFile.Entries.Add(newEntry);
+            for (int i = 0; i < LoadedFile.Fields.Length; i++)
+            {
+                values[i] = LoadedFile.Fields[i].GetFieldDefaultValue();
+            }
 
-            mainDataGridView.Rows.Add([.. newEntry.Values]);
+            LoadedFile.Entries.Add(values);
         }
         else
         {
             var lastEntry = LoadedFile.Entries.Last();
-            var newEntry = new BCSVEntry();
+            var newEntry = new object[lastEntry.Length];
 
-            // Copy fields
-            foreach (var entryField in lastEntry)
-                newEntry.Add(entryField.Key, entryField.Value);
+            for (int i = 0; i < lastEntry.Length; i++)
+                newEntry[i] = lastEntry[i];
 
             // TODO: Check UniqueId and assign one?
             LoadedFile.Entries.Add(newEntry);
-
-            var newEntryRow = mainDataGridView.Rows.Add([.. newEntry.Values]);
-            mainDataGridView.Rows[newEntryRow].Selected = true;
-            mainDataGridView.FirstDisplayedScrollingRowIndex = newEntryRow;
         }
+
+        ChangedRowCount(LoadedFile.Length);
+        mainDataGridView.FirstDisplayedScrollingRowIndex = LoadedFile.Length - 1;
 
         ReloadInfo();
     }
@@ -612,7 +541,7 @@ public partial class BCSVForm : Form, ISearchable
     {
         if (LoadedFile != null)
         {
-            var saveFileDialog = new SaveFileDialog
+            using var saveFileDialog = new SaveFileDialog
             {
                 Filter = "BCSV (*.bcsv)|*.bcsv",
                 FilterIndex = 1,
@@ -621,8 +550,7 @@ public partial class BCSVForm : Form, ISearchable
             };
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                LoadedFile.SaveAs(saveFileDialog.FileName);
-
+                File.WriteAllBytes(saveFileDialog.FileName, LoadedFile.Save());
         }
     }
 
@@ -640,26 +568,23 @@ public partial class BCSVForm : Form, ISearchable
 
     private void DuplicateRowToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        foreach (IndexRow selectedRow in mainDataGridView.SelectedRows)
+        if (LoadedFile == null) return;
+
+        foreach (DataGridViewRow selectedRow in mainDataGridView.SelectedRows)
         {
-            if (selectedRow.OriginalIndex >= LoadedFile.Entries.Count) continue;
+            if (selectedRow.Index >= LoadedFile.Length || selectedRow.Index >= reorderableIndexDictionary.Count) continue;
 
-            var selectedEntry = LoadedFile.Entries[selectedRow.OriginalIndex];
+            var atualIndex = reorderableIndexDictionary[selectedRow.Index];
+            var selectedEntry = LoadedFile.Entries[atualIndex];
+            var newEntry = new object[selectedEntry.Length];
 
-            var newEntry = new BCSVEntry();
-
-            // Copy fields
-            foreach (var entryField in selectedEntry)
-                newEntry.Add(entryField.Key, entryField.Value);
+            for (var i = 0; i < selectedEntry.Length; i++)
+                newEntry[i] = selectedEntry[i];
 
             // TODO: Check UniqueId and assign one?
             LoadedFile.Entries.Add(newEntry);
 
-            var newEntryRow = mainDataGridView.Rows.Add([.. newEntry.Values]);
-            mainDataGridView.Rows[newEntryRow].Selected = true;
-            mainDataGridView.FirstDisplayedScrollingRowIndex = newEntryRow;
-
-
+            ChangedRowCount(LoadedFile.Length);
         }
 
         ReloadInfo();
@@ -672,88 +597,91 @@ public partial class BCSVForm : Form, ISearchable
         var result = MessageBox.Show($"Do you really want to delete {text}?\nThis action can't be un-done!", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         if (result == DialogResult.Yes)
         {
-            var originalIndexes = new List<int>();
-            foreach (IndexRow item in mainDataGridView.SelectedRows)
+            var indexesToRemove = new List<int>();
+            foreach (DataGridViewRow item in mainDataGridView.SelectedRows)
             {
-                originalIndexes.Add(item.OriginalIndex);
-                mainDataGridView.Rows.Remove(item);
+                if (item.Index >= LoadedFile.Length || item.Index >= reorderableIndexDictionary.Count) continue;
+
+                var atualIndex = reorderableIndexDictionary[item.Index];
+                indexesToRemove.Add(atualIndex);
             }
 
-            foreach (var index in originalIndexes.OrderByDescending(x => x))
+            foreach (var index in indexesToRemove.OrderByDescending(x => x))
                 LoadedFile.Entries.RemoveAt(index);
+
+            ChangedRowCount(LoadedFile.Length);
         }
 
         ReloadInfo();
     }
 
-    private string lastSelectedHash = null;
-    private uint lastSelectedHashUint = 0;
+    private int lastSelectedColumn = -1;
+
+    private string sortColumn = null;
+    private SortOrder sortOrder = SortOrder.None;
+    public void ResetOrdering()
+    {
+        if (sortColumn != null && mainDataGridView.Columns.Contains(sortColumn))
+            mainDataGridView.Columns[sortColumn].HeaderCell.SortGlyphDirection = SortOrder.None;
+
+        sortColumn = null;
+        sortOrder = SortOrder.None;
+    }
+
     private void MainDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
     {
         if (LoadedFile == null || LoadedFile.Fields.Length <= e.ColumnIndex) return;
 
+        if (e.Button == MouseButtons.Left) {
+            string clickedColumn = mainDataGridView.Columns[e.ColumnIndex].Name;
+
+            if (sortColumn != null && sortColumn != clickedColumn && mainDataGridView.Columns.Contains(sortColumn))
+                mainDataGridView.Columns[sortColumn].HeaderCell.SortGlyphDirection = SortOrder.None;
+
+            if (sortColumn == clickedColumn)
+            {
+                switch (sortOrder)
+                {
+                    case SortOrder.None:
+                        sortOrder = SortOrder.Descending;
+                        break;
+                    case SortOrder.Descending:
+                        sortOrder = SortOrder.Ascending;
+                        break;
+                    case SortOrder.Ascending:
+                        sortOrder = SortOrder.None;
+                        break;
+                }
+            }
+            else
+            {
+                // A new column was clicked, set ascending order by default.
+                sortColumn = clickedColumn;
+                sortOrder = SortOrder.Descending;
+            }
+
+            mainDataGridView.Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection = sortOrder;
+            switch (sortOrder)
+            {
+                case SortOrder.None:
+                    ChangedRowCount(LoadedFile.Length);
+                    break;
+                case SortOrder.Descending:
+                    OrderByDescending(e.ColumnIndex);
+                    break;
+                case SortOrder.Ascending:
+                    OrderByAscending(e.ColumnIndex);
+                    break;
+            }
+
+            mainDataGridView.Invalidate();
+        }
+
         if (e.Button == MouseButtons.Right)
         {
-            var field = LoadedFile.Fields[e.ColumnIndex];
-
-            viewAsToolStripMenuItem.Enabled = field.IsMissingHash() && field.Size <= 6;
+            lastSelectedColumn = e.ColumnIndex;
             validHeaderContextMenu.Show(Cursor.Position);
-
-            lastSelectedHash = field.HEX;
-            lastSelectedHashUint = field.Hash;
         }
-    }
-
-    private void HshCstringRefToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedHash == null) return;
-
-        KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.HashedCsc32);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void F32ToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedHash == null) return;
-
-        KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.Float32);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void S32u32ToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedHash == null) return;
-
-        KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.UInt32);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void StringToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedHash == null) return;
-
-        KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.String);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void MurmurHashToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedHash == null) return;
-        KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.Murmur3);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void Int32ToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedHash == null) return;
-        KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.Int32);
-
-        MessageBox.Show("Re-open your file to update values!");
     }
 
     private void MainFrm_DragEnter(object sender, DragEventArgs e)
@@ -786,18 +714,16 @@ public partial class BCSVForm : Form, ISearchable
         if (LoadedFile != null)
         {
             var result = MessageBox.Show("Do you really want to close this file?\nUnsaved changes will be lost!", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result != DialogResult.Yes)
-            {
-                e.Cancel = true;
-            }
+            if (result == DialogResult.Yes)
+                UnloadFile();
+            else e.Cancel = true;
         }
     }
 
-    private void AssociatebcsvWithThisProgramToolStripMenuItem_Click(object sender, EventArgs e)
+    private void AssociateBCSVToolStripMenuItem_Click(object sender, EventArgs e)
     {
         var exePath = Application.ExecutablePath;
-        var arguments = $"--{(associatebcsvWithThisProgramToolStripMenuItem.Checked ? "disassociate" : "associate")} bcsv";
-
+        var arguments = $"--{(associateBcsvToolStripMenuItem.Checked ? "disassociate" : "associate")} bcsv";
 
         var process = Process.Start(new ProcessStartInfo
         {
@@ -808,14 +734,15 @@ public partial class BCSVForm : Form, ISearchable
         });
 
         process.WaitForExit();
-        associatebcsvWithThisProgramToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
+        associateBcsvToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
     }
+
 
     private void ExportToCSVFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (mainDataGridView.Columns.Count == 0) return;
 
-        var saveFileDialog = new SaveFileDialog
+        using var saveFileDialog = new SaveFileDialog
         {
             Filter = "CSV (*.csv)|*.csv",
             FilterIndex = 1,
@@ -830,37 +757,37 @@ public partial class BCSVForm : Form, ISearchable
             var headers = mainDataGridView.Columns.Cast<DataGridViewColumn>();
             sb.AppendLine(string.Join(",", headers.Select(column => $"\"{column.HeaderText}\"").ToArray()));
 
-            foreach (var row in LoadedFile.Entries)
+            for (int i = 0; i < LoadedFile.Entries.Count; i++)
             {
-
+                var row = LoadedFile.Entries[i];
                 //var cells = row.Cells.Cast<DataGridViewCell>();
                 //sb.AppendLine(string.Join(",", cells.Select(cell => $"\"{cell.Value}\"").ToArray()));
                 sb.AppendLine(string.Join(",", row.Select(cell =>
                 {
-                    var parsedValue = $"\"{cell.Value}\"";
-                    var field = LoadedFile.GetFieldByHashedName(cell.Key);
+                    var parsedValue = $"\"{cell}\"";
+                    var field = LoadedFile.Fields[i];
 
-                    if (field != null)
+                    if (field == null) return parsedValue;
+                    
+                    switch (field.DataType)
                     {
-                        switch (field.DataType)
-                        {
-                            case BCSVDataType.HashedCsc32:
-                                {
-                                    if (cell.Value is uint hashValue && BCSVHashing.CRCHashes.TryGetValue(hashValue, out string value))
-                                        parsedValue = value;
+                        case DataType.CRC32:
+                            {
+                                if (cell is uint hashValue && HashManager.CRCHashes.TryGetValue(hashValue, out string value))
+                                    return value;
 
-                                    break;
-                                }
+                                break;
+                            }
 
-                            case BCSVDataType.Murmur3:
-                                {
-                                    if (cell.Value is uint hashValue && BCSVHashing.MurmurHashes.TryGetValue(hashValue, out string value))
-                                        parsedValue = value;
+                        case DataType.MMH3:
+                            {
+                                if (cell is uint hashValue && HashManager.MurmurHashes.TryGetValue(hashValue, out string value))
+                                    return value;
 
-                                    break;
-                                }
-                        }
+                                break;
+                            }
                     }
+                    
 
                     return parsedValue;
                 }).ToArray()));
@@ -873,9 +800,9 @@ public partial class BCSVForm : Form, ISearchable
 
     private void ExportValuesAstxtFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (LoadedFile == null || lastSelectedHash == null) return;
+        if (LoadedFile == null || lastSelectedColumn == -1) return;
 
-        var saveFileDialog = new SaveFileDialog
+        using var saveFileDialog = new SaveFileDialog
         {
             Filter = "Text files (*.txt)|*.txt",
             FilterIndex = 1,
@@ -885,19 +812,22 @@ public partial class BCSVForm : Form, ISearchable
 
         if (saveFileDialog.ShowDialog() == DialogResult.OK)
         {
-            var field = LoadedFile.Fields.Single(x => x.HEX == lastSelectedHash);
+            if (lastSelectedColumn < 0 || lastSelectedColumn > LoadedFile.Fields.Length)
+                return;
+
+            var field = LoadedFile.Fields[lastSelectedColumn];
 
             var exportedValues = new List<string>();
             foreach (var row in LoadedFile.Entries)
             {
-                var cell = row[lastSelectedHash];
-                if (field.DataType == BCSVDataType.HashedCsc32)
+                var cell = row[lastSelectedColumn];
+                if (field.DataType == DataType.CRC32)
                 {
                     if (cell is uint hashValue)
                     {
-                        var containsKey = CRCHashes.ContainsKey(hashValue);
+                        var containsKey = HashManager.CRCHashes.ContainsKey(hashValue);
                         if (containsKey)
-                            exportedValues.AddIfNotExist(CRCHashes[hashValue]);
+                            exportedValues.AddIfNotExist(HashManager.CRCHashes[hashValue]);
                         else
                             exportedValues.AddIfNotExist(hashValue.ToString("x"));
 
@@ -911,6 +841,7 @@ public partial class BCSVForm : Form, ISearchable
             File.WriteAllLines(saveFileDialog.FileName, exportedValues);
         }
     }
+
 
     private void CompareRowsToolStripMenuItem_Click(object sender, EventArgs e)
     {
@@ -937,17 +868,6 @@ public partial class BCSVForm : Form, ISearchable
         compareWindow.ShowDialog();
     }
 
-    private void MainDataGridView_SelectionChanged(object sender, EventArgs e)
-    {
-        if (mainDataGridView.SelectedRows.Count > 1)
-        {
-            compareRowsToolStripMenuItem.Enabled = true;
-        }
-        else
-        {
-            compareRowsToolStripMenuItem.Enabled = false;
-        }
-    }
 
     private SearchBox searchBox;
     private void SearchToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1016,7 +936,7 @@ public partial class BCSVForm : Form, ISearchable
     }
 
     public void Search(string search, SearchType searchType, bool searchBackwards, bool caseSensitive)
-    {
+    {        
         if (lastSearch != search || lastSearchType != searchType || lastCaseSensitive != caseSensitive)
         {
             lastSearch = search;
@@ -1031,22 +951,36 @@ public partial class BCSVForm : Form, ISearchable
 
         if (searchCache == null || searchCache.Length == 0)
         {
-            var rows = mainDataGridView.Rows.Cast<DataGridViewRow>();
-            var cells = rows.SelectMany(x => x.Cells.Cast<DataGridViewCell>())
-                .Where(cell =>
+
+            if (!caseSensitive) search = search.ToLower();
+
+            List<DataGridViewCell> cells = [];
+            for (int columnIndex = 0; columnIndex < mainDataGridView.Columns.Count; columnIndex++)
+            {
+                if (mainDataGridView.Columns[columnIndex] is not IndexableDataGridColumn indexableDataGridColumn) continue;
+                if (indexableDataGridColumn.HeaderIndex >= LoadedFile.Fields.Length) continue;
+
+                var field = LoadedFile.Fields[indexableDataGridColumn.HeaderIndex];
+
+                for (int rowIndex = 0; rowIndex < mainDataGridView.Rows.Count; rowIndex++)
                 {
-                    var formattedValue = cell.FormattedValue.ToString();
+                    var actualIndex = reorderableIndexDictionary[rowIndex];
+                    var formattedValue = GetFormattedValue(LoadedFile.Entries[actualIndex], indexableDataGridColumn.HeaderIndex, field);
 
                     if (!caseSensitive)
-                    {
                         formattedValue = formattedValue.ToLower();
-                        search = search.ToLower();
+
+
+                    if ((searchType == SearchType.Contains && formattedValue.Contains(search)) ||
+                        (searchType == SearchType.Exactly && formattedValue == search))
+                    {
+                        cells.Add(mainDataGridView[columnIndex, rowIndex]);
                     }
 
-                    return (searchType == SearchType.Contains && formattedValue.Contains(search)) || (searchType == SearchType.Exactly && formattedValue == search);
-                });
+                }
+            }
 
-            searchCache = cells.ToArray();
+            searchCache = [.. cells];
 
             if (searchCache.Length > 1 && searchBackwards)
                 currentSearchIndex = searchCache.Length - 1;
@@ -1119,7 +1053,6 @@ public partial class BCSVForm : Form, ISearchable
                 else
                     currentSearchIndex++;
             }
-
         }
     }
 
@@ -1129,12 +1062,14 @@ public partial class BCSVForm : Form, ISearchable
 
         var newFile = BinaryCSV.CopyFileWithoutEntries(LoadedFile);
 
-        var selectedRows = new IndexRow[mainDataGridView.SelectedRows.Count];
+        var selectedRows = new DataGridViewRow[mainDataGridView.SelectedRows.Count];
         mainDataGridView.SelectedRows.CopyTo(selectedRows, 0);
 
-        newFile.Entries = LoadedFile.Entries.Where((_, index) => selectedRows.Any(y => y.OriginalIndex == index)).ToList();
+        newFile.Entries = LoadedFile.Entries
+            .Where((_, index) => selectedRows.Any(y =>  y.Index < reorderableIndexDictionary.Count && reorderableIndexDictionary[y.Index] == index
+        )).ToList();
 
-        var saveFileDialog = new SaveFileDialog
+        using var saveFileDialog = new SaveFileDialog
         {
             Filter = "BCSV (*.bcsv)|*.bcsv",
             FilterIndex = 1,
@@ -1143,12 +1078,12 @@ public partial class BCSVForm : Form, ISearchable
         };
 
         if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            newFile.SaveAs(saveFileDialog.FileName);
+            File.WriteAllBytes(saveFileDialog.FileName, newFile.Save());
     }
 
     private void ImportFromFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var openFileDialog = new OpenFileDialog()
+        using var openFileDialog = new OpenFileDialog()
         {
             Title = "Select a BCSV to import",
             Filter = "BCSV|*.bcsv",
@@ -1158,7 +1093,9 @@ public partial class BCSVForm : Form, ISearchable
         if (openFileDialog.ShowDialog(this) == DialogResult.OK)
         {
             var file = openFileDialog.FileName;
-            var bcsvToCopy = new BinaryCSV(file);
+
+            using var reader = File.OpenRead(file);
+            var bcsvToCopy = new BinaryCSV(reader.ToArray());
 
             var haveDifferentField = LoadedFile.Fields.Length != bcsvToCopy.Fields.Length;
             if (!haveDifferentField)
@@ -1181,7 +1118,8 @@ public partial class BCSVForm : Form, ISearchable
             foreach (var entry in bcsvToCopy.Entries)
             {
                 LoadedFile.Entries.Add(entry);
-                lastEntry = mainDataGridView.Rows.Add([.. entry.Values]);
+                ChangedRowCount(LoadedFile.Length);
+                //lastEntry = mainDataGridView.Rows.Add([.. entry.Values]);
             }
 
             if (lastEntry != -1)
@@ -1192,122 +1130,26 @@ public partial class BCSVForm : Form, ISearchable
 
     private void HeaderNameToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (lastSelectedHashUint == 0) return;
+        if (LoadedFile == null ||
+                   lastSelectedColumn == -1 ||
+                   lastSelectedColumn >= mainDataGridView.ColumnCount ||
+                   mainDataGridView.Columns[lastSelectedColumn] is not IndexableDataGridColumn indexableDataGridColumn ||
+                   indexableDataGridColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
 
-        Clipboard.SetText(CRCHashes.TryGetValue(lastSelectedHashUint, out string value) ? value : $"0x{lastSelectedHashUint:x}");
+        var field = LoadedFile.Fields[indexableDataGridColumn.HeaderIndex];
+        Clipboard.SetText(HashManager.CRCHashes.TryGetValue(field.Hash, out string value) ? value : $"0x{field.Hash:x}");
     }
 
     private void HeaderHashToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (lastSelectedHashUint == 0) return;
+        if (LoadedFile == null ||
+                  lastSelectedColumn == -1 ||
+                  lastSelectedColumn >= mainDataGridView.ColumnCount ||
+                  mainDataGridView.Columns[lastSelectedColumn] is not IndexableDataGridColumn indexableDataGridColumn ||
+                  indexableDataGridColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
 
-        Clipboard.SetText($"0x{lastSelectedHashUint:x}");
-    }
+        var field = LoadedFile.Fields[indexableDataGridColumn.HeaderIndex];
 
-    private void MainDataGridView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
-    {
-        var field = LoadedFile.GetFieldByHashedName(e.Column.Name);
-
-        if (field.DataType == BCSVDataType.HashedCsc32 || field.DataType == BCSVDataType.Murmur3)
-        {
-            var formattedValue1 = mainDataGridView.Rows[e.RowIndex1].Cells[e.Column.Name].FormattedValue.ToString();
-            var formattedValue2 = mainDataGridView.Rows[e.RowIndex2].Cells[e.Column.Name].FormattedValue.ToString();
-
-            e.SortResult = formattedValue1.CompareTo(formattedValue2);
-            e.Handled = true;
-        }
-    }
-
-
-    public class FieldData(uint hash, uint offset)
-    {
-        public uint Hash { get; set; } = hash;
-        public uint Offset { get; set; } = offset;
-    }
-
-    private void DumpFieldsToJson_Click(object sender, EventArgs e)
-    {
-        if (LoadedFile == null) return;
-
-        var jsonObject = new List<FieldData>();
-
-        foreach (var field in LoadedFile.Fields)
-        {
-            jsonObject.Add(new FieldData(field.Hash, field.Offset));
-        }
-
-
-        var saveFileDialog = new SaveFileDialog
-        {
-            Filter = "Json (*.json)|*.json",
-            FilterIndex = 1,
-            RestoreDirectory = true,
-            OverwritePrompt = true
-        };
-
-        if (saveFileDialog.ShowDialog() == DialogResult.OK)
-        {
-            var json = JsonSerializer.Serialize(jsonObject);
-
-            File.WriteAllText(saveFileDialog.FileName, json);
-        }
-    }
-
-    private bool sortByAscending = true;
-    private void sortByRowIdToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        //mainDataGridView.Sort(new DefaultSort(sortByAscending ? SortOrder.Ascending : SortOrder.Descending));
-        mainDataGridView.Sort(new DefaultSort(SortOrder.Ascending));
-        sortByAscending = !sortByAscending;
-    }
-
-    private class DefaultSort : System.Collections.IComparer
-    {
-        private static int sortOrderModifier = 1;
-
-        public DefaultSort(SortOrder sortOrder)
-        {
-            if (sortOrder == SortOrder.Descending)
-            {
-                sortOrderModifier = -1;
-            }
-            else if (sortOrder == SortOrder.Ascending)
-            {
-                sortOrderModifier = 1;
-            }
-        }
-
-        public int Compare(object x, object y)
-        {
-            IndexRow DataGridViewRow1 = (IndexRow)x;
-            IndexRow DataGridViewRow2 = (IndexRow)y;
-
-            // Try to sort based on the Last Name column.
-
-            int CompareResult = DataGridViewRow1.OriginalIndex.CompareTo(DataGridViewRow2.OriginalIndex);
-
-            return CompareResult * sortOrderModifier;
-        }
-    }
-
-    private void mainDataGridView_CurrentCellDirtyStateChanged(object sender, EventArgs e)
-    {
-        //if (sender is not DataGridView dgv) return;
-
-        //DataGridViewCell cell = dgv.CurrentCell;
-        //var selected = mainDataGridView.SelectedRows;
-        //bool commit = false;
-
-        //if (cell.RowIndex >= 0)
-        //{
-        //    var value = dgv.Rows[cell.RowIndex].Cells[cell.ColumnIndex].FormattedValue;
-
-        //    commit = value != null;
-        //    if (commit)
-        //        for (int i = 0; i < selected.Count; i++)
-        //            dgv.Rows[selected[i].Index].Cells[cell.ColumnIndex].Value = value;
-        //}
-
-        //if (commit) dgv.CommitEdit(DataGridViewDataErrorContexts.Commit);
+        Clipboard.SetText($"0x{field.Hash:x}");
     }
 }

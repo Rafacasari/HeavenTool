@@ -79,7 +79,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="Forms\BCSV\BCSVRework.cs">
+    <Compile Update="Forms\BCSV\BCSVForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Forms\Components\DarkToolstripRenderer.cs" />

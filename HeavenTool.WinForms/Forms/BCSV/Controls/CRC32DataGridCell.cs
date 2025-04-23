@@ -1,5 +1,4 @@
 ﻿using HeavenTool.IO;
-using HeavenTool.Utility.FileTypes.BCSV;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -38,7 +37,7 @@ public class CRC32DataGridCell : DataGridViewTextBoxCell
                               NumberStyles.HexNumber,
                               CultureInfo.CurrentCulture,
                               out uint enumHash)
-                && BCSVHashing.EnumHashes.TryGetValue(enumHash, out var list))
+                && HashManager.EnumHashes.TryGetValue(enumHash, out var list))
             {
                 var source = new AutoCompleteStringCollection();
                 source.AddRange(list.Select(x => x.ToString()).ToArray());

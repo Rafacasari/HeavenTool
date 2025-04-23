@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HeavenTool.IO;
+using HeavenTool.IO.FileFormats.BCSV;
+using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -53,12 +55,13 @@ namespace HeavenTool.Forms
             if (!File.Exists(path))
                 return;
 
-            var bcsvFile = new Utility.FileTypes.BCSV.BinaryCSV(path);
+            using var stream = File.OpenRead(path);
+            var bcsvFile = new BinaryCSV(stream.ToArray());
 
-            foreach(var header in bcsvFile.Fields)
+            foreach (var header in bcsvFile.Fields)
             {
                 var name = header.GetTranslatedNameOrHash();
-                if ((containButton.Checked && name.ToLower().Contains(searchField.Text.ToLower())) || name == searchField.Text)
+                if ((containButton.Checked && name.Contains(searchField.Text, StringComparison.CurrentCultureIgnoreCase)) || name == searchField.Text)
                 {
                     var key = Path.GetFileNameWithoutExtension(path);
                     if (!foundHits.Nodes.ContainsKey(key))
@@ -71,10 +74,11 @@ namespace HeavenTool.Forms
             
             foreach(var (entry, index) in bcsvFile.Entries.Select((x, y) => (x, y)))
             {
-                foreach (var item in entry)
+                for (int fieldIndex = 0; fieldIndex < entry.Length; fieldIndex++)
                 {
-                    var value = item.Value.ToString();
-                    if ((containButton.Checked && value.ToLower().Contains(searchField.Text.ToLower())) || value == searchField.Text)
+                    object item = entry[fieldIndex];
+                    var value = item.ToString();
+                    if ((containButton.Checked && value.Contains(searchField.Text, StringComparison.CurrentCultureIgnoreCase)) || value == searchField.Text)
                     {
                         //hitsFound.Items.Add($"{Path.GetFileNameWithoutExtension(path)}: {value} (value)");
                         var key = Path.GetFileNameWithoutExtension(path);
@@ -82,7 +86,7 @@ namespace HeavenTool.Forms
                             foundHits.Nodes.Add(key, key);
 
                         var node = foundHits.Nodes[key];
-                        var entryField = bcsvFile.GetFieldByHashedName(item.Key);
+                        var entryField = bcsvFile.Fields[fieldIndex];
                         if (entryField != null)
                             node.Nodes.Add($"Entry: {index} | Header: {entryField.GetTranslatedNameOrHash()} | {value} (value)");
                         else 
