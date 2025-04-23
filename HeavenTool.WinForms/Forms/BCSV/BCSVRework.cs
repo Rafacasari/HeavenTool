@@ -7,12 +7,10 @@ using System.Text;
 using System.Windows.Forms;
 using HeavenTool.Forms;
 using System.Diagnostics;
-using HeavenTool.Utility;
-using HeavenTool.Utility.IO;
 using HeavenTool.Forms.Search;
 using HeavenTool.Forms.Components;
 using HeavenTool.IO.FileFormats.BCSV;
-using BCSVHashing = HeavenTool.Utility.FileTypes.BCSV.BCSVHashing;
+using ProgramAssociation = HeavenTool.Utility.IO.ProgramAssociation;
 using HeavenTool.IO;
 using HeavenTool.Forms.BCSV.Controls;
 
@@ -20,10 +18,7 @@ namespace HeavenTool;
 
 public partial class BCSVRework : Form, ISearchable
 {
-    public static Dictionary<uint, string> CRCHashes => BCSVHashing.CRCHashes;
-    public static Dictionary<uint, string> MurmurHashes => BCSVHashing.MurmurHashes;
-
-    private static readonly string OriginalFormName = "Heaven Tool - New BCSV Editor";
+    private static readonly string originalFormName = "Heaven Tool - New BCSV Editor";
     private BinaryCSV LoadedFile { get; set; }
     public BCSVRework()
     {
@@ -34,10 +29,8 @@ public partial class BCSVRework : Form, ISearchable
         dragInfo.AutoSize = false;
 
         // Initialize Hashes
-        BCSVHashing.InitializeHashes();
+        HashManager.InitializeHashes();
         ReloadInfo();
-
-        KnownHashValueManager.Load();
 
         validHeaderContextMenu.Renderer = new ToolStripProfessionalRenderer(new DarkColorTable());
 
@@ -58,12 +51,33 @@ public partial class BCSVRework : Form, ISearchable
         mainDataGridView.EditMode = DataGridViewEditMode.EditOnF2;
 
         versionNumberLabel.Text = Program.VERSION;
-        Text = OriginalFormName;
+        Text = originalFormName;
 
         associateBcsvToolStripMenuItem.Checked = ProgramAssociation.GetAssociatedProgram(".bcsv") == Application.ExecutablePath;
 
         viewColumnsMenuItem.DropDown.AutoClose = false;
         viewColumnsMenuItem.DropDownItemClicked += ViewColumnsMenuItem_DropDownItemClicked;
+
+        foreach (var dataType in Enum.GetValues<DataType>())
+        {
+            viewAsToolStripMenuItem.DropDown.Items.Add(new ToolStripMenuItem(dataType.ToString(), null, new EventHandler((_, _) =>
+            {
+                if (LoadedFile == null ||
+                  lastSelectedColumn == -1 ||
+                  lastSelectedColumn >= mainDataGridView.ColumnCount ||
+                  mainDataGridView.Columns[lastSelectedColumn] is not IndexableDataGridColumn indexableDataGridColumn ||
+                  indexableDataGridColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
+
+                var column = LoadedFile.Fields[indexableDataGridColumn.HeaderIndex];
+
+                HashManager.AddOrEditForcedType(column.HEX, dataType);
+
+                MessageBox.Show("Re-open your file to update values!");
+            }))
+            {
+                ForeColor = Color.White
+            });
+        }
     }
 
     private void ViewColumnsMenuItem_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -123,6 +137,8 @@ public partial class BCSVRework : Form, ISearchable
             compareRowsToolStripMenuItem.Enabled = true;
         else
             compareRowsToolStripMenuItem.Enabled = false;
+
+        ReloadInfo();
     }
 
     private DataGridViewCell selectedCellOnEdit;
@@ -154,16 +170,16 @@ public partial class BCSVRework : Form, ISearchable
                 {
                     if (val is not uint hashValue) return "Invalid";
 
-                    var containsKey = BCSVHashing.CRCHashes.ContainsKey(hashValue);
-                    return containsKey ? BCSVHashing.CRCHashes[hashValue] : hashValue.ToString("x");
+                    var containsKey = HashManager.CRCHashes.ContainsKey(hashValue);
+                    return containsKey ? HashManager.CRCHashes[hashValue] : hashValue.ToString("x");
                 }
 
             case DataType.MMH3:
                 {
                     if (val is not uint hashValue) return "Invalid";
 
-                    var containsKey = BCSVHashing.MurmurHashes.ContainsKey(hashValue);
-                    return containsKey ? BCSVHashing.MurmurHashes[hashValue] : hashValue.ToString("x");
+                    var containsKey = HashManager.MurmurHashes.ContainsKey(hashValue);
+                    return containsKey ? HashManager.MurmurHashes[hashValue] : hashValue.ToString("x");
                 }
 
             default:
@@ -327,7 +343,7 @@ public partial class BCSVRework : Form, ISearchable
         }
 
         var infos = new List<string> {
-            $"CRC32 Hashes: {BCSVHashing.CRCHashes.Count} | Murmur Hashes: {BCSVHashing.MurmurHashes.Count}"
+            $"CRC32 Hashes: {HashManager.CRCHashes.Count} | Murmur Hashes: {HashManager.MurmurHashes.Count}"
         };
 
         if (mainDataGridView.Columns.Count > 0)
@@ -335,6 +351,9 @@ public partial class BCSVRework : Form, ISearchable
 
         if (mainDataGridView.Columns.Count > 0)
             infos.Add("Rows: " + mainDataGridView.Rows.Count);
+
+        if (mainDataGridView.CurrentCell != null)
+            infos.Add("Selected RowId: " + mainDataGridView.CurrentCell.RowIndex);
 
         infoLabel.Text = string.Join(" | ", infos);
 
@@ -350,7 +369,7 @@ public partial class BCSVRework : Form, ISearchable
 
     private void ClearDataGrid()
     {
-        Text = OriginalFormName;
+        Text = originalFormName;
         mainDataGridView.ClearSelection();
         mainDataGridView.Columns.Clear();
         ChangedRowCount(0);
@@ -396,42 +415,43 @@ public partial class BCSVRework : Form, ISearchable
         using (var reader = File.OpenRead(path))
         LoadedFile = new BinaryCSV(reader.ToArray());
 
-        if (LoadedFile == null) 
-            return;
+        if (LoadedFile == null) return;
 
-        Text = $"{OriginalFormName}: {Path.GetFileName(path)}";
+        Text = $"{originalFormName}: {Path.GetFileName(path)}";
 
         viewColumnsMenuItem.DropDownItems.Clear();
         for (int fieldIndex = 0; fieldIndex < LoadedFile.Fields.Length; fieldIndex++)
         {
             Field fieldHeader = LoadedFile.Fields[fieldIndex];
-            var columnDisplayName = fieldHeader.GetTranslatedNameOrHash();
-           
-            if (columnDisplayName.Contains('.'))
-                columnDisplayName = columnDisplayName.Split('.')[0];
-            else if (columnDisplayName.Contains(' '))
-                columnDisplayName = columnDisplayName.Split(' ')[0];
+
 
             DataGridViewCell cellTemplate = fieldHeader.DataType switch
             {
                 DataType.CRC32 => new CRC32DataGridCell(),
                 _ => new DataGridViewTextBoxCell(),
             };
+            var translatedName = fieldHeader.GetTranslatedNameOrNull();
+
+            string tooltip = (translatedName != null ? $"Name: {translatedName}\n" : "") +
+                $"Hash: {fieldHeader.HEX}\n" +
+                $"Type: {fieldHeader.DataType}\n" +
+                $"Size: {fieldHeader.Size}";
 
             int columnId = mainDataGridView.Columns.Add(new IndexableDataGridColumn(fieldIndex)
             {
                 Name = fieldHeader.Hash.ToString("x"),
-                HeaderText = columnDisplayName,
+                HeaderText = fieldHeader.DisplayName,
                 ValueType = fieldHeader.DataType.ToType(), 
                 CellTemplate = cellTemplate,
-                SortMode = DataGridViewColumnSortMode.Automatic
+                SortMode = DataGridViewColumnSortMode.Automatic,
+                ToolTipText = tooltip
             });
 
             var column = mainDataGridView.Columns[columnId];
 
             viewColumnsMenuItem.DropDownItems.Add(new ToolStripMenuItem()
             {
-                Text = columnDisplayName,
+                Text = fieldHeader.DisplayName,
                 ForeColor = Color.White,
                 CommandParameter = column.Name,
                 Checked = column.Visible
@@ -458,6 +478,8 @@ public partial class BCSVRework : Form, ISearchable
         LoadedFile = null;
 
         ReloadInfo();
+
+        lastSelectedColumn = -1;
     }
 
     BCSVDirectorySearch directorySearchWindow;
@@ -527,10 +549,7 @@ public partial class BCSVRework : Form, ISearchable
             };
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
                 File.WriteAllBytes(saveFileDialog.FileName, LoadedFile.Save());
-            }
-
         }
     }
 
@@ -548,26 +567,23 @@ public partial class BCSVRework : Form, ISearchable
 
     private void DuplicateRowToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        if (LoadedFile == null) return;
+
         foreach (DataGridViewRow selectedRow in mainDataGridView.SelectedRows)
         {
-            if (selectedRow.Index >= LoadedFile.Length) continue;
+            if (selectedRow.Index >= LoadedFile.Length || selectedRow.Index >= reorderableIndexDictionary.Count) continue;
 
-            var selectedEntry = LoadedFile.Entries[selectedRow.Index];
+            var atualIndex = reorderableIndexDictionary[selectedRow.Index];
+            var selectedEntry = LoadedFile.Entries[atualIndex];
             var newEntry = new object[selectedEntry.Length];
 
-            // Copy fields
             for (var i = 0; i < selectedEntry.Length; i++)
                 newEntry[i] = selectedEntry[i];
 
-
             // TODO: Check UniqueId and assign one?
-            
             LoadedFile.Entries.Add(newEntry);
 
             ChangedRowCount(LoadedFile.Length);
-            //var newEntryRow = mainDataGridView.Rows.Add([.. newEntry.Values]);
-            //mainDataGridView.Rows[newEntryRow].Selected = true;
-            //mainDataGridView.FirstDisplayedScrollingRowIndex = newEntryRow;
         }
 
         ReloadInfo();
@@ -583,8 +599,10 @@ public partial class BCSVRework : Form, ISearchable
             var indexesToRemove = new List<int>();
             foreach (DataGridViewRow item in mainDataGridView.SelectedRows)
             {
-                indexesToRemove.Add(item.Index);
-                mainDataGridView.Rows.Remove(item);
+                if (item.Index >= LoadedFile.Length || item.Index >= reorderableIndexDictionary.Count) continue;
+
+                var atualIndex = reorderableIndexDictionary[item.Index];
+                indexesToRemove.Add(atualIndex);
             }
 
             foreach (var index in indexesToRemove.OrderByDescending(x => x))
@@ -597,7 +615,6 @@ public partial class BCSVRework : Form, ISearchable
     }
 
     private int lastSelectedColumn = -1;
-    private uint lastSelectedHashUint = 0;
 
     private string sortColumn = null;
     private SortOrder sortOrder = SortOrder.None;
@@ -642,7 +659,6 @@ public partial class BCSVRework : Form, ISearchable
                 sortOrder = SortOrder.Descending;
             }
 
-            Console.WriteLine($"Order {e.ColumnIndex} | Count: {reorderableIndexDictionary.Count}");
             mainDataGridView.Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection = sortOrder;
             switch (sortOrder)
             {
@@ -662,66 +678,9 @@ public partial class BCSVRework : Form, ISearchable
 
         if (e.Button == MouseButtons.Right)
         {
-            var field = LoadedFile.Fields[e.ColumnIndex];
-
-            viewAsToolStripMenuItem.Enabled = field.IsMissingHash && field.Size <= 6;
-            validHeaderContextMenu.Show(Cursor.Position);
-
             lastSelectedColumn = e.ColumnIndex;
-            lastSelectedHashUint = field.Hash;
+            validHeaderContextMenu.Show(Cursor.Position);
         }
-    }
-
-    private void HshCstringRefToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedColumn == -1) return;
-
-        //KnownHashValueManager.AddOrEdit(lastSelectedHash, DataType.CRC32);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void F32ToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedColumn == -1) return;
-
-        //KnownHashValueManager.AddOrEdit(lastSelectedHash, DataType.Float32);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void S32u32ToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedColumn == -1) return;
-
-        //KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.UInt32);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void StringToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedColumn == -1) return;
-
-        //KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.String);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void MurmurHashToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedColumn == -1) return;
-        //KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.Murmur3);
-
-        MessageBox.Show("Re-open your file to update values!");
-    }
-
-    private void Int32ToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        if (lastSelectedColumn == -1) return;
-        //KnownHashValueManager.AddOrEdit(lastSelectedHash, BCSVDataType.Int32);
-
-        MessageBox.Show("Re-open your file to update values!");
     }
 
     private void MainFrm_DragEnter(object sender, DragEventArgs e)
@@ -755,12 +714,8 @@ public partial class BCSVRework : Form, ISearchable
         {
             var result = MessageBox.Show("Do you really want to close this file?\nUnsaved changes will be lost!", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
-            {
                 UnloadFile();
-            }
-            else { 
-                e.Cancel = true;
-            }
+            else e.Cancel = true;
         }
     }
 
@@ -817,7 +772,7 @@ public partial class BCSVRework : Form, ISearchable
                     {
                         case DataType.CRC32:
                             {
-                                if (cell is uint hashValue && BCSVHashing.CRCHashes.TryGetValue(hashValue, out string value))
+                                if (cell is uint hashValue && HashManager.CRCHashes.TryGetValue(hashValue, out string value))
                                     return value;
 
                                 break;
@@ -825,7 +780,7 @@ public partial class BCSVRework : Form, ISearchable
 
                         case DataType.MMH3:
                             {
-                                if (cell is uint hashValue && BCSVHashing.MurmurHashes.TryGetValue(hashValue, out string value))
+                                if (cell is uint hashValue && HashManager.MurmurHashes.TryGetValue(hashValue, out string value))
                                     return value;
 
                                 break;
@@ -869,9 +824,9 @@ public partial class BCSVRework : Form, ISearchable
                 {
                     if (cell is uint hashValue)
                     {
-                        var containsKey = CRCHashes.ContainsKey(hashValue);
+                        var containsKey = HashManager.CRCHashes.ContainsKey(hashValue);
                         if (containsKey)
-                            exportedValues.AddIfNotExist(CRCHashes[hashValue]);
+                            exportedValues.AddIfNotExist(HashManager.CRCHashes[hashValue]);
                         else
                             exportedValues.AddIfNotExist(hashValue.ToString("x"));
 
@@ -1109,7 +1064,9 @@ public partial class BCSVRework : Form, ISearchable
         var selectedRows = new DataGridViewRow[mainDataGridView.SelectedRows.Count];
         mainDataGridView.SelectedRows.CopyTo(selectedRows, 0);
 
-        newFile.Entries = LoadedFile.Entries.Where((_, index) => selectedRows.Any(y => y.Index == index)).ToList();
+        newFile.Entries = LoadedFile.Entries
+            .Where((_, index) => selectedRows.Any(y =>  y.Index < reorderableIndexDictionary.Count && reorderableIndexDictionary[y.Index] == index
+        )).ToList();
 
         using var saveFileDialog = new SaveFileDialog
         {
@@ -1172,15 +1129,26 @@ public partial class BCSVRework : Form, ISearchable
 
     private void HeaderNameToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (lastSelectedHashUint == 0) return;
+        if (LoadedFile == null ||
+                   lastSelectedColumn == -1 ||
+                   lastSelectedColumn >= mainDataGridView.ColumnCount ||
+                   mainDataGridView.Columns[lastSelectedColumn] is not IndexableDataGridColumn indexableDataGridColumn ||
+                   indexableDataGridColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
 
-        Clipboard.SetText(CRCHashes.TryGetValue(lastSelectedHashUint, out string value) ? value : $"0x{lastSelectedHashUint:x}");
+        var field = LoadedFile.Fields[indexableDataGridColumn.HeaderIndex];
+        Clipboard.SetText(HashManager.CRCHashes.TryGetValue(field.Hash, out string value) ? value : $"0x{field.Hash:x}");
     }
 
     private void HeaderHashToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (lastSelectedHashUint == 0) return;
+        if (LoadedFile == null ||
+                  lastSelectedColumn == -1 ||
+                  lastSelectedColumn >= mainDataGridView.ColumnCount ||
+                  mainDataGridView.Columns[lastSelectedColumn] is not IndexableDataGridColumn indexableDataGridColumn ||
+                  indexableDataGridColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
 
-        Clipboard.SetText($"0x{lastSelectedHashUint:x}");
+        var field = LoadedFile.Fields[indexableDataGridColumn.HeaderIndex];
+
+        Clipboard.SetText($"0x{field.Hash:x}");
     }
 }

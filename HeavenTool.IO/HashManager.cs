@@ -5,6 +5,8 @@ namespace HeavenTool.IO;
 
 public static class HashManager
 {
+    private static readonly string KNOWN_TYPES_PATH = Path.Combine("extra", "known-types.txt");
+
     public static readonly Dictionary<string, DataType> KnownTypes = [];
     public static readonly Dictionary<uint, string> CRCHashes = [];
     public static readonly Dictionary<uint, string> MurmurHashes = [];
@@ -51,15 +53,14 @@ public static class HashManager
 
         LoadEnumHashes();
         LoadKnownTypes();
+        
     }
 
     private static void LoadKnownTypes()
     {
-        string knownTypes = Path.Combine(AppContext.BaseDirectory, "extra", "known-types.txt");
-
-        if (File.Exists(knownTypes))
+        if (File.Exists(KNOWN_TYPES_PATH))
         {
-            var lines = File.ReadAllLines(knownTypes);
+            var lines = File.ReadAllLines(KNOWN_TYPES_PATH);
 
             foreach (var line in lines)
             {
@@ -106,6 +107,16 @@ public static class HashManager
                 }
             }
         }
+    }
+
+    public static void AddOrEditForcedType(string key, DataType value)
+    {
+        if (!KnownTypes.TryAdd(key, value))
+            KnownTypes[key] = value;
+
+        File.WriteAllLines(KNOWN_TYPES_PATH, KnownTypes.Select(x => {
+            return $"{x.Key}={x.Value}";
+        }));
     }
 }
 

@@ -3453,7 +3453,6 @@ TopsTexOnepieceOverallLColorsuits
 BottomsTexPantsNormalSlackspattern
 PointList u8
 ASCommand string65
-ConnectIcon string48
 Label string33
 Month2 u8
 Month3 u8

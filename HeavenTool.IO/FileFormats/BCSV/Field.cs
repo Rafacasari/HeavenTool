@@ -1,6 +1,4 @@
-﻿using static HeavenTool.IO.HashManager;
-
-namespace HeavenTool.IO.FileFormats.BCSV;
+﻿namespace HeavenTool.IO.FileFormats.BCSV;
 
 public class Field
 {
@@ -11,47 +9,32 @@ public class Field
 
     public bool TrustedType { get; set; } = false;
 
-    public object? GetFieldDefaultValue()
+    public object GetFieldDefaultValue()
     {
-        switch (DataType)
+        return DataType switch
         {
-            case DataType.U8Array:
-                return new byte[Size];
 
-            case DataType.U8:
-                return (byte)0;
-
-            case DataType.UInt16:
-                return (short)0;
-
-            case DataType.Int32:
-                return 0;
-
-            case DataType.Float32:
-                return (float)0;
-
-            case DataType.String:
-                return "";
-
-            case DataType.UInt32:
-            case DataType.CRC32:
-            case DataType.MMH3:
-                return (uint)0;
-
-
-            default:
-                return null;
-        }
+            DataType.U8Array => new byte[Size],
+            DataType.S8Array => new sbyte[Size],
+            DataType.U8 => (byte)0,
+            DataType.S8 => (sbyte)0,
+            DataType.Int16 => (short)0,
+            DataType.UInt16 => (ushort)0,
+            DataType.Int32 => 0,
+            DataType.UInt32 or DataType.CRC32 or DataType.MMH3 => (uint)0,
+            DataType.Float32 => (float)0,
+            DataType.Float64 => (double)0,
+            DataType.String => "",
+            _ => null,
+        };
     }
 
-    public string HEX { get { return Hash.ToString("x"); } }
+    public string HEX => Hash.ToString("x");
 
-    public bool IsMissingHash
-    {
-        get => CRCHashes.ContainsKey(Hash) == false;
-    }
+    public bool IsMissingHash => HashManager.CRCHashes.ContainsKey(Hash) == false;
+    
 
-    private string? _displayName;
+    private string _displayName;
     public string DisplayName { 
         get
         {
@@ -81,16 +64,18 @@ public class Field
         return GetTranslatedNameOrNull() ?? HEX;
     }
 
-    public string? GetTranslatedNameOrNull()
+    public string GetTranslatedNameOrNull()
     {
-        return CRCHashes.TryGetValue(Hash, out string? value) ? value : null;
+        return HashManager.CRCHashes.TryGetValue(Hash, out string value) ? value : null;
     }
 
     public override bool Equals(object obj)
     {
-        if (obj is Field field)
-            return Hash == field.Hash;
-        
-        return base.Equals(obj);
+        return obj is Field field && Hash == field.Hash;
+    }
+
+    public override int GetHashCode()
+    {
+        return Hash.GetHashCode();
     }
 }

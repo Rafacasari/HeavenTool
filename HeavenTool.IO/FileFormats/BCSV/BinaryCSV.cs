@@ -37,6 +37,12 @@ public class BinaryCSV : IDisposable
         set => Entries[row][column] = value;
     }
 
+    public object this[int row, Field field]
+    {
+        get => Entries[row][Array.IndexOf(Fields, field)];
+        set => Entries[row][Array.IndexOf(Fields, field)] = value;
+    }
+
     public BinaryCSV(int entrySize, Field[] fields, List<object[]> entries, byte hasExtendedHeader, byte unknownField, int version)
     {
         EntrySize = entrySize;
@@ -135,9 +141,6 @@ public class BinaryCSV : IDisposable
 
                             else if (translatedName.EndsWith(" f32"))
                                 type = DataType.Float32;
-
-                            // Otherwise will still be an uint32
-                            // Note: Theoretically it can also be a normal string, but I never saw a string4 yet so I assume it doesn't exist
                         }
                     }
                     break;
@@ -152,18 +155,11 @@ public class BinaryCSV : IDisposable
                 else if (translatedName.EndsWith(" s8") && currentField.Size > 1)
                     type = DataType.S8Array;
             }
-            else
-            {
-                if (HashManager.KnownTypes.TryGetValue(currentField.HEX, out DataType value))
-                {
-                    currentField.TrustedType = true;
-                    type = value;
-                }
-                else if (type == DataType.String && currentField.Size <= 6)
-                {
-                    type = DataType.U8Array;
-                }
 
+            if (HashManager.KnownTypes.TryGetValue(currentField.HEX, out DataType value))
+            {
+                currentField.TrustedType = true;
+                type = value;
             }
 
             currentField.DataType = type;
@@ -233,14 +229,13 @@ public class BinaryCSV : IDisposable
                         value = reader.ReadString(currentField.Size, Encoding.UTF8);
                         break;
                 }
+
                 newEntry[fieldId] = value;
-                //Entries[i][fieldId] = value;
             }
 
             Entries.Add(newEntry);
             // Go to the next entry, important if we don't know the header
             reader.Position = entryPosition + EntrySize;
-            //reader.SeekBegin(entryPosition + EntrySize);
         }
 
         reader.Close();

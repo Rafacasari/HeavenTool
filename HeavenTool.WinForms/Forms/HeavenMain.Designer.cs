@@ -41,13 +41,12 @@ namespace HeavenTool
             bCSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             exportLabelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             exportEnumsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            exportCFGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            exportUsedHashesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             pictureBox1 = new System.Windows.Forms.PictureBox();
             rstbEditorButton = new System.Windows.Forms.Button();
             sarcEditorButton = new System.Windows.Forms.Button();
             itemParamHelperButton = new System.Windows.Forms.Button();
             bcsvReworkButton = new System.Windows.Forms.Button();
-            exportUsedHashesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -121,7 +120,7 @@ namespace HeavenTool
             // 
             // bCSVToolStripMenuItem
             // 
-            bCSVToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportLabelsToolStripMenuItem, exportEnumsToolStripMenuItem, exportCFGToolStripMenuItem, exportUsedHashesToolStripMenuItem });
+            bCSVToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportLabelsToolStripMenuItem, exportEnumsToolStripMenuItem, exportUsedHashesToolStripMenuItem });
             bCSVToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             bCSVToolStripMenuItem.Name = "bCSVToolStripMenuItem";
             bCSVToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
@@ -131,7 +130,7 @@ namespace HeavenTool
             // 
             exportLabelsToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             exportLabelsToolStripMenuItem.Name = "exportLabelsToolStripMenuItem";
-            exportLabelsToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            exportLabelsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             exportLabelsToolStripMenuItem.Text = "Export Labels";
             exportLabelsToolStripMenuItem.Click += ExportLabelsToolStripMenuItem_Click;
             // 
@@ -139,17 +138,17 @@ namespace HeavenTool
             // 
             exportEnumsToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             exportEnumsToolStripMenuItem.Name = "exportEnumsToolStripMenuItem";
-            exportEnumsToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            exportEnumsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             exportEnumsToolStripMenuItem.Text = "Export Enums";
             exportEnumsToolStripMenuItem.Click += ExportEnumsToolStripMenuItem_Click;
             // 
-            // exportCFGToolStripMenuItem
+            // exportUsedHashesToolStripMenuItem
             // 
-            exportCFGToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            exportCFGToolStripMenuItem.Name = "exportCFGToolStripMenuItem";
-            exportCFGToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
-            exportCFGToolStripMenuItem.Text = "Export CFG (Aeon's Editor)";
-            exportCFGToolStripMenuItem.Click += exportCFGToolStripMenuItem_Click;
+            exportUsedHashesToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            exportUsedHashesToolStripMenuItem.Name = "exportUsedHashesToolStripMenuItem";
+            exportUsedHashesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            exportUsedHashesToolStripMenuItem.Text = "Export Used Hashes";
+            exportUsedHashesToolStripMenuItem.Click += exportUsedHashesToolStripMenuItem_Click;
             // 
             // pictureBox1
             // 
@@ -226,13 +225,6 @@ namespace HeavenTool
             bcsvReworkButton.UseVisualStyleBackColor = false;
             bcsvReworkButton.Click += BcsvReworkButton_Click;
             // 
-            // exportUsedHashesToolStripMenuItem
-            // 
-            exportUsedHashesToolStripMenuItem.Name = "exportUsedHashesToolStripMenuItem";
-            exportUsedHashesToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
-            exportUsedHashesToolStripMenuItem.Text = "Export Used Hashes";
-            exportUsedHashesToolStripMenuItem.Click += exportUsedHashesToolStripMenuItem_Click;
-            // 
             // HeavenMain
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -275,7 +267,6 @@ namespace HeavenTool
         private System.Windows.Forms.ToolStripMenuItem bCSVToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportLabelsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportEnumsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exportCFGToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportUsedHashesToolStripMenuItem;
     }
 }

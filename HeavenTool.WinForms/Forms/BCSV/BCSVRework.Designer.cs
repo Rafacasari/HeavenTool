@@ -71,12 +71,6 @@ namespace HeavenTool
             headerHashToolStripMenuItem = new ToolStripMenuItem();
             exportValuesAstxtFileToolStripMenuItem = new ToolStripMenuItem();
             viewAsToolStripMenuItem = new ToolStripMenuItem();
-            s32u32ToolStripMenuItem = new ToolStripMenuItem();
-            int32ToolStripMenuItem = new ToolStripMenuItem();
-            f32ToolStripMenuItem = new ToolStripMenuItem();
-            stringToolStripMenuItem = new ToolStripMenuItem();
-            hshCstringRefToolStripMenuItem = new ToolStripMenuItem();
-            murmurHashToolStripMenuItem = new ToolStripMenuItem();
             dragInfo = new Label();
             topMenuStrip.SuspendLayout();
             statusStripMenu.SuspendLayout();
@@ -383,9 +377,9 @@ namespace HeavenTool
             // validHeaderContextMenu
             // 
             validHeaderContextMenu.BackColor = System.Drawing.Color.FromArgb(60, 60, 60);
-            validHeaderContextMenu.Items.AddRange(new ToolStripItem[] { copyToolStripMenuItem, exportValuesAstxtFileToolStripMenuItem, viewAsToolStripMenuItem });
+            validHeaderContextMenu.Items.AddRange(new ToolStripItem[] { viewAsToolStripMenuItem, copyToolStripMenuItem, exportValuesAstxtFileToolStripMenuItem });
             validHeaderContextMenu.Name = "validHeaderContextMenu";
-            validHeaderContextMenu.Size = new System.Drawing.Size(196, 70);
+            validHeaderContextMenu.Size = new System.Drawing.Size(196, 92);
             // 
             // copyToolStripMenuItem
             // 
@@ -421,65 +415,10 @@ namespace HeavenTool
             // 
             // viewAsToolStripMenuItem
             // 
-            viewAsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { s32u32ToolStripMenuItem, int32ToolStripMenuItem, f32ToolStripMenuItem, stringToolStripMenuItem, hshCstringRefToolStripMenuItem, murmurHashToolStripMenuItem });
             viewAsToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             viewAsToolStripMenuItem.Name = "viewAsToolStripMenuItem";
             viewAsToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             viewAsToolStripMenuItem.Text = "View as";
-            // 
-            // s32u32ToolStripMenuItem
-            // 
-            s32u32ToolStripMenuItem.BackColor = System.Drawing.Color.Transparent;
-            s32u32ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            s32u32ToolStripMenuItem.Name = "s32u32ToolStripMenuItem";
-            s32u32ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            s32u32ToolStripMenuItem.Text = "UInt";
-            s32u32ToolStripMenuItem.Click += S32u32ToolStripMenuItem_Click;
-            // 
-            // int32ToolStripMenuItem
-            // 
-            int32ToolStripMenuItem.BackColor = System.Drawing.Color.Transparent;
-            int32ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            int32ToolStripMenuItem.Name = "int32ToolStripMenuItem";
-            int32ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            int32ToolStripMenuItem.Text = "Int";
-            int32ToolStripMenuItem.Click += Int32ToolStripMenuItem_Click;
-            // 
-            // f32ToolStripMenuItem
-            // 
-            f32ToolStripMenuItem.BackColor = System.Drawing.Color.Transparent;
-            f32ToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            f32ToolStripMenuItem.Name = "f32ToolStripMenuItem";
-            f32ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            f32ToolStripMenuItem.Text = "Float";
-            f32ToolStripMenuItem.Click += F32ToolStripMenuItem_Click;
-            // 
-            // stringToolStripMenuItem
-            // 
-            stringToolStripMenuItem.BackColor = System.Drawing.Color.Transparent;
-            stringToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            stringToolStripMenuItem.Name = "stringToolStripMenuItem";
-            stringToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            stringToolStripMenuItem.Text = "String";
-            stringToolStripMenuItem.Click += StringToolStripMenuItem_Click;
-            // 
-            // hshCstringRefToolStripMenuItem
-            // 
-            hshCstringRefToolStripMenuItem.BackColor = System.Drawing.Color.Transparent;
-            hshCstringRefToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            hshCstringRefToolStripMenuItem.Name = "hshCstringRefToolStripMenuItem";
-            hshCstringRefToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            hshCstringRefToolStripMenuItem.Text = "Crc32";
-            hshCstringRefToolStripMenuItem.Click += HshCstringRefToolStripMenuItem_Click;
-            // 
-            // murmurHashToolStripMenuItem
-            // 
-            murmurHashToolStripMenuItem.BackColor = System.Drawing.Color.Transparent;
-            murmurHashToolStripMenuItem.ForeColor = System.Drawing.Color.White;
-            murmurHashToolStripMenuItem.Name = "murmurHashToolStripMenuItem";
-            murmurHashToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            murmurHashToolStripMenuItem.Text = "Murmur3";
-            murmurHashToolStripMenuItem.Click += MurmurHashToolStripMenuItem_Click;
             // 
             // dragInfo
             // 
@@ -556,12 +495,6 @@ namespace HeavenTool
         private ToolStripMenuItem headerNameToolStripMenuItem;
         private ToolStripMenuItem headerHashToolStripMenuItem;
         private ToolStripMenuItem viewAsToolStripMenuItem;
-        private ToolStripMenuItem stringToolStripMenuItem;
-        private ToolStripMenuItem s32u32ToolStripMenuItem;
-        private ToolStripMenuItem f32ToolStripMenuItem;
-        private ToolStripMenuItem hshCstringRefToolStripMenuItem;
-        private ToolStripMenuItem murmurHashToolStripMenuItem;
-        private ToolStripMenuItem int32ToolStripMenuItem;
         private Label dragInfo;
         private ToolStripMenuItem viewToolStripMenuItem;
         private ToolStripMenuItem viewColumnsMenuItem;

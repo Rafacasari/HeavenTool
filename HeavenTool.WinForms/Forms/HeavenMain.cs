@@ -3,9 +3,7 @@ using HeavenTool.Forms.RSTB;
 using HeavenTool.Forms.SARC;
 using HeavenTool.IO;
 using HeavenTool.IO.Compression;
-using HeavenTool.Utility;
 using HeavenTool.Utility.FileTypes.BCSV;
-using HeavenTool.Utility.FileTypes.BCSV.Exporting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -188,97 +186,6 @@ public partial class HeavenMain : Form
 
                 Process.Start(outputDirectory);
             }
-        }
-    }
-
-    private void exportCFGToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        var openFolderDialog = new FolderBrowserDialog()
-        {
-            ShowNewFolderButton = false,
-            Description = "Select BCSV folder",
-            UseDescriptionForTitle = true
-        };
-
-        if (openFolderDialog.ShowDialog() == DialogResult.OK)
-        {
-            var selectedPath = openFolderDialog.SelectedPath;
-            if (selectedPath == null || !Directory.Exists(selectedPath)) return;
-
-
-            var dir = new Dictionary<string, BCSVExporter.BcsvHeader>();
-            var crcList = new List<string>();
-            var murmurList = new List<string>();
-
-            var bcsvFiles = Directory.GetFiles(selectedPath, "*.bcsv");
-            foreach (var bcsvFile in bcsvFiles)
-            {
-                var bcsv = new BinaryCSV(bcsvFile);
-
-                if (bcsv == null) continue;
-
-                foreach (var field in bcsv.Fields)
-                {
-                    // Find Enums
-                    if (field.DataType == BCSVDataType.HashedCsc32 || field.DataType == BCSVDataType.Murmur3)
-                    {
-                        foreach (var entry in bcsv.Entries)
-                        {
-                            var entryValue = entry[field.HEX];
-                            if (entryValue == null) continue;
-
-                            if (entryValue is uint hash)
-                            {
-                                if (field.DataType == BCSVDataType.HashedCsc32 && BCSVHashing.CRCHashes.TryGetValue(hash, out string crcValue))
-                                    crcList.AddIfNotExist(crcValue);
-                                else if (field.DataType == BCSVDataType.Murmur3 && BCSVHashing.MurmurHashes.TryGetValue(hash, out string murmurValue))
-                                    murmurList.AddIfNotExist(murmurValue);
-                            }
-                        }
-                    }
-
-                    // Get Header Info
-                    if (dir.ContainsKey(field.HEX))
-                        continue;
-
-                    var headerInfo = new BCSVExporter.BcsvHeader()
-                    {
-                        Hash = field.GetTranslatedNameOrNull() != null ? string.Empty : $"0x{field.HEX}",
-                        Name = field.GetTranslatedNameOrNull() ?? string.Empty
-                    };
-
-                    if (field.TrustedType)
-                        headerInfo.DataType = field.DataType.GetName();
-
-                    if (!string.IsNullOrEmpty(headerInfo.DataType) || !string.IsNullOrEmpty(headerInfo.Name))
-                        dir.Add(field.HEX, headerInfo);
-                }
-            }
-
-            var gameConfig = new BCSVExporter.GameConfig()
-            {
-                Bcsv = new BCSVExporter.BcsvConfig()
-                {
-                    Headers = [.. dir.Values],
-                    FieldHashes = new BCSVExporter.FieldHashes()
-                    {
-                        MurmurHashes = murmurList,
-                        CRCHashes = crcList
-                    }
-                }
-            };
-
-            var saveFileDialog = new SaveFileDialog
-            {
-                Filter = "CFG (*.cfg)|*.cfg",
-                FilterIndex = 1,
-                RestoreDirectory = true,
-                OverwritePrompt = true
-            };
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                gameConfig.ExportConfig(saveFileDialog.FileName);
-
         }
     }
 

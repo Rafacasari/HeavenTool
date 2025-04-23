@@ -8,14 +8,12 @@ using System.Windows.Forms;
 using HeavenTool.Forms;
 using System.Diagnostics;
 using HeavenTool.DataTable;
-using HeavenTool.Utility;
 using HeavenTool.Utility.FileTypes.BCSV;
 using System.Globalization;
 using HeavenTool.Utility.IO;
 using HeavenTool.Forms.Search;
 using System.Text.Json;
 using HeavenTool.Forms.Components;
-using HeavenTool.Utility.FileTypes.BCSV.Exporting;
 using HeavenTool.IO;
 
 namespace HeavenTool;
@@ -1252,97 +1250,6 @@ public partial class BCSVForm : Form, ISearchable
             var json = JsonSerializer.Serialize(jsonObject);
 
             File.WriteAllText(saveFileDialog.FileName, json);
-        }
-    }
-
-    private void devExportHeadersToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        var openFolderDialog = new FolderBrowserDialog()
-        {
-            ShowNewFolderButton = false,
-            Description = "Select BCSV folder",
-            UseDescriptionForTitle = true
-        };
-
-        if (openFolderDialog.ShowDialog() == DialogResult.OK)
-        {
-            var selectedPath = openFolderDialog.SelectedPath;
-            if (selectedPath == null || !Directory.Exists(selectedPath)) return;
-
-
-            var dir = new Dictionary<string, BCSVExporter.BcsvHeader>();
-            var crcList = new List<string>();
-            var murmurList = new List<string>();
-
-            var bcsvFiles = Directory.GetFiles(selectedPath, "*.bcsv");
-            foreach (var bcsvFile in bcsvFiles)
-            {
-                var bcsv = new BinaryCSV(bcsvFile);
-
-                if (bcsv == null) continue;
-
-                foreach (var field in bcsv.Fields)
-                {
-                    // Find Enums
-                    if (field.DataType == BCSVDataType.HashedCsc32 || field.DataType == BCSVDataType.Murmur3)
-                    {
-                        foreach (var entry in bcsv.Entries)
-                        {
-                            var entryValue = entry[field.HEX];
-                            if (entryValue == null) continue;
-
-                            if (entryValue is uint hash)
-                            {
-                                if (field.DataType == BCSVDataType.HashedCsc32 && CRCHashes.TryGetValue(hash, out string crcValue))
-                                    crcList.AddIfNotExist(crcValue);
-                                else if (field.DataType == BCSVDataType.Murmur3 && MurmurHashes.TryGetValue(hash, out string murmurValue))
-                                    murmurList.AddIfNotExist(murmurValue);
-                            }
-                        }
-                    }
-
-                    // Get Header Info
-                    if (dir.ContainsKey(field.HEX))
-                        continue;
-
-                    var headerInfo = new BCSVExporter.BcsvHeader()
-                    {
-                        Hash = field.GetTranslatedNameOrNull() != null ? string.Empty : $"0x{field.HEX}",
-                        Name = field.GetTranslatedNameOrNull() ?? string.Empty
-                    };
-
-                    if (field.TrustedType)
-                        headerInfo.DataType = field.DataType.GetName();
-
-                    if (!string.IsNullOrEmpty(headerInfo.DataType) || !string.IsNullOrEmpty(headerInfo.Name))
-                        dir.Add(field.HEX, headerInfo);
-                }
-            }
-
-            var gameConfig = new BCSVExporter.GameConfig()
-            {
-                Bcsv = new BCSVExporter.BcsvConfig()
-                {
-                    Headers = [.. dir.Values],
-                    FieldHashes = new BCSVExporter.FieldHashes()
-                    {
-                        MurmurHashes = murmurList,
-                        CRCHashes = crcList
-                    }
-                }
-            };
-
-            var saveFileDialog = new SaveFileDialog
-            {
-                Filter = "CFG (*.cfg)|*.cfg",
-                FilterIndex = 1,
-                RestoreDirectory = true,
-                OverwritePrompt = true
-            };
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                gameConfig.ExportConfig(saveFileDialog.FileName);
-
         }
     }
 

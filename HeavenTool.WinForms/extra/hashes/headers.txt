@@ -1575,7 +1575,6 @@ AnimeTypeMaracas string64
 AnimeTypeTrowel string64
 mIsRhizobia int16
 Reverberation u8
-ConnectIcon string48
 ShellRotate.hshCstringRef
 LookAtType.hshCstringRef
 EntryName string32

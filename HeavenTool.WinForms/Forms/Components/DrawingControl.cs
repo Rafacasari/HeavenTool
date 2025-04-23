@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace HeavenTool.Utility;
+namespace HeavenTool.Forms.Components;
 
 public static class DrawingControl
 {

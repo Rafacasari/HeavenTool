@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace HeavenTool.Utility
+﻿namespace HeavenTool.IO
 {
-    public static class ListUtilities
+    public static class LinqUtilities
     {
         public static void AddIfNotExist<T>(this List<T> list, T key) where T : class
         {
             ArgumentNullException.ThrowIfNull(list);
             ArgumentNullException.ThrowIfNull(key);
 
-            if (!list.Contains(key)) 
+            if (!list.Contains(key))
                 list.Add(key);
         }
 
