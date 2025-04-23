@@ -27,7 +27,7 @@ public class BinaryCSV : IDisposable
     internal byte HasExtendedHeader { get; private set; }
     internal byte UnknownField { get; private set; }
 
-    internal ushort HeaderVersion { get; private set; }
+    internal int HeaderVersion { get; private set; }
 
     internal readonly byte[] MAGIC = "VSCB"u8.ToArray();
 
@@ -37,7 +37,7 @@ public class BinaryCSV : IDisposable
         set => Entries[row][column] = value;
     }
 
-    public BinaryCSV(int entrySize, Field[] fields, List<object[]> entries, byte hasExtendedHeader, byte unknownField, ushort version)
+    public BinaryCSV(int entrySize, Field[] fields, List<object[]> entries, byte hasExtendedHeader, byte unknownField, int version)
     {
         EntrySize = entrySize;
         Fields = fields;
@@ -73,10 +73,10 @@ public class BinaryCSV : IDisposable
             if (!MAGIC.SequenceEqual(magic))
                 throw new Exception("File is not a BCSV!");
 
-            HeaderVersion = reader.ReadUInt16();
+            HeaderVersion = reader.ReadInt32();
 
-            // 10 byte padding
-            reader.Position += 10;
+            // 8 byte padding
+            reader.Position += 8;
         }
 
         // Read Fields
@@ -263,11 +263,10 @@ public class BinaryCSV : IDisposable
         if (HasExtendedHeader == 1)
         {
             writer.Write(MAGIC);
-            //writer.Write(Encoding.UTF8.GetBytes(HeaderMagic));
             writer.Write(HeaderVersion);
 
             // Padding
-            writer.Seek(10, SeekOrigin.Current);
+            writer.Seek(8, SeekOrigin.Current);
         }
 
 
