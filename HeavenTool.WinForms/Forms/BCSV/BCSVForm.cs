@@ -10,7 +10,7 @@ using System.Diagnostics;
 using HeavenTool.Forms.Search;
 using HeavenTool.Forms.Components;
 using HeavenTool.IO.FileFormats.BCSV;
-using ProgramAssociation = HeavenTool.Utility.IO.ProgramAssociation;
+using ProgramAssociation = HeavenTool.Utility.ProgramAssociation;
 using HeavenTool.IO;
 using HeavenTool.Forms.BCSV.Controls;
 

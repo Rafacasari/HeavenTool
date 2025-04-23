@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace HeavenTool.Utility.IO
+namespace HeavenTool.Utility
 {
     public class ProgramAssociation
     {
@@ -28,7 +28,7 @@ namespace HeavenTool.Utility.IO
         }
 
         [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
+        public static extern void SHChangeNotify(uint wEventId, uint uFlags, nint dwItem1, nint dwItem2);
 
         private const int SHCNE_ASSOCCHANGED = 0x8000000;
         private const int SHCNF_FLUSH = 0x1000;
@@ -59,7 +59,7 @@ namespace HeavenTool.Utility.IO
                     CurrentUser.DeleteSubKey("UserChoice", false);
 
 
-                SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_FLUSH, IntPtr.Zero, IntPtr.Zero);
+                SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_FLUSH, nint.Zero, nint.Zero);
             }
             catch (UnauthorizedAccessException)
             {
@@ -79,21 +79,21 @@ namespace HeavenTool.Utility.IO
                 using (var BaseKey = Registry.ClassesRoot.OpenSubKey(extension, true))
                 {
                     if (BaseKey != null)
-                        Registry.ClassesRoot.DeleteSubKeyTree(extension, false);  
+                        Registry.ClassesRoot.DeleteSubKeyTree(extension, false);
                 }
 
                 using (var OpenMethodKey = Registry.ClassesRoot.OpenSubKey(key_name, true))
                 {
                     if (OpenMethodKey != null)
                         Registry.ClassesRoot.DeleteSubKeyTree(key_name, false);
-                    
+
                 }
 
                 using (var CurrentUser = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\" + extension, true))
                     CurrentUser?.DeleteSubKey("UserChoice", false);
-                
 
-                SHChangeNotify(0x08000000, 0x0000, IntPtr.Zero, IntPtr.Zero);
+
+                SHChangeNotify(0x08000000, 0x0000, nint.Zero, nint.Zero);
             }
             catch (UnauthorizedAccessException)
             {

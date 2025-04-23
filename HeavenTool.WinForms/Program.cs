@@ -1,5 +1,5 @@
 ﻿using HeavenTool.Forms.RSTB;
-using HeavenTool.Utility.IO;
+using HeavenTool.Utility;
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.IO;

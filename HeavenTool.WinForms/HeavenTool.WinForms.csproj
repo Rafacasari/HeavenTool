@@ -111,7 +111,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Folder Include="Forms\BCSV\Templates\" />
-    <Folder Include="Libraries\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
@@ -122,11 +121,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HeavenTool.IO\HeavenTool.IO.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="SARCExt">
-      <HintPath>Libraries\SARCExt.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
