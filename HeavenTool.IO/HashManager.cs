@@ -5,12 +5,14 @@ namespace HeavenTool.IO;
 
 public static class HashManager
 {
-    private static readonly string KNOWN_TYPES_PATH = Path.Combine("extra", "known-types.txt");
+    private static readonly string KNOWN_TYPES_PATH = Path.Combine(AppContext.BaseDirectory, "extra", "known-types.txt");
 
     public static readonly Dictionary<string, DataType> KnownTypes = [];
-    public static readonly Dictionary<uint, string> CRCHashes = [];
-    public static readonly Dictionary<uint, string> MurmurHashes = [];
-    public static readonly Dictionary<uint, List<BCSV_CRC32Value>> EnumHashes = [];
+    public static readonly Dictionary<uint, string> CRC32_Hashes = [];
+    public static readonly Dictionary<uint, string> MMH3_Hashes = [];
+
+    public static readonly Dictionary<uint, List<CRC32_Entry>> EnumListCRC32 = [];
+    public static readonly Dictionary<uint, List<MMH3_Entry>> EnumListMMH3 = [];
 
     private static bool isInitialized;
     public static void InitializeHashes()
@@ -20,36 +22,35 @@ public static class HashManager
         Console.WriteLine("[BCSV] Initializing Hashes...");
         isInitialized = true;
 
-        string crcHashes = Path.Combine("extra", "hashes");
-        string murmurHashes = Path.Combine("extra", "murmur3-hashes");
+        string crcHashes = Path.Combine(AppContext.BaseDirectory, "extra", "hashes");
+        string murmurHashes = Path.Combine(AppContext.BaseDirectory, "extra", "murmur3-hashes");
 
         // Create directory if they don't exist
         Directory.CreateDirectory(crcHashes);
         Directory.CreateDirectory(murmurHashes);
 
-        foreach (var file in Directory.GetFiles(crcHashes))
+        foreach (var file in Directory.GetFiles(crcHashes, "*.txt"))
+        {
+            if (Path.GetExtension(file) != ".txt") continue;
+
+            foreach (string hashStr in File.ReadAllLines(file))
+                CRC32_Hashes.TryAdd(hashStr.ToCRC32(), hashStr);
+
+        }
+
+        Console.WriteLine("[BCSV] Loaded {0} CRC32 Hashes", CRC32_Hashes.Count);
+
+        foreach (var file in Directory.GetFiles(murmurHashes, "*.txt"))
         {
             if (Path.GetExtension(file) != ".txt")
                 continue;
 
             foreach (string hashStr in File.ReadAllLines(file))
-                CRCHashes.TryAdd(hashStr.ToCRC32(), hashStr);
+                MMH3_Hashes.TryAdd(hashStr.ToMurmur(), hashStr);
 
         }
 
-        Console.WriteLine("[BCSV] Loaded {0} CRC32 Hashes", CRCHashes.Count);
-
-        foreach (var file in Directory.GetFiles(murmurHashes))
-        {
-            if (Path.GetExtension(file) != ".txt")
-                continue;
-
-            foreach (string hashStr in File.ReadAllLines(file))
-                MurmurHashes.TryAdd(hashStr.ToMurmur(), hashStr);
-
-        }
-
-        Console.WriteLine("[BCSV] Loaded {0} Murmur3 Hashes", MurmurHashes.Count);
+        Console.WriteLine("[BCSV] Loaded {0} Murmur3 Hashes", MMH3_Hashes.Count);
 
         LoadEnumHashes();
         LoadKnownTypes();
@@ -92,18 +93,18 @@ public static class HashManager
             bool parsedSuccessfully = uint.TryParse(fileName, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out uint enumHash);
             if (parsedSuccessfully)
             {
-                if (!EnumHashes.ContainsKey(enumHash))
-                    EnumHashes.Add(enumHash, []);
+                if (!EnumListCRC32.ContainsKey(enumHash))
+                    EnumListCRC32.Add(enumHash, []);
 
-                var collection = EnumHashes[enumHash];
+                var collection = EnumListCRC32[enumHash];
                 foreach (string hashStr in File.ReadAllLines(file))
                 {
                     uint hash = hashStr.ToCRC32();
 
                     if (!collection.Any(x => x.Value == hash))
-                        collection.Add(new BCSV_CRC32Value(hash));
+                        collection.Add(new CRC32_Entry(hash));
 
-                    CRCHashes.TryAdd(hash, hashStr);
+                    CRC32_Hashes.TryAdd(hash, hashStr);
                 }
             }
         }
@@ -120,12 +121,22 @@ public static class HashManager
     }
 }
 
-public class BCSV_CRC32Value(uint val)
+public class CRC32_Entry(uint val)
 {
     public uint Value { get; private set; } = val;
 
     public override string ToString()
     {
-        return HashManager.CRCHashes.TryGetValue(Value, out string value) ? value : Value.ToString("x");
+        return HashManager.CRC32_Hashes.TryGetValue(Value, out string value) ? value : Value.ToString("x");
+    }
+}
+
+public class MMH3_Entry(uint val)
+{
+    public uint Value { get; private set; } = val;
+
+    public override string ToString()
+    {
+        return HashManager.MMH3_Hashes.TryGetValue(Value, out string value) ? value : Value.ToString("x");
     }
 }

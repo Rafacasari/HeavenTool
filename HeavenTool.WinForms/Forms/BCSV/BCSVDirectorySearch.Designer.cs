@@ -28,144 +28,162 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.directoryPath = new System.Windows.Forms.TextBox();
-            this.selectDirectoryButton = new System.Windows.Forms.Button();
-            this.searchButton = new System.Windows.Forms.Button();
-            this.openFolderDialog = new System.Windows.Forms.OpenFileDialog();
-            this.containButton = new System.Windows.Forms.RadioButton();
-            this.exactlyButton = new System.Windows.Forms.RadioButton();
-            this.searchField = new System.Windows.Forms.TextBox();
-            this.textLabel = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.foundHits = new System.Windows.Forms.TreeView();
-            this.SuspendLayout();
+            directoryPath = new System.Windows.Forms.TextBox();
+            selectDirectoryButton = new System.Windows.Forms.Button();
+            searchButton = new System.Windows.Forms.Button();
+            openFolderDialog = new System.Windows.Forms.OpenFileDialog();
+            containButton = new System.Windows.Forms.RadioButton();
+            exactlyButton = new System.Windows.Forms.RadioButton();
+            searchField = new System.Windows.Forms.TextBox();
+            textLabel = new System.Windows.Forms.Label();
+            label1 = new System.Windows.Forms.Label();
+            foundHits = new System.Windows.Forms.TreeView();
+            SuspendLayout();
             // 
             // directoryPath
             // 
-            this.directoryPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.directoryPath.Location = new System.Drawing.Point(12, 11);
-            this.directoryPath.Name = "directoryPath";
-            this.directoryPath.Size = new System.Drawing.Size(210, 20);
-            this.directoryPath.TabIndex = 0;
+            directoryPath.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            directoryPath.BackColor = System.Drawing.Color.FromArgb(90, 90, 90);
+            directoryPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            directoryPath.Font = new System.Drawing.Font("Segoe UI", 14F);
+            directoryPath.ForeColor = System.Drawing.SystemColors.ButtonShadow;
+            directoryPath.Location = new System.Drawing.Point(14, 12);
+            directoryPath.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            directoryPath.Name = "directoryPath";
+            directoryPath.Size = new System.Drawing.Size(244, 25);
+            directoryPath.TabIndex = 0;
             // 
             // selectDirectoryButton
             // 
-            this.selectDirectoryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.selectDirectoryButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
-            this.selectDirectoryButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.selectDirectoryButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.selectDirectoryButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.selectDirectoryButton.Location = new System.Drawing.Point(228, 9);
-            this.selectDirectoryButton.Name = "selectDirectoryButton";
-            this.selectDirectoryButton.Size = new System.Drawing.Size(109, 23);
-            this.selectDirectoryButton.TabIndex = 1;
-            this.selectDirectoryButton.Text = "Select Directory";
-            this.selectDirectoryButton.UseVisualStyleBackColor = false;
-            this.selectDirectoryButton.Click += new System.EventHandler(this.selectDirectoryButton_Click);
+            selectDirectoryButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            selectDirectoryButton.BackColor = System.Drawing.Color.FromArgb(70, 70, 70);
+            selectDirectoryButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(80, 80, 80);
+            selectDirectoryButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            selectDirectoryButton.ForeColor = System.Drawing.Color.FromArgb(230, 230, 230);
+            selectDirectoryButton.Location = new System.Drawing.Point(266, 12);
+            selectDirectoryButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            selectDirectoryButton.Name = "selectDirectoryButton";
+            selectDirectoryButton.Size = new System.Drawing.Size(127, 25);
+            selectDirectoryButton.TabIndex = 1;
+            selectDirectoryButton.Text = "Select Directory";
+            selectDirectoryButton.UseVisualStyleBackColor = false;
+            selectDirectoryButton.Click += SelectDirectoryButton_Click;
             // 
             // searchButton
             // 
-            this.searchButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.searchButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(70)))), ((int)(((byte)(70)))));
-            this.searchButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.searchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.searchButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.searchButton.Location = new System.Drawing.Point(228, 62);
-            this.searchButton.Name = "searchButton";
-            this.searchButton.Size = new System.Drawing.Size(109, 23);
-            this.searchButton.TabIndex = 2;
-            this.searchButton.Text = "Search";
-            this.searchButton.UseVisualStyleBackColor = false;
-            this.searchButton.Click += new System.EventHandler(this.searchButton_Click);
+            searchButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            searchButton.BackColor = System.Drawing.Color.FromArgb(70, 70, 70);
+            searchButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(80, 80, 80);
+            searchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            searchButton.ForeColor = System.Drawing.Color.FromArgb(230, 230, 230);
+            searchButton.Location = new System.Drawing.Point(235, 71);
+            searchButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            searchButton.Name = "searchButton";
+            searchButton.Size = new System.Drawing.Size(157, 26);
+            searchButton.TabIndex = 2;
+            searchButton.Text = "Search";
+            searchButton.UseVisualStyleBackColor = false;
+            searchButton.Click += SearchButton_Click;
             // 
             // openFolderDialog
             // 
-            this.openFolderDialog.FileName = "openFileDialog1";
+            openFolderDialog.FileName = "openFileDialog1";
             // 
             // containButton
             // 
-            this.containButton.AutoSize = true;
-            this.containButton.Checked = true;
-            this.containButton.Location = new System.Drawing.Point(12, 65);
-            this.containButton.Name = "containButton";
-            this.containButton.Size = new System.Drawing.Size(61, 17);
-            this.containButton.TabIndex = 3;
-            this.containButton.TabStop = true;
-            this.containButton.Text = "Contain";
-            this.containButton.UseVisualStyleBackColor = true;
+            containButton.AutoSize = true;
+            containButton.Checked = true;
+            containButton.ForeColor = System.Drawing.SystemColors.ButtonShadow;
+            containButton.Location = new System.Drawing.Point(14, 75);
+            containButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            containButton.Name = "containButton";
+            containButton.Size = new System.Drawing.Size(67, 19);
+            containButton.TabIndex = 3;
+            containButton.TabStop = true;
+            containButton.Text = "Contain";
+            containButton.UseVisualStyleBackColor = true;
             // 
             // exactlyButton
             // 
-            this.exactlyButton.AutoSize = true;
-            this.exactlyButton.Location = new System.Drawing.Point(79, 65);
-            this.exactlyButton.Name = "exactlyButton";
-            this.exactlyButton.Size = new System.Drawing.Size(59, 17);
-            this.exactlyButton.TabIndex = 4;
-            this.exactlyButton.Text = "Exactly";
-            this.exactlyButton.UseVisualStyleBackColor = true;
+            exactlyButton.AutoSize = true;
+            exactlyButton.ForeColor = System.Drawing.SystemColors.ButtonShadow;
+            exactlyButton.Location = new System.Drawing.Point(92, 75);
+            exactlyButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            exactlyButton.Name = "exactlyButton";
+            exactlyButton.Size = new System.Drawing.Size(61, 19);
+            exactlyButton.TabIndex = 4;
+            exactlyButton.Text = "Exactly";
+            exactlyButton.UseVisualStyleBackColor = true;
             // 
             // searchField
             // 
-            this.searchField.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.searchField.Location = new System.Drawing.Point(46, 37);
-            this.searchField.Name = "searchField";
-            this.searchField.Size = new System.Drawing.Size(291, 20);
-            this.searchField.TabIndex = 5;
+            searchField.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            searchField.BackColor = System.Drawing.Color.FromArgb(90, 90, 90);
+            searchField.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            searchField.Font = new System.Drawing.Font("Segoe UI", 10F);
+            searchField.ForeColor = System.Drawing.SystemColors.ButtonShadow;
+            searchField.Location = new System.Drawing.Point(53, 44);
+            searchField.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            searchField.Name = "searchField";
+            searchField.Size = new System.Drawing.Size(339, 18);
+            searchField.TabIndex = 5;
             // 
             // textLabel
             // 
-            this.textLabel.AutoSize = true;
-            this.textLabel.Location = new System.Drawing.Point(12, 40);
-            this.textLabel.Name = "textLabel";
-            this.textLabel.Size = new System.Drawing.Size(28, 13);
-            this.textLabel.TabIndex = 6;
-            this.textLabel.Text = "Text";
+            textLabel.AutoSize = true;
+            textLabel.Location = new System.Drawing.Point(17, 46);
+            textLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            textLabel.Name = "textLabel";
+            textLabel.Size = new System.Drawing.Size(28, 15);
+            textLabel.TabIndex = 6;
+            textLabel.Text = "Text";
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 88);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(28, 13);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "Hits:";
+            label1.AutoSize = true;
+            label1.ForeColor = System.Drawing.SystemColors.WindowFrame;
+            label1.Location = new System.Drawing.Point(14, 102);
+            label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(31, 15);
+            label1.TabIndex = 8;
+            label1.Text = "Hits:";
             // 
             // foundHits
             // 
-            this.foundHits.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.foundHits.Location = new System.Drawing.Point(12, 104);
-            this.foundHits.Name = "foundHits";
-            this.foundHits.Size = new System.Drawing.Size(325, 99);
-            this.foundHits.TabIndex = 10;
+            foundHits.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            foundHits.BackColor = System.Drawing.Color.FromArgb(60, 60, 60);
+            foundHits.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            foundHits.Location = new System.Drawing.Point(14, 120);
+            foundHits.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            foundHits.Name = "foundHits";
+            foundHits.Size = new System.Drawing.Size(378, 114);
+            foundHits.TabIndex = 10;
             // 
-            // DirectorySearch
+            // BCSVDirectorySearch
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.ClientSize = new System.Drawing.Size(349, 215);
-            this.Controls.Add(this.foundHits);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.textLabel);
-            this.Controls.Add(this.searchField);
-            this.Controls.Add(this.exactlyButton);
-            this.Controls.Add(this.containButton);
-            this.Controls.Add(this.searchButton);
-            this.Controls.Add(this.selectDirectoryButton);
-            this.Controls.Add(this.directoryPath);
-            this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "DirectorySearch";
-            this.ShowIcon = false;
-            this.Text = "Search in Directory";
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            BackColor = System.Drawing.Color.FromArgb(51, 51, 51);
+            ClientSize = new System.Drawing.Size(407, 248);
+            Controls.Add(foundHits);
+            Controls.Add(label1);
+            Controls.Add(textLabel);
+            Controls.Add(searchField);
+            Controls.Add(exactlyButton);
+            Controls.Add(containButton);
+            Controls.Add(searchButton);
+            Controls.Add(selectDirectoryButton);
+            Controls.Add(directoryPath);
+            ForeColor = System.Drawing.Color.FromArgb(230, 230, 230);
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "BCSVDirectorySearch";
+            ShowIcon = false;
+            Text = "Search in Directory";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

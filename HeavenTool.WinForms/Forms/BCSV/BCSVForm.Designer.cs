@@ -32,11 +32,11 @@ namespace HeavenTool
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle11 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle12 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle13 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle14 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle15 = new DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BCSVForm));
             topMenuStrip = new DarkMenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
@@ -72,6 +72,7 @@ namespace HeavenTool
             headerHashToolStripMenuItem = new ToolStripMenuItem();
             exportValuesAstxtFileToolStripMenuItem = new ToolStripMenuItem();
             dragInfo = new Label();
+            hideColumnToolStripMenuItem = new ToolStripMenuItem();
             topMenuStrip.SuspendLayout();
             statusStripMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)mainDataGridView).BeginInit();
@@ -317,32 +318,32 @@ namespace HeavenTool
             mainDataGridView.AllowUserToAddRows = false;
             mainDataGridView.AllowUserToDeleteRows = false;
             mainDataGridView.AllowUserToOrderColumns = true;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(30, 30, 30);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            mainDataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle11.BackColor = System.Drawing.Color.FromArgb(30, 30, 30);
+            dataGridViewCellStyle11.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            mainDataGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle11;
             mainDataGridView.BackgroundColor = System.Drawing.Color.FromArgb(60, 60, 60);
             mainDataGridView.BorderStyle = BorderStyle.None;
             mainDataGridView.ClipboardCopyMode = DataGridViewClipboardCopyMode.Disable;
             mainDataGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(80, 80, 80);
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(240, 240, 240);
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-            mainDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle12.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle12.BackColor = System.Drawing.Color.FromArgb(80, 80, 80);
+            dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            dataGridViewCellStyle12.ForeColor = System.Drawing.Color.FromArgb(240, 240, 240);
+            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle12.WrapMode = DataGridViewTriState.True;
+            mainDataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle12;
             mainDataGridView.ColumnHeadersHeight = 25;
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
-            mainDataGridView.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle13.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle13.WrapMode = DataGridViewTriState.False;
+            mainDataGridView.DefaultCellStyle = dataGridViewCellStyle13;
             mainDataGridView.Dock = DockStyle.Fill;
             mainDataGridView.EnableHeadersVisualStyles = false;
             mainDataGridView.GridColor = System.Drawing.Color.FromArgb(60, 60, 60);
@@ -350,19 +351,19 @@ namespace HeavenTool
             mainDataGridView.Margin = new Padding(4, 3, 4, 3);
             mainDataGridView.Name = "mainDataGridView";
             mainDataGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(70, 70, 70);
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.True;
-            mainDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle14.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle14.BackColor = System.Drawing.Color.FromArgb(70, 70, 70);
+            dataGridViewCellStyle14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            dataGridViewCellStyle14.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle14.WrapMode = DataGridViewTriState.True;
+            mainDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle14;
             mainDataGridView.RowHeadersWidth = 25;
             mainDataGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(51, 51, 51);
-            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.White;
-            mainDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle15.BackColor = System.Drawing.Color.FromArgb(51, 51, 51);
+            dataGridViewCellStyle15.ForeColor = System.Drawing.Color.White;
+            mainDataGridView.RowsDefaultCellStyle = dataGridViewCellStyle15;
             mainDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             mainDataGridView.Size = new System.Drawing.Size(684, 341);
             mainDataGridView.StandardTab = true;
@@ -378,9 +379,9 @@ namespace HeavenTool
             // validHeaderContextMenu
             // 
             validHeaderContextMenu.BackColor = System.Drawing.Color.FromArgb(60, 60, 60);
-            validHeaderContextMenu.Items.AddRange(new ToolStripItem[] { viewAsToolStripMenuItem, copyToolStripMenuItem, exportValuesAstxtFileToolStripMenuItem });
+            validHeaderContextMenu.Items.AddRange(new ToolStripItem[] { hideColumnToolStripMenuItem, viewAsToolStripMenuItem, copyToolStripMenuItem, exportValuesAstxtFileToolStripMenuItem });
             validHeaderContextMenu.Name = "validHeaderContextMenu";
-            validHeaderContextMenu.Size = new System.Drawing.Size(196, 70);
+            validHeaderContextMenu.Size = new System.Drawing.Size(196, 114);
             // 
             // viewAsToolStripMenuItem
             // 
@@ -401,7 +402,7 @@ namespace HeavenTool
             // 
             headerNameToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             headerNameToolStripMenuItem.Name = "headerNameToolStripMenuItem";
-            headerNameToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            headerNameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             headerNameToolStripMenuItem.Text = "Header Name";
             headerNameToolStripMenuItem.Click += HeaderNameToolStripMenuItem_Click;
             // 
@@ -409,7 +410,7 @@ namespace HeavenTool
             // 
             headerHashToolStripMenuItem.ForeColor = System.Drawing.Color.White;
             headerHashToolStripMenuItem.Name = "headerHashToolStripMenuItem";
-            headerHashToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            headerHashToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             headerHashToolStripMenuItem.Text = "Header Hash";
             headerHashToolStripMenuItem.Click += HeaderHashToolStripMenuItem_Click;
             // 
@@ -434,7 +435,15 @@ namespace HeavenTool
             dragInfo.Text = "Drag a file here\r\nor use File > Open";
             dragInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // BCSVRework
+            // hideColumnToolStripMenuItem
+            // 
+            hideColumnToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            hideColumnToolStripMenuItem.Name = "hideColumnToolStripMenuItem";
+            hideColumnToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            hideColumnToolStripMenuItem.Text = "Hide Column";
+            hideColumnToolStripMenuItem.Click += HideColumnToolStripMenuItem_Click;
+            // 
+            // BCSVForm
             // 
             AllowDrop = true;
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -449,7 +458,7 @@ namespace HeavenTool
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = topMenuStrip;
             Margin = new Padding(4, 3, 4, 3);
-            Name = "BCSVRework";
+            Name = "BCSVForm";
             Text = "ACNH Heaven Tool | v1.0.0 | BCSV Editor";
             FormClosing += MainFrm_FormClosing;
             DragDrop += MainFrm_DragDrop;
@@ -499,6 +508,7 @@ namespace HeavenTool
         private Label dragInfo;
         private ToolStripMenuItem viewToolStripMenuItem;
         private ToolStripMenuItem viewColumnsMenuItem;
+        private ToolStripMenuItem hideColumnToolStripMenuItem;
     }
 }
 

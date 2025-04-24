@@ -1,5 +1,9 @@
-﻿namespace HeavenTool.Forms.Components;
+﻿using System.ComponentModel;
 
+namespace HeavenTool.Forms.Components;
+
+[ToolboxItem(true)]
+[DisplayName("Int32 TextBox")]
 public class Int32TextBox : ValidatingTextBox
 {
     protected override void OnTextValidating(object sender, TextValidatingEventArgs e)
@@ -8,6 +12,8 @@ public class Int32TextBox : ValidatingTextBox
     }
 }
 
+[ToolboxItem(true)]
+[DisplayName("UInt32 TextBox")]
 public class UInt64TextBox : ValidatingTextBox
 {
     protected override void OnTextValidating(object sender, TextValidatingEventArgs e)
@@ -16,6 +22,8 @@ public class UInt64TextBox : ValidatingTextBox
     }
 }
 
+[ToolboxItem(true)]
+[DisplayName("Byte TextBox")]
 public class ByteTextBox : ValidatingTextBox
 {
     protected override void OnTextValidating(object sender, TextValidatingEventArgs e)
@@ -24,6 +32,8 @@ public class ByteTextBox : ValidatingTextBox
     }
 }
 
+[ToolboxItem(true)]
+[DisplayName("UShort TextBox")]
 public class UInt16TextBox : ValidatingTextBox
 {
     protected override void OnTextValidating(object sender, TextValidatingEventArgs e)

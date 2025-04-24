@@ -29,149 +29,176 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SearchBox));
-            this.searchValue = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.findButton = new System.Windows.Forms.Button();
-            this.containsButton = new System.Windows.Forms.RadioButton();
-            this.exactlyButton = new System.Windows.Forms.RadioButton();
-            this.matchesCount = new System.Windows.Forms.Label();
-            this.reverseDirectionCheckbox = new System.Windows.Forms.CheckBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.caseSensitivivtyCheckbox = new System.Windows.Forms.CheckBox();
-            this.groupBox1.SuspendLayout();
-            this.SuspendLayout();
+            searchValue = new System.Windows.Forms.TextBox();
+            label1 = new System.Windows.Forms.Label();
+            findButton = new System.Windows.Forms.Button();
+            containsButton = new System.Windows.Forms.RadioButton();
+            exactlyButton = new System.Windows.Forms.RadioButton();
+            matchesCount = new System.Windows.Forms.Label();
+            reverseDirectionCheckbox = new System.Windows.Forms.CheckBox();
+            groupBox1 = new System.Windows.Forms.GroupBox();
+            caseSensitivivtyCheckbox = new System.Windows.Forms.CheckBox();
+            panel1 = new System.Windows.Forms.Panel();
+            groupBox1.SuspendLayout();
+            panel1.SuspendLayout();
+            SuspendLayout();
             // 
             // searchValue
             // 
-            this.searchValue.Location = new System.Drawing.Point(67, 10);
-            this.searchValue.Name = "searchValue";
-            this.searchValue.Size = new System.Drawing.Size(295, 20);
-            this.searchValue.TabIndex = 0;
-            this.searchValue.TextChanged += new System.EventHandler(this.searchValue_TextChanged);
+            searchValue.BackColor = System.Drawing.Color.FromArgb(90, 90, 90);
+            searchValue.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            searchValue.ForeColor = System.Drawing.SystemColors.ScrollBar;
+            searchValue.Location = new System.Drawing.Point(4, 4);
+            searchValue.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            searchValue.Name = "searchValue";
+            searchValue.Size = new System.Drawing.Size(343, 16);
+            searchValue.TabIndex = 0;
+            searchValue.TextChanged += searchValue_TextChanged;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(13, 14);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(34, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Value";
+            label1.AutoSize = true;
+            label1.ForeColor = System.Drawing.Color.FromArgb(210, 210, 210);
+            label1.Location = new System.Drawing.Point(15, 16);
+            label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(35, 15);
+            label1.TabIndex = 1;
+            label1.Text = "Value";
             // 
             // findButton
             // 
-            this.findButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(65)))), ((int)(((byte)(65)))));
-            this.findButton.Enabled = false;
-            this.findButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.findButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
-            this.findButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(60)))));
-            this.findButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.findButton.ForeColor = System.Drawing.Color.White;
-            this.findButton.Location = new System.Drawing.Point(218, 113);
-            this.findButton.Name = "findButton";
-            this.findButton.Size = new System.Drawing.Size(144, 24);
-            this.findButton.TabIndex = 2;
-            this.findButton.Text = "Next";
-            this.findButton.UseVisualStyleBackColor = false;
-            this.findButton.Click += new System.EventHandler(this.findButton_Click);
+            findButton.BackColor = System.Drawing.Color.FromArgb(65, 65, 65);
+            findButton.Enabled = false;
+            findButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(30, 30, 30);
+            findButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(40, 40, 40);
+            findButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(50, 50, 60);
+            findButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            findButton.ForeColor = System.Drawing.Color.Gainsboro;
+            findButton.Location = new System.Drawing.Point(254, 130);
+            findButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            findButton.Name = "findButton";
+            findButton.Size = new System.Drawing.Size(168, 28);
+            findButton.TabIndex = 2;
+            findButton.Text = "Next";
+            findButton.UseVisualStyleBackColor = false;
+            findButton.Click += findButton_Click;
             // 
             // containsButton
             // 
-            this.containsButton.AutoSize = true;
-            this.containsButton.Checked = true;
-            this.containsButton.ForeColor = System.Drawing.Color.White;
-            this.containsButton.Location = new System.Drawing.Point(11, 19);
-            this.containsButton.Name = "containsButton";
-            this.containsButton.Size = new System.Drawing.Size(66, 17);
-            this.containsButton.TabIndex = 3;
-            this.containsButton.TabStop = true;
-            this.containsButton.Text = "Contains";
-            this.containsButton.UseVisualStyleBackColor = true;
+            containsButton.AutoSize = true;
+            containsButton.Checked = true;
+            containsButton.ForeColor = System.Drawing.Color.Gainsboro;
+            containsButton.Location = new System.Drawing.Point(13, 22);
+            containsButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            containsButton.Name = "containsButton";
+            containsButton.Size = new System.Drawing.Size(72, 19);
+            containsButton.TabIndex = 3;
+            containsButton.TabStop = true;
+            containsButton.Text = "Contains";
+            containsButton.UseVisualStyleBackColor = true;
             // 
             // exactlyButton
             // 
-            this.exactlyButton.AutoSize = true;
-            this.exactlyButton.ForeColor = System.Drawing.Color.White;
-            this.exactlyButton.Location = new System.Drawing.Point(83, 19);
-            this.exactlyButton.Name = "exactlyButton";
-            this.exactlyButton.Size = new System.Drawing.Size(59, 17);
-            this.exactlyButton.TabIndex = 4;
-            this.exactlyButton.Text = "Exactly";
-            this.exactlyButton.UseVisualStyleBackColor = true;
+            exactlyButton.AutoSize = true;
+            exactlyButton.ForeColor = System.Drawing.Color.Gainsboro;
+            exactlyButton.Location = new System.Drawing.Point(97, 22);
+            exactlyButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            exactlyButton.Name = "exactlyButton";
+            exactlyButton.Size = new System.Drawing.Size(61, 19);
+            exactlyButton.TabIndex = 4;
+            exactlyButton.Text = "Exactly";
+            exactlyButton.UseVisualStyleBackColor = true;
             // 
             // matchesCount
             // 
-            this.matchesCount.AutoSize = true;
-            this.matchesCount.ForeColor = System.Drawing.Color.White;
-            this.matchesCount.Location = new System.Drawing.Point(13, 119);
-            this.matchesCount.Name = "matchesCount";
-            this.matchesCount.Size = new System.Drawing.Size(94, 13);
-            this.matchesCount.TabIndex = 5;
-            this.matchesCount.Text = "No matches found";
+            matchesCount.AutoSize = true;
+            matchesCount.ForeColor = System.Drawing.Color.FromArgb(210, 210, 210);
+            matchesCount.Location = new System.Drawing.Point(15, 137);
+            matchesCount.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            matchesCount.Name = "matchesCount";
+            matchesCount.Size = new System.Drawing.Size(106, 15);
+            matchesCount.TabIndex = 5;
+            matchesCount.Text = "No matches found";
             // 
             // reverseDirectionCheckbox
             // 
-            this.reverseDirectionCheckbox.AutoSize = true;
-            this.reverseDirectionCheckbox.ForeColor = System.Drawing.Color.White;
-            this.reverseDirectionCheckbox.Location = new System.Drawing.Point(11, 42);
-            this.reverseDirectionCheckbox.Name = "reverseDirectionCheckbox";
-            this.reverseDirectionCheckbox.Size = new System.Drawing.Size(111, 17);
-            this.reverseDirectionCheckbox.TabIndex = 6;
-            this.reverseDirectionCheckbox.Text = "Reverse Direction";
-            this.reverseDirectionCheckbox.UseVisualStyleBackColor = true;
+            reverseDirectionCheckbox.AutoSize = true;
+            reverseDirectionCheckbox.ForeColor = System.Drawing.Color.Gainsboro;
+            reverseDirectionCheckbox.Location = new System.Drawing.Point(13, 48);
+            reverseDirectionCheckbox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            reverseDirectionCheckbox.Name = "reverseDirectionCheckbox";
+            reverseDirectionCheckbox.Size = new System.Drawing.Size(117, 19);
+            reverseDirectionCheckbox.TabIndex = 6;
+            reverseDirectionCheckbox.Text = "Reverse Direction";
+            reverseDirectionCheckbox.UseVisualStyleBackColor = true;
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.caseSensitivivtyCheckbox);
-            this.groupBox1.Controls.Add(this.exactlyButton);
-            this.groupBox1.Controls.Add(this.reverseDirectionCheckbox);
-            this.groupBox1.Controls.Add(this.containsButton);
-            this.groupBox1.ForeColor = System.Drawing.Color.White;
-            this.groupBox1.Location = new System.Drawing.Point(12, 36);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(350, 71);
-            this.groupBox1.TabIndex = 7;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Options";
+            groupBox1.Controls.Add(caseSensitivivtyCheckbox);
+            groupBox1.Controls.Add(exactlyButton);
+            groupBox1.Controls.Add(reverseDirectionCheckbox);
+            groupBox1.Controls.Add(containsButton);
+            groupBox1.ForeColor = System.Drawing.Color.FromArgb(210, 210, 210);
+            groupBox1.Location = new System.Drawing.Point(14, 42);
+            groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            groupBox1.Size = new System.Drawing.Size(408, 82);
+            groupBox1.TabIndex = 7;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Options";
             // 
             // caseSensitivivtyCheckbox
             // 
-            this.caseSensitivivtyCheckbox.AutoSize = true;
-            this.caseSensitivivtyCheckbox.Location = new System.Drawing.Point(128, 42);
-            this.caseSensitivivtyCheckbox.Name = "caseSensitivivtyCheckbox";
-            this.caseSensitivivtyCheckbox.Size = new System.Drawing.Size(96, 17);
-            this.caseSensitivivtyCheckbox.TabIndex = 7;
-            this.caseSensitivivtyCheckbox.Text = "Case Sensitive";
-            this.caseSensitivivtyCheckbox.UseVisualStyleBackColor = true;
+            caseSensitivivtyCheckbox.AutoSize = true;
+            caseSensitivivtyCheckbox.ForeColor = System.Drawing.Color.Gainsboro;
+            caseSensitivivtyCheckbox.Location = new System.Drawing.Point(149, 48);
+            caseSensitivivtyCheckbox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            caseSensitivivtyCheckbox.Name = "caseSensitivivtyCheckbox";
+            caseSensitivivtyCheckbox.Size = new System.Drawing.Size(100, 19);
+            caseSensitivivtyCheckbox.TabIndex = 7;
+            caseSensitivivtyCheckbox.Text = "Case Sensitive";
+            caseSensitivivtyCheckbox.UseVisualStyleBackColor = true;
             // 
-            // BCSVSearchBox
+            // panel1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.ClientSize = new System.Drawing.Size(374, 149);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.matchesCount);
-            this.Controls.Add(this.findButton);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.searchValue);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "BCSVSearchBox";
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.Text = "Search";
-            this.Activated += new System.EventHandler(this.BCSVSearchBox_Activated);
-            this.Deactivate += new System.EventHandler(this.BCSVSearchBox_Deactivate);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BCSVSearchBox_FormClosing);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            panel1.BackColor = System.Drawing.Color.FromArgb(90, 90, 90);
+            panel1.Controls.Add(searchValue);
+            panel1.Location = new System.Drawing.Point(71, 12);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(351, 24);
+            panel1.TabIndex = 8;
+            // 
+            // SearchBox
+            // 
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            ClientSize = new System.Drawing.Size(436, 172);
+            Controls.Add(panel1);
+            Controls.Add(groupBox1);
+            Controls.Add(matchesCount);
+            Controls.Add(findButton);
+            Controls.Add(label1);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "SearchBox";
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            Text = "Search";
+            Activated += BCSVSearchBox_Activated;
+            Deactivate += BCSVSearchBox_Deactivate;
+            FormClosing += BCSVSearchBox_FormClosing;
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -185,5 +212,6 @@
         private System.Windows.Forms.CheckBox reverseDirectionCheckbox;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox caseSensitivivtyCheckbox;
+        private System.Windows.Forms.Panel panel1;
     }
 }

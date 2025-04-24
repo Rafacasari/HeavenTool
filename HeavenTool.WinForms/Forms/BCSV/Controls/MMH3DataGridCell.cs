@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace HeavenTool.Forms.BCSV.Controls;
 
-public class CRC32DataGridCell : DataGridViewTextBoxCell
+public class MMH3DataGridCell : DataGridViewTextBoxCell
 {
     public override Type EditType => typeof(DataGridViewTextBoxEditingControl);
 
@@ -19,7 +19,7 @@ public class CRC32DataGridCell : DataGridViewTextBoxCell
         if (formattedValue == null) return (uint)0;
 
         if (formattedValue is string s)
-            return s.ToCRC32();
+            return s.ToMurmur();
 
         return base.ParseFormattedValue(formattedValue, cellStyle, formattedValueTypeConverter, valueTypeConverter);
     }

@@ -1848,3 +1848,8 @@ MainIslandItemLayer u8
 MainIslandItemSwitch u8
 NotWithTitle u8
 PlaceNpcNum s8
+MainIslandItemDirection u8
+MainIslandObjectKind u8
+EditBaseUnitX s16
+EditBaseUnitZ s16
+EventNumLimit u16

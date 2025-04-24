@@ -176,7 +176,7 @@ public partial class HeavenMain : Form
                             {
                                 if (entry[fieldIndex] is uint fieldHash && !parsedList.Contains(fieldHash))
                                 {
-                                    if (HashManager.CRCHashes.TryGetValue(fieldHash, out string value))
+                                    if (HashManager.CRC32_Hashes.TryGetValue(fieldHash, out string value))
                                         registers.Add(value);
 
 
@@ -216,7 +216,7 @@ public partial class HeavenMain : Form
                 var bcsvFile = new BinaryCSV(stream.ToArray());
 
                 foreach (var item in bcsvFile.Fields)
-                    if (HashManager.CRCHashes.TryGetValue(item.Hash, out string hashName) && !usedHashesHeaders.Contains(hashName))
+                    if (HashManager.CRC32_Hashes.TryGetValue(item.Hash, out string hashName) && !usedHashesHeaders.Contains(hashName))
                         usedHashesHeaders.Add(hashName);
 
 
@@ -224,7 +224,7 @@ public partial class HeavenMain : Form
                     foreach (var entryField in entry)
                         if (entryField is uint hashValue && (hashValue > 100000))
                         {
-                            if (HashManager.CRCHashes.TryGetValue(hashValue, out string hashName) && !usedHashesValues.Contains(hashName))
+                            if (HashManager.CRC32_Hashes.TryGetValue(hashValue, out string hashName) && !usedHashesValues.Contains(hashName))
                                 usedHashesValues.Add(hashName);
                         }
 

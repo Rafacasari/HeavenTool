@@ -5,97 +5,95 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace HeavenTool.Forms
+namespace HeavenTool.Forms;
+
+public partial class BCSVDirectorySearch : Form
 {
-    public partial class BCSVDirectorySearch : Form
+    public BCSVDirectorySearch()
     {
-        public BCSVDirectorySearch()
+        InitializeComponent();
+    }
+
+    private void SelectDirectoryButton_Click(object sender, EventArgs e)
+    {
+        FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+
+        var result = folderBrowserDialog.ShowDialog();
+
+        if (result == DialogResult.OK)
+            directoryPath.Text = folderBrowserDialog.SelectedPath;
+
+    }
+
+    private void SearchButton_Click(object sender, EventArgs e)
+    {
+        searchButton.Enabled = false;
+        if (Directory.Exists(directoryPath.Text))
         {
-            InitializeComponent();
-        }
-
-        private void selectDirectoryButton_Click(object sender, EventArgs e)
-        {
-            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-
-            var result = folderBrowserDialog.ShowDialog();
-
-            if (result == DialogResult.OK)
-                directoryPath.Text = folderBrowserDialog.SelectedPath;
-
-        }
-
-        private void searchButton_Click(object sender, EventArgs e)
-        {
-            searchButton.Enabled = false;
-            if (Directory.Exists(directoryPath.Text))
+            
+            try
             {
-                
-                try
+                foreach (var file in Directory.GetFiles(directoryPath.Text))
                 {
-                    foreach (var file in Directory.GetFiles(directoryPath.Text))
-                    {
-                        if (Path.GetExtension(file) != ".bcsv")
-                            continue;
+                    if (Path.GetExtension(file) != ".bcsv")
+                        continue;
 
-                        ReadBCSVFileAndSearch(file);
-                    }
+                    ReadBCSVFileAndSearch(file);
                 }
-                catch (Exception ex) {
-                    MessageBox.Show("Error while searching:\n" + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                } 
             }
-
-            searchButton.Enabled = true;
+            catch (Exception ex) {
+                MessageBox.Show("Error while searching:\n" + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } 
         }
 
+        searchButton.Enabled = true;
+    }
 
-        private void ReadBCSVFileAndSearch(string path)
+
+    private void ReadBCSVFileAndSearch(string path)
+    {
+        if (!File.Exists(path))
+            return;
+
+        using var stream = File.OpenRead(path);
+        var bcsvFile = new BinaryCSV(stream.ToArray());
+
+        foreach (var header in bcsvFile.Fields)
         {
-            if (!File.Exists(path))
-                return;
-
-            using var stream = File.OpenRead(path);
-            var bcsvFile = new BinaryCSV(stream.ToArray());
-
-            foreach (var header in bcsvFile.Fields)
+            var name = header.GetTranslatedNameOrHash();
+            if ((containButton.Checked && name.Contains(searchField.Text, StringComparison.CurrentCultureIgnoreCase)) || name == searchField.Text)
             {
-                var name = header.GetTranslatedNameOrHash();
-                if ((containButton.Checked && name.Contains(searchField.Text, StringComparison.CurrentCultureIgnoreCase)) || name == searchField.Text)
+                var key = Path.GetFileNameWithoutExtension(path);
+                if (!foundHits.Nodes.ContainsKey(key))
+                    foundHits.Nodes.Add(key, key);
+
+                var node = foundHits.Nodes[key];
+                node.Nodes.Add($"Header: {name}");
+            }
+        }
+        
+        foreach(var (entry, index) in bcsvFile.Entries.Select((x, y) => (x, y)))
+        {
+            for (int fieldIndex = 0; fieldIndex < entry.Length; fieldIndex++)
+            {
+                object item = entry[fieldIndex];
+                var value = item.ToString();
+                if ((containButton.Checked && value.Contains(searchField.Text, StringComparison.CurrentCultureIgnoreCase)) || value == searchField.Text)
                 {
                     var key = Path.GetFileNameWithoutExtension(path);
                     if (!foundHits.Nodes.ContainsKey(key))
                         foundHits.Nodes.Add(key, key);
 
                     var node = foundHits.Nodes[key];
-                    node.Nodes.Add($"Header: {name}");
+                    var entryField = bcsvFile.Fields[fieldIndex];
+                    if (entryField != null)
+                        node.Nodes.Add($"Entry: {index} | Header: {entryField.GetTranslatedNameOrHash()} | {value} (value)");
+                    else 
+                        node.Nodes.Add($"Entry: {index} | {value} (value)");
                 }
             }
-            
-            foreach(var (entry, index) in bcsvFile.Entries.Select((x, y) => (x, y)))
-            {
-                for (int fieldIndex = 0; fieldIndex < entry.Length; fieldIndex++)
-                {
-                    object item = entry[fieldIndex];
-                    var value = item.ToString();
-                    if ((containButton.Checked && value.Contains(searchField.Text, StringComparison.CurrentCultureIgnoreCase)) || value == searchField.Text)
-                    {
-                        //hitsFound.Items.Add($"{Path.GetFileNameWithoutExtension(path)}: {value} (value)");
-                        var key = Path.GetFileNameWithoutExtension(path);
-                        if (!foundHits.Nodes.ContainsKey(key))
-                            foundHits.Nodes.Add(key, key);
-
-                        var node = foundHits.Nodes[key];
-                        var entryField = bcsvFile.Fields[fieldIndex];
-                        if (entryField != null)
-                            node.Nodes.Add($"Entry: {index} | Header: {entryField.GetTranslatedNameOrHash()} | {value} (value)");
-                        else 
-                            node.Nodes.Add($"Entry: {index} | {value} (value)");
-                    }
-                }
-            }
-
-            bcsvFile = null;
         }
+
+        bcsvFile = null;
     }
 }

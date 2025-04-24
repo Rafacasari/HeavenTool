@@ -4,6 +4,7 @@ using System.Windows.Forms;
 
 namespace HeavenTool.Forms.Components;
 
+[ToolboxItem(false)]
 public class ValidatingTextBox : TextBox
 {
     private string _validText;
