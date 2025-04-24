@@ -18,7 +18,7 @@ namespace HeavenTool;
 
 public partial class BCSVForm : Form, ISearchable
 {
-    private static readonly string originalFormName = "Heaven Tool - New BCSV Editor";
+    private static readonly string originalFormName = "Heaven Tool - BCSV Editor";
     private BinaryCSV LoadedFile { get; set; }
     public BCSVForm()
     {
@@ -34,7 +34,7 @@ public partial class BCSVForm : Form, ISearchable
 
         validHeaderContextMenu.Renderer = new ToolStripProfessionalRenderer(new DarkColorTable());
 
-        // Fixes a visual glitch when scrolling too fast
+        // smooth scrolling
         DrawingControl.SetDoubleBuffered(mainDataGridView);
 
         mainDataGridView.VirtualMode = true;
@@ -42,8 +42,6 @@ public partial class BCSVForm : Form, ISearchable
         mainDataGridView.CellFormatting += MainDataGridView_CellFormatting;
         mainDataGridView.CellValuePushed += MainDataGridView_CellValuePushed;
 
-        mainDataGridView.CellBeginEdit += MainDataGridView_CellBeginEdit;
-        mainDataGridView.CellEndEdit += MainDataGridView_CellEndEdit;
         mainDataGridView.SelectionChanged += MainDataGridView_SelectionChanged;
 
         mainDataGridView.ColumnHeaderMouseClick += MainDataGridView_ColumnHeaderMouseClick;
@@ -94,55 +92,14 @@ public partial class BCSVForm : Form, ISearchable
         mainDataGridView.Invalidate();
     }
 
-    bool waitingForNextSelection = false;
-    private void MainDataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
-    {
-        mainDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        waitingForNextSelection = true;
-    }
-
     private void MainDataGridView_SelectionChanged(object sender, EventArgs e)
     {
-        if (waitingForNextSelection)
-        {
-            waitingForNextSelection = false;
-
-            mainDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            mainDataGridView.ClearSelection();
-            mainDataGridView.CurrentCell = selectedCellOnEdit;
-
-            foreach (DataGridViewCell dataGridViewCell in mainDataGridView.SelectedCells)
-                dataGridViewCell.Selected = false;
-
-            foreach (DataGridViewRow current in selectedRowsOnEdit)
-                current.Selected = true;
-
-            selectedRowsOnEdit = null;
-            selectedCellOnEdit = null;
-        }
-
         if (mainDataGridView.SelectedRows.Count > 1)
             compareRowsToolStripMenuItem.Enabled = true;
         else
             compareRowsToolStripMenuItem.Enabled = false;
 
         ReloadInfo();
-    }
-
-    private DataGridViewCell selectedCellOnEdit;
-    private DataGridViewSelectedRowCollection selectedRowsOnEdit;
-    private void MainDataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
-    {
-        selectedCellOnEdit = mainDataGridView[e.ColumnIndex, e.RowIndex];
-        selectedRowsOnEdit = mainDataGridView.SelectedRows;
-        var currentCell = mainDataGridView.CurrentCell.ColumnIndex;
-
-        mainDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
-
-        foreach (DataGridViewRow current in selectedRowsOnEdit)
-        {
-            mainDataGridView[currentCell, current.Index].Selected = true;
-        }
     }
 
     internal static string GetFormattedValue(object[] values, int index, Field field)
@@ -186,21 +143,48 @@ public partial class BCSVForm : Form, ISearchable
             return;
 
         var column = mainDataGridView.Columns[e.ColumnIndex];
-
         if (column == null || column is not IndexableDataGridColumn indexableColumn) return;
 
+        var targetField = LoadedFile.Fields[indexableColumn.HeaderIndex];
         LoadedFile.Entries[originalIndex][indexableColumn.HeaderIndex] = e.Value;
 
-        var selectedCells = mainDataGridView.SelectedCells;
-        if (selectedCells.Count > 0)
+        if (mainDataGridView.SelectionMode == DataGridViewSelectionMode.CellSelect)
         {
-            foreach (DataGridViewCell selectedCell in selectedCells)
+            // update entries from selected cells, if DataType matches the targetField
+            var selectedCells = mainDataGridView.SelectedCells;
+            if (selectedCells.Count > 0)
             {
-                if (reorderableIndexDictionary.Count < selectedCell.RowIndex) return;
-                var selectedIndex = reorderableIndexDictionary[selectedCell.RowIndex];
+                foreach (DataGridViewCell selectedCell in selectedCells)
+                {
+                    if (selectedCell.RowIndex == e.RowIndex && selectedCell.ColumnIndex == e.ColumnIndex) continue; 
 
-                if (selectedCell.ColumnIndex == e.ColumnIndex && selectedCell.RowIndex != e.RowIndex)
+                    if (selectedCell.OwningColumn is not IndexableDataGridColumn cellColumn) continue;
+                    var cellField = LoadedFile.Fields[cellColumn.HeaderIndex];
+
+                    if (targetField.DataType != cellField.DataType) continue;
+
+                    if (selectedCell.RowIndex >= reorderableIndexDictionary.Count) return;
+                    var selectedIndex = reorderableIndexDictionary[selectedCell.RowIndex];
+
+                    LoadedFile[selectedIndex, cellField] = e.Value;
+                }
+            }
+        }
+        else if (mainDataGridView.SelectionMode == DataGridViewSelectionMode.FullRowSelect)
+        {
+            // update entries from the same column
+            var selectedRows = mainDataGridView.SelectedRows;
+            if (selectedRows.Count > 0)
+            {
+                foreach (DataGridViewRow selectedRow in selectedRows)
+                {
+                    if (selectedRow.Index == e.RowIndex) continue;
+
+                    if (selectedRow.Index >= reorderableIndexDictionary.Count) return;
+                    var selectedIndex = reorderableIndexDictionary[selectedRow.Index];
+
                     LoadedFile.Entries[selectedIndex][indexableColumn.HeaderIndex] = e.Value;
+                }
             }
         }
     }
@@ -1156,4 +1140,18 @@ public partial class BCSVForm : Form, ISearchable
             e.Cancel = true;
     }
     #endregion
+
+    private void RowSelectToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        mainDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        rowSelectToolStripMenuItem.Checked = true;
+        cellSelectToolStripMenuItem.Checked = false;
+    }
+
+    private void CellSelectToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        mainDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
+        rowSelectToolStripMenuItem.Checked = false;
+        cellSelectToolStripMenuItem.Checked = true;
+    }
 }
