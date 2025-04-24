@@ -102,51 +102,21 @@ public partial class BCSVForm : Form, ISearchable
         ReloadInfo();
     }
 
-    internal static string GetFormattedValue(object[] values, int index, Field field)
-    {
-        if (field == null || values == null || index < 0 || index > values.Length)
-            return "Invalid";
-
-        var val = values[index];
-
-        switch (field.DataType)
-        {
-            case DataType.CRC32:
-                {
-                    if (val is not uint hashValue) return "Invalid";
-
-                    var containsKey = HashManager.CRC32_Hashes.ContainsKey(hashValue);
-                    return containsKey ? HashManager.CRC32_Hashes[hashValue] : hashValue.ToString("x");
-                }
-
-            case DataType.MMH3:
-                {
-                    if (val is not uint hashValue) return "Invalid";
-
-                    var containsKey = HashManager.MMH3_Hashes.ContainsKey(hashValue);
-                    return containsKey ? HashManager.MMH3_Hashes[hashValue] : hashValue.ToString("x");
-                }
-
-            default:
-                return val.ToString();
-        }
-    }
-
     private void MainDataGridView_CellValuePushed(object sender, DataGridViewCellValueEventArgs e)
     {
-        if (LoadedFile == null) return;
-
-        if (reorderableIndexDictionary.Count < e.RowIndex) return;
-        var originalIndex = reorderableIndexDictionary[e.RowIndex];
-
-        if (LoadedFile.Length < originalIndex)
+        if (LoadedFile == null 
+            || e.ColumnIndex >= mainDataGridView.ColumnCount 
+            || e.RowIndex >= reorderableIndexDictionary.Count 
+            || mainDataGridView.Columns[e.ColumnIndex] is not IndexableDataGridColumn indexableColumn) 
             return;
 
-        var column = mainDataGridView.Columns[e.ColumnIndex];
-        if (column == null || column is not IndexableDataGridColumn indexableColumn) return;
+        var entryIndex = reorderableIndexDictionary[e.RowIndex];
+        var fieldIndex = indexableColumn.HeaderIndex;
 
-        var targetField = LoadedFile.Fields[indexableColumn.HeaderIndex];
-        LoadedFile.Entries[originalIndex][indexableColumn.HeaderIndex] = e.Value;
+        if (entryIndex >= LoadedFile.Length || fieldIndex >= LoadedFile.Fields.Length) return;
+
+        var targetField = LoadedFile.Fields[fieldIndex];
+        LoadedFile.Entries[entryIndex][fieldIndex] = e.Value;
 
         if (mainDataGridView.SelectionMode == DataGridViewSelectionMode.CellSelect)
         {
@@ -158,15 +128,17 @@ public partial class BCSVForm : Form, ISearchable
                 {
                     if (selectedCell.RowIndex == e.RowIndex && selectedCell.ColumnIndex == e.ColumnIndex) continue; 
 
-                    if (selectedCell.OwningColumn is not IndexableDataGridColumn cellColumn) continue;
-                    var cellField = LoadedFile.Fields[cellColumn.HeaderIndex];
+                    if (selectedCell.OwningColumn is not IndexableDataGridColumn cellColumn || 
+                        cellColumn.HeaderIndex >= LoadedFile.Fields.Length) continue;
 
-                    if (targetField.DataType != cellField.DataType) continue;
+                    var selectedCellField = LoadedFile.Fields[cellColumn.HeaderIndex];
+
+                    if (targetField.DataType != selectedCellField.DataType) continue;
 
                     if (selectedCell.RowIndex >= reorderableIndexDictionary.Count) return;
                     var selectedIndex = reorderableIndexDictionary[selectedCell.RowIndex];
 
-                    LoadedFile[selectedIndex, cellField] = e.Value;
+                    LoadedFile[selectedIndex, selectedCellField] = e.Value;
                 }
             }
         }
@@ -189,31 +161,55 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
+    internal static (string, bool) GetFormattedValue(object[] values, int index, Field field)
+    {
+        if (field == null || values == null || index < 0 || index >= values.Length)
+            return ("Invalid", false);
+
+        var val = values[index];
+
+        switch (field.DataType)
+        {
+            case DataType.CRC32:
+                {
+                    if (val is not uint hashValue) return ("Invalid", false);
+
+                    var containsKey = HashManager.CRC32_Hashes.ContainsKey(hashValue);
+                    return (containsKey ? HashManager.CRC32_Hashes[hashValue] : hashValue.ToString("x"), containsKey);
+                }
+
+            case DataType.MMH3:
+                {
+                    if (val is not uint hashValue) return ("Invalid", false);
+
+                    var containsKey = HashManager.MMH3_Hashes.ContainsKey(hashValue);
+                    return (containsKey ? HashManager.MMH3_Hashes[hashValue] : hashValue.ToString("x"), containsKey);
+                }
+
+            default:
+                return (val.ToString(), true);
+        }
+    }
+
     private void MainDataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
     {
-        if (LoadedFile == null) return;
+        if (LoadedFile == null || e.RowIndex >= reorderableIndexDictionary.Count || e.ColumnIndex >= mainDataGridView.ColumnCount) return;
+        var entryIndex = reorderableIndexDictionary[e.RowIndex];
 
-        if (reorderableIndexDictionary.Count < e.RowIndex) return;
-        var originalIndex = reorderableIndexDictionary[e.RowIndex];
+        if (entryIndex >= LoadedFile.Length || mainDataGridView.Columns[e.ColumnIndex] is not IndexableDataGridColumn column) return;
 
-        if (LoadedFile.Length < originalIndex)
-            return;
+        var entry = LoadedFile.Entries[entryIndex];
+        var field = LoadedFile.Fields[column.HeaderIndex];
 
-        var column = mainDataGridView.Columns[e.ColumnIndex];
-        if (column == null || column is not IndexableDataGridColumn indexableColumn) return;
-
-
-        var entry = LoadedFile.Entries[originalIndex];
-        var field = LoadedFile.Fields[indexableColumn.HeaderIndex];
-
-        var formattedValue = GetFormattedValue(entry, e.ColumnIndex, field);
+        var (formattedValue, isFormatted) = GetFormattedValue(entry, e.ColumnIndex, field);
 
         if (formattedValue == "Invalid")
             e.CellStyle.BackColor = Color.Red;
+        else if (!isFormatted && (field.DataType == DataType.CRC32 || field.DataType == DataType.MMH3))
+            e.CellStyle.BackColor = Color.DarkRed;
 
         e.Value = formattedValue;
         e.FormattingApplied = true;
-
     }
 
     private List<int> reorderableIndexDictionary = [];
@@ -382,14 +378,15 @@ public partial class BCSVForm : Form, ISearchable
         viewColumnsMenuItem.DropDownItems.Clear();
         for (int fieldIndex = 0; fieldIndex < LoadedFile.Fields.Length; fieldIndex++)
         {
-            Field fieldHeader = LoadedFile.Fields[fieldIndex];
-
+            var fieldHeader = LoadedFile.Fields[fieldIndex];
 
             DataGridViewCell cellTemplate = fieldHeader.DataType switch
             {
                 DataType.CRC32 => new CRC32DataGridCell(),
+                DataType.MMH3 => new MMH3DataGridCell(),
                 _ => new DataGridViewTextBoxCell(),
             };
+
             var translatedName = fieldHeader.GetTranslatedNameOrNull();
 
             string tooltip = (translatedName != null ? $"Name: {translatedName}\n" : "") +
@@ -916,17 +913,16 @@ public partial class BCSVForm : Form, ISearchable
                 for (int rowIndex = 0; rowIndex < mainDataGridView.Rows.Count; rowIndex++)
                 {
                     var actualIndex = reorderableIndexDictionary[rowIndex];
-                    var formattedValue = GetFormattedValue(LoadedFile.Entries[actualIndex], indexableDataGridColumn.HeaderIndex, field);
+                    var (formattedValue, isFormatted) = GetFormattedValue(LoadedFile.Entries[actualIndex], indexableDataGridColumn.HeaderIndex, field);
 
-                    if (!caseSensitive)
-                        formattedValue = formattedValue.ToLower();
+                    if (!isFormatted) continue;
 
+                    if (!caseSensitive) formattedValue = formattedValue.ToLower();
 
                     if ((searchType == SearchType.Contains && formattedValue.Contains(search)) ||
                         (searchType == SearchType.Exactly && formattedValue == search))
-                    {
                         cells.Add(mainDataGridView[columnIndex, rowIndex]);
-                    }
+                    
 
                 }
             }
