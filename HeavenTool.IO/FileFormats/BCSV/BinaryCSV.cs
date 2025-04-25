@@ -7,6 +7,50 @@ namespace HeavenTool.IO.FileFormats.BCSV;
 
 public class BinaryCSV : IDisposable
 {
+    private static readonly string[] _uniqueFieldNames =
+        [
+            "UniqueID u16", // Most files use this
+
+            // Specific files
+            "Label string8", // NmlNpcRaceParam
+            "ItemUniqueID u16", // WherearenItemKind
+            "StateName string48", // PlayerStateParam
+            "NumberingId u16", // AmiiboData
+            "ResourceName string33", // TVProgram
+            "StageName string32", // FieldCreateParam
+            "ItemFrom string32", // ShopItemRouteFlags
+            "TVProgramName.hshCstringRef", // TVProgramMonday
+            "GroundAttributeUniqueID u16", // FieldLandMakingRoadKindParam
+            "NpcRoleSetID u16", // WherearenRollSet
+
+           // Don't have anything we can do, need a specific way of handling
+                // FishAppearRiverParam.bcsv,
+                // NpcLife.bcsv,
+                // SeafoodAppearParam.bcsv,
+                // FishAppearSeaParam.bcsv,
+                // FgFlowerHeredity.bcsv,
+                // NpcCastLabelData.bcsv,
+                // NpcInterest.bcsv,
+                // NpcCastScheduleData.bcsv,
+                // SeasonCalendar.bcsv,
+                // FieldLandMakingActionParam.bcsv,
+                // NpcMoveRoomTemplate.bcsv
+        ];
+
+    private static readonly uint[] _unknownUniqueHashes = [
+        0x37571146, // MessageCardSelectDesign, MessageCardSelectDesignSp, MessageCardSelectPresent and MessageCardSelectPresentSp
+    ];
+
+    private static uint[] _uniqueHashes;
+    public static uint[] UniqueHashes
+    {
+        get
+        {
+            _uniqueHashes ??= [.. _uniqueFieldNames.Select(x => x.ToCRC32()), .. _unknownUniqueHashes];
+            return _uniqueHashes;
+        }
+    }
+
     /// <summary>
     /// The size of each entry
     /// </summary>

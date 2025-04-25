@@ -118,3 +118,4 @@ fa62611d=Int16
 9d71641a=Int16
 dad11eca=Int16
 79cde6e6=S8
+c233727b=U8

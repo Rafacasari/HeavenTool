@@ -1,4 +1,5 @@
 ﻿using HeavenTool.IO.FileFormats.BCSV;
+using System.Collections;
 using System.Globalization;
 
 namespace HeavenTool.IO;
@@ -8,7 +9,10 @@ public static class HashManager
     private static readonly string KNOWN_TYPES_PATH = Path.Combine(AppContext.BaseDirectory, "extra", "known-types.txt");
 
     public static readonly Dictionary<string, DataType> KnownTypes = [];
-    public static readonly Dictionary<uint, string> CRC32_Hashes = [];
+    public static readonly Dictionary<uint, string> CRC32_Hashes = new()
+    {
+        { 0, "" }
+    };
     public static readonly Dictionary<uint, string> MMH3_Hashes = [];
 
     public static readonly Dictionary<uint, List<CRC32_Entry>> EnumListCRC32 = [];
@@ -66,7 +70,8 @@ public static class HashManager
             foreach (var line in lines)
             {
                 var split = line.Split('=');
-                if (split.Length > 1 && split[0].Length > 0 && Enum.TryParse(split[1], out DataType type))
+
+                if (split.Length == 2 && Enum.TryParse(split[1], out DataType type))
                     KnownTypes.TryAdd(split[0], type);
             }
         }

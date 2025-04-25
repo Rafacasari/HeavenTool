@@ -47,7 +47,7 @@ public partial class BCSVForm : Form, ISearchable
         mainDataGridView.ColumnHeaderMouseClick += MainDataGridView_ColumnHeaderMouseClick;
         mainDataGridView.ColumnStateChanged += MainDataGridView_ColumnStateChanged;
         mainDataGridView.EditMode = DataGridViewEditMode.EditOnF2;
-
+        
         versionNumberLabel.Text = Program.VERSION;
         Text = originalFormName;
 
@@ -363,6 +363,7 @@ public partial class BCSVForm : Form, ISearchable
         }
     }
 
+    private bool isUniqueColumnAlreadyFound = false;
     internal void LoadBCSVFile(string path)
     {
         ClearSearchCache();
@@ -375,7 +376,9 @@ public partial class BCSVForm : Form, ISearchable
 
         Text = $"{originalFormName}: {Path.GetFileName(path)}";
 
+        isUniqueColumnAlreadyFound = false;
         viewColumnsMenuItem.DropDownItems.Clear();
+
         for (int fieldIndex = 0; fieldIndex < LoadedFile.Fields.Length; fieldIndex++)
         {
             var fieldHeader = LoadedFile.Fields[fieldIndex];
@@ -406,6 +409,9 @@ public partial class BCSVForm : Form, ISearchable
 
             var column = mainDataGridView.Columns[columnId];
 
+            if (fieldHeader.DataType == DataType.CRC32 || fieldHeader.DataType == DataType.MMH3)
+                column.DefaultCellStyle.Font = new Font(mainDataGridView.Font, FontStyle.Underline);
+
             viewColumnsMenuItem.DropDownItems.Add(new ToolStripMenuItem()
             {
                 Name = $"ViewColumn_{fieldHeader.HEX}",
@@ -421,6 +427,14 @@ public partial class BCSVForm : Form, ISearchable
                     column.HeaderCell.Style.BackColor = Color.PaleVioletRed;
                 else
                     column.HeaderCell.Style.BackColor = Color.Orange;
+            }
+
+            if (!isUniqueColumnAlreadyFound && BinaryCSV.UniqueHashes.Contains(fieldHeader.Hash))
+            {
+                isUniqueColumnAlreadyFound = true;
+                column.DisplayIndex = 0;
+                column.HeaderCell.Style.BackColor = Color.DarkGreen;
+                column.HeaderCell.Style.Font = new Font(mainDataGridView.Font, FontStyle.Bold);
             }
         }
 
