@@ -3,6 +3,7 @@ using HeavenTool.IO.FileFormats.ResourceSizeTable;
 using HeavenTool.ModManager.FileTypes;
 using NintendoTools.Compression.Yaz0;
 using NintendoTools.Compression.Zstd;
+using NintendoTools.FileFormats.Bcsv;
 using NintendoTools.FileFormats.Msbt;
 using NintendoTools.FileFormats.Sarc;
 using System;
@@ -56,6 +57,8 @@ namespace HeavenTool.ModManager
                 modFile = new MSBT(stream, fileName);
             else if (SarcFileParser.CanParseStatic(stream))
                 modFile = new SARC(stream, fileName);
+            else if (BcsvFileParser.CanParseStatic(stream))
+                modFile = new BCSV(stream, fileName);
             else
                 modFile = new GenericFile(stream, fileName);
 

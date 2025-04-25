@@ -1,5 +1,6 @@
 ﻿using HeavenTool.IO;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace HeavenTool.ModManager.CLI
 {
@@ -12,6 +13,14 @@ namespace HeavenTool.ModManager.CLI
         {
             var outputPath = DEFAULT_OUTPUT_PATH;
             var modsFolder = DEFAULT_MODS_FOLDER;
+
+            if (!Directory.Exists(modsFolder))
+            {
+                ConsoleUtilities.WriteLine("\"Mods\" folder doesn't exist, creating a new folder.", ConsoleColor.Cyan);
+                Directory.CreateDirectory(modsFolder);
+                ConsoleUtilities.WriteLine("Mods folder have been created, please put your mods (as zip files) inside it and run this program again.", ConsoleColor.Green);
+                return;
+            }
 
             if (Directory.Exists(outputPath) && Directory.GetFiles(outputPath, "*", SearchOption.AllDirectories).Length > 0)
             {
@@ -45,11 +54,54 @@ namespace HeavenTool.ModManager.CLI
             Console.WriteLine("Merge complete!");
             Console.WriteLine($"Saved at: {outputDirectory.FullName}");
 
-            // TODO: Detect if its in Windows
-            Process.Start("explorer.exe", outputDirectory.FullName);
+            TryToOpenPath(outputDirectory.FullName);
 
             Console.ResetColor();
             Console.ReadLine();
+        }
+
+
+        private static void TryToOpenPath(string path)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                using Process fileOpener = new();
+                fileOpener.StartInfo.FileName = "explorer";
+                fileOpener.StartInfo.Arguments = "/select," + path + "\"";
+                fileOpener.Start();
+                return;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                using Process fileOpener = new();
+                fileOpener.StartInfo.FileName = "explorer";
+                fileOpener.StartInfo.Arguments = "-R " + path;
+                fileOpener.Start();
+                return;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                using Process dbusShowItemsProcess = new()
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "dbus-send",
+                        Arguments = "--print-reply --dest=org.freedesktop.FileManager1 /org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItems array:string:\"file://" + path + "\" string:\"\"",
+                        UseShellExecute = true
+                    }
+                };
+                dbusShowItemsProcess.Start();
+                dbusShowItemsProcess.WaitForExit();
+
+                if (dbusShowItemsProcess.ExitCode == 0)
+                {
+                    // The dbus invocation can fail for a variety of reasons:
+                    // - dbus is not available
+                    // - no programs implement the service,
+                    // - ...
+                    return;
+                }
+            }
         }
     }
 }

@@ -21,54 +21,19 @@ public sealed class BCSV : ModFile
             LoadedFile = new BinaryCSV(bytes);
             if (LoadedFile.Length == 0 || LoadedFile.Fields.Length == 0) return;
 
-            string[] uniqueFields = [
-                "UniqueID u16", // Most files use this
-
-                // Specific files
-                "Label string8", // NmlNpcRaceParam.bcsv
-                "ItemUniqueID u16", // WherearenItemKind.bcsv
-                "StateName string48", // PlayerStateParam.bcsv
-                "NumberingId u16", // AmiiboData.bcsv
-                "ResourceName string33", // TVProgram.bcsv
-                "StageName string32", // FieldCreateParam.bcsv
-                "ItemFrom string32", // ShopItemRouteFlags.bcsv
-                "TVProgramName.hshCstringRef", // TVProgramMonday.bcsv
-                "GroundAttributeUniqueID u16", // FieldLandMakingRoadKindParam.bcsv
-                "NpcRoleSetID u16", // WherearenRollSet.bcsv
-                // Don't have anything we can do, we gonna need to match entire row (which can cause issues when editing/removing rows; addition rows should work fine)
-                // FishAppearRiverParam.bcsv,
-                // NpcLife.bcsv,
-                // SeafoodAppearParam.bcsv,
-                // FishAppearSeaParam.bcsv,
-                // FgFlowerHeredity.bcsv,
-                // NpcCastLabelData.bcsv,
-                // NpcInterest.bcsv,
-                // NpcCastScheduleData.bcsv,
-                // SeasonCalendar.bcsv,
-                // FieldLandMakingActionParam.bcsv,
-                // NpcMoveRoomTemplate.bcsv
-            ];
-
-            uint[] uniqueHashes = [
-                0x37571146, // MessageCardSelectDesign.bcsv, MessageCardSelectDesignSp.bcsv, MessageCardSelectPresent.bcsv and MessageCardSelectPresentSp.bcsv
-            ];
-
-            List<uint> hashes = new(uniqueFields.Select(x => x.ToCRC32()));
-            hashes.AddRange(uniqueHashes);
-
-            UniqueHeader = hashes.FirstOrNullStruct(x => LoadedFile.Fields.Any(field => field.Hash == x));
+            UniqueHeader = BinaryCSV.UniqueHashes.FirstOrNullStruct(x => LoadedFile.Fields.Any(field => field.Hash == x));
             UniqueHeaderIndex = UniqueHeader.HasValue ? Array.FindIndex(LoadedFile.Fields, x => x.Hash == UniqueHeader) : -1;
 
-            if (UniqueHeaderIndex == -1) 
-                return;
+            if (UniqueHeaderIndex == -1) return;
 
             for (int entryIndex = 0; entryIndex < LoadedFile.Length; entryIndex++)
             {
                 object uniqueValue = null;
                 var values = new object[LoadedFile.Fields.Length];
+                // store all entry values into a dictionary with the unique value as key
+
                 for (int fieldIndex = 0; fieldIndex < LoadedFile.Fields.Length; fieldIndex++)
                 {
-
                     var entry = LoadedFile[entryIndex, fieldIndex];
 
                     if (fieldIndex == UniqueHeaderIndex && entry is object uniqueVal)
@@ -77,7 +42,12 @@ public sealed class BCSV : ModFile
                 }
 
                 if (uniqueValue != null)
+                {
+                    if (Entries.ContainsKey(uniqueValue))
+                        ConsoleUtilities.WriteLine($"[BCSV] File {name} have entries with the same unique header, this can result in broken mods!", ConsoleColor.Red);
+
                     Entries.TryAdd(uniqueValue, values);
+                }
             }
         }
     }
@@ -99,6 +69,11 @@ public sealed class BCSV : ModFile
             Name != otherBCSV.Name ||
             LoadedFile.Fields.SequenceEqual(otherBCSV.LoadedFile.Fields)) return;
 
+        if (UniqueHeaderIndex == -1)
+        {
+            ConsoleUtilities.WriteLine($"[BCSV] File {Name} does not support merging. This file doesn't contain a Unique Header.", ConsoleColor.Red);
+            return;
+        }
 
         foreach (var (uniqueId, _) in Entries)
             if (!otherBCSV.Entries.ContainsKey(uniqueId) && !Removes.Contains(uniqueId))
@@ -110,13 +85,13 @@ public sealed class BCSV : ModFile
             if (Entries.TryGetValue(uniqueId, out var currentValues) && !values.SequenceEqual(currentValues))
             {
                 if (Changes.ContainsKey(uniqueId))
-                    ConsoleUtilities.WriteLine($"[BCSV] Conflict in file {Name} (UniqueHeader: {UniqueHeader:x} | Value {uniqueId})", ConsoleColor.Red);
+                    ConsoleUtilities.WriteLine($"[BCSV] Conflict in file {Name} (UniqueHeader: {UniqueHeader:x} | Value {uniqueId})", ConsoleColor.Yellow);
                 Changes[uniqueId] = currentValues;
             }
             else if (!Entries.ContainsKey(uniqueId))
             {
                 if (Additions.ContainsKey(uniqueId))
-                    ConsoleUtilities.WriteLine($"[BCSV] Conflict! Two mods tried to add a entry with same UniqueId in {Name} (UniqueHeader: {UniqueHeader:x} | Value {uniqueId})", ConsoleColor.Red);
+                    ConsoleUtilities.WriteLine($"[BCSV] Conflict! Two mods tried to add a entry with same Unique Key in {Name} (UniqueHeader: {UniqueHeader:x} | Value {uniqueId})", ConsoleColor.Red);
                 Additions[uniqueId] = values;
             }
         }
@@ -134,10 +109,12 @@ public sealed class BCSV : ModFile
 
     private void BakeFile() 
     {
+        if (UniqueHeaderIndex == -1) return;
+        
 
         Removes.RemoveAll(Changes.ContainsKey);
 
-        if (UniqueHeaderIndex != -1 && Changes.Count > 0)
+        if (Changes.Count > 0)
         {
             for (int entryIndex = 0; entryIndex < LoadedFile.Length; entryIndex++)
             {
@@ -160,6 +137,11 @@ public sealed class BCSV : ModFile
                 LoadedFile[entryId, i] = values[i];
         }
 
-        // TODO: remake how the BCSV file works, cause using multidimension array [,] is a pain to make a "delete" 
+        LoadedFile.Entries.RemoveAll(entryValues =>
+        {
+            var uniqueValue = entryValues[UniqueHeaderIndex];
+
+            return Removes.Contains(uniqueValue);
+        });
     }
 }
