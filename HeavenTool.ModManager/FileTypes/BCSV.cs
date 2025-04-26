@@ -1,5 +1,6 @@
 ﻿using HeavenTool.IO;
 using HeavenTool.IO.FileFormats.BCSV;
+using System.Xml;
 
 namespace HeavenTool.ModManager.FileTypes;
 
@@ -24,35 +25,35 @@ public sealed class BCSV : ModFile
             UniqueHeader = BinaryCSV.UniqueHashes.FirstOrNullStruct(x => LoadedFile.Fields.Any(field => field.Hash == x));
             UniqueHeaderIndex = UniqueHeader.HasValue ? Array.FindIndex(LoadedFile.Fields, x => x.Hash == UniqueHeader) : -1;
 
-            if (UniqueHeaderIndex == -1) return;
+            //if (UniqueHeaderIndex == -1) return;
 
-            for (int entryIndex = 0; entryIndex < LoadedFile.Length; entryIndex++)
-            {
-                object uniqueValue = null;
-                var values = new object[LoadedFile.Fields.Length];
-                // store all entry values into a dictionary with the unique value as key
+            //for (int entryIndex = 0; entryIndex < LoadedFile.Length; entryIndex++)
+            //{
+            //    object uniqueValue = null;
+            //    var values = new object[LoadedFile.Fields.Length];
+            //    // store all entry values into a dictionary with the unique value as key
 
-                for (int fieldIndex = 0; fieldIndex < LoadedFile.Fields.Length; fieldIndex++)
-                {
-                    var entry = LoadedFile[entryIndex, fieldIndex];
+            //    for (int fieldIndex = 0; fieldIndex < LoadedFile.Fields.Length; fieldIndex++)
+            //    {
+            //        var entry = LoadedFile[entryIndex, fieldIndex];
 
-                    if (fieldIndex == UniqueHeaderIndex && entry is object uniqueVal)
-                        uniqueValue = uniqueVal;
-                    values[fieldIndex] = entry;
-                }
+            //        if (fieldIndex == UniqueHeaderIndex && entry is object uniqueVal)
+            //            uniqueValue = uniqueVal;
+            //        values[fieldIndex] = entry;
+            //    }
 
-                if (uniqueValue != null)
-                {
-                    if (Entries.ContainsKey(uniqueValue))
-                        ConsoleUtilities.WriteLine($"[BCSV] File {name} have entries with the same unique header, this can result in broken mods!", ConsoleColor.Red);
+            //    if (uniqueValue != null)
+            //    {
+            //        if (Entries.ContainsKey(uniqueValue))
+            //            ConsoleUtilities.WriteLine($"[BCSV] File {name} have entries with the same unique header, this can result in broken mods!", ConsoleColor.Red);
 
-                    Entries.TryAdd(uniqueValue, values);
-                }
-            }
+            //        Entries.TryAdd(uniqueValue, values);
+            //    }
+            //}
         }
     }
 
-    public Dictionary<object, object[]> Entries = [];
+    //public Dictionary<object, object[]> Entries = [];
 
     internal Dictionary<object, object[]> Changes = [];
     internal Dictionary<object, object[]> Additions = [];
@@ -75,32 +76,40 @@ public sealed class BCSV : ModFile
             return;
         }
 
-        foreach (var (uniqueId, _) in Entries)
-            if (!otherBCSV.Entries.ContainsKey(uniqueId) && !Removes.Contains(uniqueId))
-                Removes.Add(uniqueId);
-        
-
-        foreach (var (uniqueId, values) in otherBCSV.Entries) 
+        try
         {
-            if (Entries.TryGetValue(uniqueId, out var currentValues) && !values.SequenceEqual(currentValues))
+            var fileEntries = LoadedFile.Entries.ToDictionary(x => x[UniqueHeaderIndex], y => y);
+            var otherFileEntries = otherBCSV.LoadedFile.Entries.ToDictionary(x => x[UniqueHeaderIndex], y => y);
+
+            foreach (var (uniqueId, _) in fileEntries)
+                if (!otherFileEntries.ContainsKey(uniqueId) && !Removes.Contains(uniqueId))
+                    Removes.Add(uniqueId);
+
+            foreach (var (uniqueId, values) in otherFileEntries)
             {
-                if (Changes.ContainsKey(uniqueId))
-                    ConsoleUtilities.WriteLine($"[BCSV] Conflict in file {Name} (UniqueHeader: {UniqueHeader:x} | Value {uniqueId})", ConsoleColor.Yellow);
-                Changes[uniqueId] = currentValues;
+                if (!fileEntries.ContainsKey(uniqueId))
+                {
+                    if (Additions.ContainsKey(uniqueId))
+                        ConsoleUtilities.WriteLine($"[BCSV] Conflict! Two mods tried to add a entry with same Unique Key in {Name} (UniqueHeader: {UniqueHeader:x} | Value {uniqueId})", ConsoleColor.Red);
+                    Additions[uniqueId] = values;
+                }
+                else if (fileEntries.TryGetValue(uniqueId, out var currentValues) && !values.SequenceEqual(currentValues))
+                {
+                    if (Changes.ContainsKey(uniqueId))
+                        ConsoleUtilities.WriteLine($"[BCSV] Conflict in file {Name} (UniqueHeader: {UniqueHeader:x} | Value {uniqueId})", ConsoleColor.Yellow);
+                    Changes[uniqueId] = currentValues;
+                }
             }
-            else if (!Entries.ContainsKey(uniqueId))
-            {
-                if (Additions.ContainsKey(uniqueId))
-                    ConsoleUtilities.WriteLine($"[BCSV] Conflict! Two mods tried to add a entry with same Unique Key in {Name} (UniqueHeader: {UniqueHeader:x} | Value {uniqueId})", ConsoleColor.Red);
-                Additions[uniqueId] = values;
-            }
+        }
+        catch (Exception ex) 
+        {
+            ConsoleUtilities.WriteLine($"[BCSV] Failed to merge {Name} (probably there is one or more entries using the same unique-key)\n{ex}\n", ConsoleColor.Red);
         }
     }
 
     public override byte[] SaveFile()
     {
-        if (LoadedFile == null) 
-            return null;
+        if (LoadedFile == null)  return null;
 
         BakeFile();
 

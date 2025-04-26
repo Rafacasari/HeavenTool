@@ -13,6 +13,7 @@ using HeavenTool.IO.FileFormats.BCSV;
 using ProgramAssociation = HeavenTool.Utility.ProgramAssociation;
 using HeavenTool.IO;
 using HeavenTool.Forms.BCSV.Controls;
+using HeavenTool.Forms.BCSV.Templates;
 
 namespace HeavenTool;
 
@@ -46,6 +47,8 @@ public partial class BCSVForm : Form, ISearchable
 
         mainDataGridView.ColumnHeaderMouseClick += MainDataGridView_ColumnHeaderMouseClick;
         mainDataGridView.ColumnStateChanged += MainDataGridView_ColumnStateChanged;
+        mainDataGridView.RowPostPaint += MainDataGridView_RowPostPaint;
+        mainDataGridView.RowHeadersWidth = 50;
         mainDataGridView.EditMode = DataGridViewEditMode.EditOnF2;
         
         versionNumberLabel.Text = Program.VERSION;
@@ -76,6 +79,22 @@ public partial class BCSVForm : Form, ISearchable
                 ForeColor = Color.White
             });
         }
+    }
+
+    private void MainDataGridView_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
+    {
+        var grid = sender as DataGridView;
+        var rowIdx = (e.RowIndex + 1).ToString();
+
+        var centerFormat = new StringFormat()
+        {
+            // right alignment might actually make more sense for numbers
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+
+        var headerBounds = new Rectangle(e.RowBounds.Left, e.RowBounds.Top, grid.RowHeadersWidth, e.RowBounds.Height);
+        e.Graphics.DrawString(rowIdx, this.Font, new SolidBrush(Color.FromArgb(110, 110, 110)), headerBounds, centerFormat);
     }
 
     public void ChangedRowCount(int count)
@@ -184,6 +203,13 @@ public partial class BCSVForm : Form, ISearchable
 
                     var containsKey = HashManager.MMH3_Hashes.ContainsKey(hashValue);
                     return (containsKey ? HashManager.MMH3_Hashes[hashValue] : hashValue.ToString("x"), containsKey);
+                }
+
+            case DataType.U8Array:
+                {
+                    if (val is not byte[] bitField) return ("Invalid", false);
+
+                    return (string.Join(" ", bitField), true);
                 }
 
             default:
@@ -382,15 +408,18 @@ public partial class BCSVForm : Form, ISearchable
         for (int fieldIndex = 0; fieldIndex < LoadedFile.Fields.Length; fieldIndex++)
         {
             var fieldHeader = LoadedFile.Fields[fieldIndex];
+            var translatedName = fieldHeader.GetTranslatedNameOrNull();
 
             DataGridViewCell cellTemplate = fieldHeader.DataType switch
             {
                 DataType.CRC32 => new CRC32DataGridCell(),
                 DataType.MMH3 => new MMH3DataGridCell(),
+                DataType.U8Array => new BitFieldDataGridCell() { 
+                    FieldLength = fieldHeader.Size
+                },
+
                 _ => new DataGridViewTextBoxCell(),
             };
-
-            var translatedName = fieldHeader.GetTranslatedNameOrNull();
 
             string tooltip = (translatedName != null ? $"Name: {translatedName}\n" : "") +
                 $"Hash: {fieldHeader.HEX}\n" +
@@ -410,7 +439,8 @@ public partial class BCSVForm : Form, ISearchable
             var column = mainDataGridView.Columns[columnId];
 
             if (fieldHeader.DataType == DataType.CRC32 || fieldHeader.DataType == DataType.MMH3)
-                column.DefaultCellStyle.Font = new Font(mainDataGridView.Font, FontStyle.Underline);
+                column.DefaultCellStyle.Font = new Font(mainDataGridView.Font, FontStyle.Bold);
+            
 
             viewColumnsMenuItem.DropDownItems.Add(new ToolStripMenuItem()
             {
@@ -762,7 +792,11 @@ public partial class BCSVForm : Form, ISearchable
 
     private void ExportValuesAstxtFileToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (LoadedFile == null || lastSelectedColumn == -1) return;
+        if (LoadedFile == null ||
+            lastSelectedColumn == -1 ||
+            lastSelectedColumn >= mainDataGridView.ColumnCount ||
+            mainDataGridView.Columns[lastSelectedColumn] is not IndexableDataGridColumn indexableDataGridColumn ||
+            indexableDataGridColumn.HeaderIndex >= LoadedFile.Fields.Length) return;
 
         using var saveFileDialog = new SaveFileDialog
         {
@@ -774,15 +808,13 @@ public partial class BCSVForm : Form, ISearchable
 
         if (saveFileDialog.ShowDialog() == DialogResult.OK)
         {
-            if (lastSelectedColumn < 0 || lastSelectedColumn > LoadedFile.Fields.Length)
-                return;
 
-            var field = LoadedFile.Fields[lastSelectedColumn];
+            var field = LoadedFile.Fields[indexableDataGridColumn.HeaderIndex];
 
             var exportedValues = new List<string>();
             foreach (var row in LoadedFile.Entries)
             {
-                var cell = row[lastSelectedColumn];
+                var cell = row[indexableDataGridColumn.HeaderIndex];
                 if (field.DataType == DataType.CRC32)
                 {
                     if (cell is uint hashValue)
@@ -790,6 +822,18 @@ public partial class BCSVForm : Form, ISearchable
                         var containsKey = HashManager.CRC32_Hashes.ContainsKey(hashValue);
                         if (containsKey)
                             exportedValues.AddIfNotExist(HashManager.CRC32_Hashes[hashValue]);
+                        else
+                            exportedValues.AddIfNotExist(hashValue.ToString("x"));
+
+                        continue;
+                    }
+                } else if (field.DataType == DataType.MMH3)
+                {
+                    if (cell is uint hashValue)
+                    {
+                        var containsKey = HashManager.MMH3_Hashes.ContainsKey(hashValue);
+                        if (containsKey)
+                            exportedValues.AddIfNotExist(HashManager.MMH3_Hashes[hashValue]);
                         else
                             exportedValues.AddIfNotExist(hashValue.ToString("x"));
 

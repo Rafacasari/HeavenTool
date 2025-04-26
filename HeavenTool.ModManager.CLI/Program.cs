@@ -19,6 +19,13 @@ namespace HeavenTool.ModManager.CLI
                 ConsoleUtilities.WriteLine("\"Mods\" folder doesn't exist, creating a new folder.", ConsoleColor.Cyan);
                 Directory.CreateDirectory(modsFolder);
                 ConsoleUtilities.WriteLine("Mods folder have been created, please put your mods (as zip files) inside it and run this program again.", ConsoleColor.Green);
+                Console.ReadKey();
+                return;
+            } 
+            else if (Directory.GetFiles(modsFolder).Length == 0)
+            {
+                ConsoleUtilities.WriteLine("Your mods directory is empty. Please put your mods (.zip files) inside it and run this program again.", ConsoleColor.Cyan);
+                Console.ReadKey();
                 return;
             }
 

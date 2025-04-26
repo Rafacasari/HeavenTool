@@ -145,7 +145,6 @@ namespace HeavenTool.ModManager
 
                 foreach (var modZip in Directory.GetFiles(ModFolder, "*.zip", SearchOption.TopDirectoryOnly))
                 {
-
                     using var zipFile = ZipFile.OpenRead(modZip);
 
                     bool predicate(ZipArchiveEntry entry) {

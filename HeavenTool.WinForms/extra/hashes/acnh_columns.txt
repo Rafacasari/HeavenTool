@@ -16,7 +16,6 @@ Action0_5.hshCstringRef
 Action0_6.hshCstringRef
 Action0_7.hshCstringRef
 Action0_8.hshCstringRef
-Action0_9.hshCstringRef
 Action1_0.hshCstringRef
 Action1_1.hshCstringRef
 Action1_2.hshCstringRef
@@ -26,25 +25,14 @@ Action1_5.hshCstringRef
 Action1_6.hshCstringRef
 Action1_7.hshCstringRef
 Action1_8.hshCstringRef
-Action1_9.hshCstringRef
 Action2_0.hshCstringRef
 Action2_1.hshCstringRef
 Action2_2.hshCstringRef
 Action2_3.hshCstringRef
-Action2_4.hshCstringRef
-Action2_5.hshCstringRef
-Action2_6.hshCstringRef
-Action2_7.hshCstringRef
-Action2_8.hshCstringRef
 Action3_0.hshCstringRef
 Action3_1.hshCstringRef
 Action3_2.hshCstringRef
 Action3_3.hshCstringRef
-Action3_4.hshCstringRef
-Action3_5.hshCstringRef
-Action3_6.hshCstringRef
-Action3_7.hshCstringRef
-Action3_8.hshCstringRef
 ActionAngle u8
 ActionFlags u8
 ActionLockRange u8
@@ -55,6 +43,9 @@ ActionRange.hshCstringRef
 ActionSet0.hshCstringRef
 ActionSet1.hshCstringRef
 ActionSet2.hshCstringRef
+ActionSetRate0 s8
+ActionSetRate1 s8
+ActionSetRate2 s8
 ActionType.hshCstringRef
 AIFlowEntryName string32
 AIFlowName string64
@@ -100,6 +91,7 @@ AppearType.hshCstringRef
 AppearValue u16
 AppearWeather.hshCstringRef
 ApplyNeedActivity u8
+ApproachRate u16
 ArchUniqueID u16
 AreaUniqueID u16
 ArriveDist f32
@@ -186,6 +178,7 @@ CanFtr u8
 CanGift u8
 CanHasSit u8
 CanHide u8
+CanHostAcceptNewVisitorDB u8
 CanNotLookFace u8
 CanNpcBirthdayPresent u8
 CanNpcPresent u8
@@ -209,6 +202,7 @@ CanSetInTrashBox u8
 CanSetItem u8
 CantTakeOver u8
 CanUsePhotoStudio u8
+CanUseWherearen u8
 Cap u16
 CapFrequencyWear u8
 CapID u16
@@ -244,6 +238,7 @@ CheekPinkColorB f32
 CheekPinkColorG f32
 CheekPinkColorR f32
 CliffCreate u8
+CloseItemUniqueId s32
 ClothesFrequencyWear u8
 ClothesFrequencyWear.hshCstringRef
 ClothesPurposeLimit u8
@@ -272,9 +267,9 @@ Comment string64
 ConditionType u8
 Construction u8
 ContinuousTime u16
-CookingRecipeID u16
 CornerType.hshCstringRef
 CountOtherVillage u8
+CountPlayerVisit u8
 CraftRecipeSeason.hshCstringRef
 CraftRecipeSelectSeasonType.hshCstringRef
 CraftUnlock.hshCstringRef
@@ -368,7 +363,6 @@ DefaultWall u16
 DefaultWallUniqueID u16
 DemoDistance f32
 DemoNetLockState u16
-DemoNetLockState u8
 DemoType u8
 Depth f32
 Desert u8
@@ -416,8 +410,19 @@ E1Parts.hshCstringRef
 E2Parts.hshCstringRef
 E3Parts.hshCstringRef
 EdgePatternType.hshCstringRef
+EditBaseUnitX s16
+EditBaseUnitZ s16
 Effect.hshCstringRef
 EffectAttribute u16
+ElectionRate0 u8
+ElectionRate1 u8
+ElectionRate2 u8
+ElectionRate3 u8
+ElectionRate4 u8
+ElectionRate5 u8
+ElectionRate6 u8
+ElectionRate7 u8
+ElectionRate8 u8
 EmoticonTool.hshCstringRef
 EnableRodCloth u8
 EnableStageChange u8
@@ -477,6 +482,7 @@ EventHalf s8
 EventLabel string64
 EventLabelShort string128
 EventName string32
+EventNumLimit u16
 EventObjUniqueID u16
 EventType.hshCstringRef
 EventWeatherArea.hshCstringRef
@@ -510,6 +516,7 @@ FashionThemeVacation u8
 FashionThemeWork u8
 FgUniqueID u16
 FieldData string32
+FishingSeries u8
 FishMuseumAction.hshCstringRef
 FishPattern s16
 FishPoint s8
@@ -544,6 +551,10 @@ Food1 u32
 Food2 u32
 FootColor u16
 ForbidOverwrite u8
+ForBuiltNpc u8
+ForFes u8
+ForFesNpc u8
+ForShareHouse u8
 FossilObjNum u16
 FossilSet.hshCstringRef
 Frames u16
@@ -589,11 +600,12 @@ HA1Index s16
 HA2Index s16
 HalfUnitSizeX u8
 HalfUnitSizeZ u8
-HandToolAsLabel string32
 HandToolAsName string32
 HangerInfo u8
+HaniwaPartsType.hshCstringRef
 HarvestFishExchangeIngredients u8
 HasDoorEigyoLight u8
+HasDoorLight u8
 HasDoorWindow u8
 HasEigyoLight u8
 HasJmp u8
@@ -675,11 +687,13 @@ InsectPattern s16
 InstrumentsType.hshCstringRef
 InterestEndModeType u8
 IntervalTime u8
+InvalidCard u8
 InvisibleEarL u8
 InvisibleEarR u8
 InWaterBody u8
 IsAppearNorth u8
 IsAppearSouth u8
+IsBeforeUnlock u8
 IsCollectAchievement u8
 IsCreateBait u8
 IsEDay u8
@@ -785,6 +799,7 @@ JudgeVisibleOn u8
 JuneBrideProgress u8
 KappeiTourCategory.hshCstringRef
 Key string64
+KimeProbability s8
 Kind u8
 Kind.hshCstringRef
 KO1Index s16
@@ -819,13 +834,9 @@ LifeSupportStamp.hshCstringRef
 Light.hshCstringRef
 LightParamName string32
 LimitNum0 s8
-LimitNum0 u8
 LimitNum1 s8
-LimitNum1 u8
 LimitNum2 s8
-LimitNum2 u8
 LimitNum3 s8
-LimitNum3 u8
 LiveMotif u8
 LocalizeAnim u8
 LocalizeModel u8
@@ -833,8 +844,13 @@ LocalizeTexture u8
 LocalWindType.hshCstringRef
 LookAtType u8
 LookAtType.hshCstringRef
+LotGrowUp u8
 LowerSetting.hshCstringRef
 MainDays u8
+MainIslandItemDirection u8
+MainIslandItemLayer u8
+MainIslandItemSwitch u8
+MainIslandObjectKind u8
 MainType u8
 MannequinPose.hshCstringRef
 MannequinUsage.hshCstringRef
@@ -848,6 +864,7 @@ Material3 u16
 Material4 u16
 Material5 u16
 Material6 u16
+MaxAmount s32
 MaxLevel u8
 MaxValue u16
 MaxValue u32
@@ -862,6 +879,7 @@ MeshEdgeDirType.hshCstringRef
 MessageKind.hshCstringRef
 MessageLabel string32
 MessageLabel u16
+MinAmount s32
 Misc u8
 ModelID u16
 ModelName string32
@@ -986,6 +1004,7 @@ NameLong string128
 NameShort string128
 NameWithTitle u8
 Nature u8
+NearbyInteract u8
 NearCulling u8
 NeedType u8
 NeglectSleep u8
@@ -1017,6 +1036,10 @@ NormalScaleNA f32
 NormalScaleNB f32
 NormalScaleNG f32
 NormalScaleNR f32
+NoteMax u8
+NoteMin u8
+NotWithTitle u8
+NpcActionUniqueID u16
 NpcBegin u8
 NpcCanSit u8
 NpcColor u8
@@ -1082,10 +1105,7 @@ OnepieceNNormalScaleMaskA f32
 OnepieceNNormalScaleMaskB f32
 OnepieceNNormalScaleMaskG f32
 OnepieceNNormalScaleMaskR f32
-Open2020 u8
-Open2021 u8
 OpenAchievementCount u16
-OpenAllYear u8
 OpenDonatedNum u16
 OpenRecordNum u16
 OrderID1 u16
@@ -1102,7 +1122,6 @@ OuterLNormalScaleMaskB f32
 OuterLNormalScaleMaskG f32
 OuterLNormalScaleMaskR f32
 OutfitSE.hshCstringRef
-Output u8
 OutsideTemplateKind u8
 PacketId s32
 PacketType.hshCstringRef
@@ -1131,12 +1150,15 @@ PenColor4 u16
 PhotoStudioRoomNo.hshCstringRef
 PicIconHeight f32
 PicItem u16
+PlaceConditionTime u8
 PlacementKey string32
 PlacementKind.hshCstringRef
 PlacementOfficeType.hshCstringRef
 PlacementRadioGymnastics.hshCstringRef
+PlaceNpcNum s8
 PlaceType u8
 PlaneChangeType.hshCstringRef
+PlanYear.hshCstringRef
 PlayerFlagKeyAfterSelect string32
 PlayerFlagKeyOFF string32
 PlayerFlagKeyON string32
@@ -1151,10 +1173,11 @@ PoseTransDive u8
 PosterItemID s16
 PosX s16
 PosZ s16
-Preincorporation u8
 PreMsgLabelValue u8
 Price s32
 PrioLevel u8
+PrioMethod u8
+PrioMethod.hshCstringRef
 Priority u16
 Priority u8
 PriorityReward u16
@@ -1306,21 +1329,11 @@ Rate2_0 s8
 Rate2_1 s8
 Rate2_2 s8
 Rate2_3 s8
-Rate2_4 s8
-Rate2_5 s8
-Rate2_6 s8
-Rate2_7 s8
-Rate2_8 s8
 Rate3 u8
 Rate3_0 s8
 Rate3_1 s8
 Rate3_2 s8
 Rate3_3 s8
-Rate3_4 s8
-Rate3_5 s8
-Rate3_6 s8
-Rate3_7 s8
-Rate3_8 s8
 Rate4 u8
 Rate5 u8
 Rate6 u8
@@ -1360,6 +1373,7 @@ ReBodyPattern7Color0 u8
 ReBodyPattern7Color1 u8
 RebodyPattern7LightColor u32
 ReBodyPatternNum s8
+RecipeDataType.hshCstringRef
 RecommendPattern u8
 ReefType.hshCstringRef
 ReFabric s16
@@ -1394,16 +1408,12 @@ RefabricPattern7LightColor u32
 ReFabricPatternNum s8
 RefItemUniqueID u16
 RefSoundAttributeID u16
-RegionAsia u8
-RegionEu u8
 RegionEventCountry1.hshCstringRef
 RegionEventCountry2 u16
 RegionEventCountry3 u16
 RegionEventCountry4 u16
 RegionEventCountry5 u16
 RegionEventItem u8
-RegionJp u8
-RegionUs u8
 ReleaseKey u16
 RemakeBodyID s16
 RemakeFabricID s16
@@ -1412,6 +1422,7 @@ RemakeKitNum u16
 RemakeLotType.hshCstringRef
 RemoteChase.hshCstringRef
 RemoveEventObj u8
+ReplaceTiming u8
 RequestNum0 s8
 RequestNum1 s8
 RequestNum2 s8
@@ -1448,6 +1459,7 @@ RightRotateOffsetZ f32
 RightTransOffsetX f32
 RightTransOffsetY f32
 RightTransOffsetZ f32
+RolePriority u8
 RoofMaterial u16
 Room0.hshCstringRef
 Room1.hshCstringRef
@@ -1473,6 +1485,7 @@ S1Parts.hshCstringRef
 S2Parts.hshCstringRef
 S3Parts.hshCstringRef
 S4Parts.hshCstringRef
+SafeRangeType.hshCstringRef
 Sakura_N u8
 Sakura_S u8
 Sand u8
@@ -1484,6 +1497,8 @@ Scale10x6.hshCstringRef
 ScaleOffset f32
 ScoreMultiplier f32
 SearchRadius.hshCstringRef
+Season_N u8
+Season_S u8
 Seasonality u32
 Seasonality.hshCstringRef
 SeasonAutumnLevel u8
@@ -1491,12 +1506,11 @@ SeasonScore s32
 SeasonSpringLevel u8
 SeasonSummerLevel u8
 SeasonWinterLevel u8
-Season_N u8
-Season_S u8
 Seat0 u16
 Seat1 u16
 Seat2 u16
 Seat3 u16
+SeatSP u16
 SeaType.hshCstringRef
 SelectableBeginDate1 u16
 SelectableBeginDate2 u16
@@ -1515,15 +1529,14 @@ SendPlayReport u8
 SEParts.hshCstringRef
 SerialID s16
 SeriesId u8
-SewingRecipeID s16
 ShadowType.hshCstringRef
 SharedNPCLabel string8
-ShellRotate u8
+ShareHouseSelectRate u8
 Shoes u16
 ShoesID u16
-ShopType.hshCstringRef
 Shop_N u8
 Shop_S u8
+ShopType.hshCstringRef
 SilhouetteID u32
 SilhouetteName string65
 SilhouettePoint u8
@@ -1534,13 +1547,13 @@ Size s8
 SkinBaseColorB f32
 SkinBaseColorG f32
 SkinBaseColorR f32
-SkinBushA u8
 SkinColor u16
 SkinEdgeColorB f32
 SkinEdgeColorG f32
 SkinEdgeColorR f32
 SLinkType.hshCstringRef
 SlopeTableId u16
+SmallGenre.hshCstringRef
 Smartphone u16
 SmartphoneRemakeCommonPattern s16
 SmartphoneRemakePattern u16
@@ -1582,6 +1595,7 @@ Speciality1 u32
 Speciality2 u32
 SpecialSelect u8
 SpecialSLink u8
+SpHobby.hshCstringRef
 SpNpcCloth s16
 SpNpcID u16
 Sports0 u32
@@ -1679,11 +1693,11 @@ SuccessResult.hshCstringRef
 SwitchableOnWall u8
 SWParts.hshCstringRef
 SyncNoCheck u8
-TalkFlowName string64
 TalkingNpcLabel string8
 TalkValueVillager u16
 TalkValueVisitor u16
 TargetInsect u8
+TargetItems u8
 TargetNPCLabel string8
 TargetShadow u8
 TasteScore s32
@@ -1759,21 +1773,71 @@ UISortID s16
 UISortID u16
 Umbrella u16
 UmbrellaID u16
+UmbrellaWherearen u16
 UniqueID u16
 UniqueID u32
+UnlockActionFlag string33
+UnlockEvent u16
+UnlockEvent1 u16
+UnlockEventBit u8
+UnlockFlag string33
 UnlockLevel u8
+UnlockTheme0 u16
+UnlockTheme1 u16
+UnlockTheme10 u16
+UnlockTheme11 u16
+UnlockTheme12 u16
+UnlockTheme13 u16
+UnlockTheme14 u16
+UnlockTheme15 u16
+UnlockTheme16 u16
+UnlockTheme17 u16
+UnlockTheme18 u16
+UnlockTheme19 u16
+UnlockTheme2 u16
+UnlockTheme20 u16
+UnlockTheme21 u16
+UnlockTheme22 u16
+UnlockTheme23 u16
+UnlockTheme24 u16
+UnlockTheme25 u16
+UnlockTheme26 u16
+UnlockTheme27 u16
+UnlockTheme28 u16
+UnlockTheme29 u16
+UnlockTheme3 u16
+UnlockTheme30 u16
+UnlockTheme31 u16
+UnlockTheme32 u16
+UnlockTheme33 u16
+UnlockTheme34 u16
+UnlockTheme35 u16
+UnlockTheme36 u16
+UnlockTheme37 u16
+UnlockTheme38 u16
+UnlockTheme39 u16
+UnlockTheme4 u16
+UnlockTheme5 u16
+UnlockTheme6 u16
+UnlockTheme7 u16
+UnlockTheme8 u16
+UnlockTheme9 u16
+UnlockTiming u8
 UnlockTrigger u8
 UpdateParts u8
 UseChimneySmoke u8
 UseCollision u8
 UseColorGroupSort u8
+UseCulling u8
 UseCurtain u8
 UseExteriorLight u8
 UseMyDesign u8
 USen u8
 UsePlayer u8
 UseRainGoods u8
+UserSelect u8
 USes u8
+UseSitOffset u8
 UseToolLeft u8
 USfr u8
 ValidDiveRate u8
@@ -1785,9 +1849,7 @@ VillageDevelopmentLevel u8
 VillagerOpenNum u32
 VisibleOff u8
 VisitorNpcLabel string32
-VmPauseType u8
 VmPauseType.hshCstringRef
-VmRhythmType u8
 VmRhythmType.hshCstringRef
 W0Parts.hshCstringRef
 W1Parts.hshCstringRef
@@ -1800,7 +1862,6 @@ WaitType u8
 WalkWatchOffsetX f32
 WalkWatchOffsetY f32
 WalkWatchOffsetZ f32
-WallCommonFabricID
 WallItemId u16
 WallPlaceType.hshCstringRef
 WallScale f32
@@ -1816,7 +1877,6 @@ WaterCheck u8
 WdayNorth u8
 WdaySouth u8
 WeatherChange u8
-WeatherPattern string32
 WeatherPattern u16
 WeatherPattern0 u16
 WeatherPattern1 u16
@@ -1836,20 +1896,3 @@ XUnitIndex s8
 ZK1Index s16
 ZK2Index s16
 ZUnitIndex s8
-MaxAmount s32
-MinAmount s32
-LotGrowUp u8
-FishingSeries u8
-EnbleRoleNum u8
-ForFes u8
-ForShareHouse u8
-LotGrowUp u8
-MainIslandItemLayer u8
-MainIslandItemSwitch u8
-NotWithTitle u8
-PlaceNpcNum s8
-MainIslandItemDirection u8
-MainIslandObjectKind u8
-EditBaseUnitX s16
-EditBaseUnitZ s16
-EventNumLimit u16

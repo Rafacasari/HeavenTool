@@ -110,7 +110,6 @@
     <Content Include="extra\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Folder Include="Forms\BCSV\Templates\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
