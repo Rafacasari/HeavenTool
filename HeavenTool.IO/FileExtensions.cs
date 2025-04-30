@@ -18,8 +18,7 @@ public static class FileExtensions
             DataType.Float32 => typeof(float),
             DataType.Float64 => typeof(double),
 
-            DataType.U8Array => typeof(byte[]),
-            DataType.S8Array => typeof(sbyte[]),
+            DataType.BitField => typeof(byte[]),
 
             //TODO: Give Murmur and CRC their own classes
             DataType.MMH3 => typeof(uint),

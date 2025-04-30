@@ -1,17 +1,16 @@
 ﻿using HeavenTool.IO;
 using HeavenTool.IO.FileFormats.ResourceSizeTable;
 using HeavenTool.ModManager.FileTypes;
-using NintendoTools.Compression.Yaz0;
 using NintendoTools.Compression.Zstd;
 using NintendoTools.FileFormats.Bcsv;
 using NintendoTools.FileFormats.Msbt;
 using NintendoTools.FileFormats.Sarc;
-using System;
+using System.Data;
 using System.IO.Compression;
 
 namespace HeavenTool.ModManager
 {
-    public class FileMerger(string ModFolder) {
+    public class FileMerger {
 
         #region Decompressors
         public static readonly ZstdCompressor ZstdCompressor = new()
@@ -21,8 +20,20 @@ namespace HeavenTool.ModManager
         public static readonly ZstdDecompressor ZstdDecompressor = new();
         #endregion
 
+        public string ModsFolder { get; set; }
+        public string OutputDirectory { get; set; }
+
+        public FileMerger(string modsFolder, string outputDirectory)
+        {
+            ModsFolder = modsFolder;
+            OutputDirectory = outputDirectory;
+        }
+
         public List<string> ModsUsedPaths = [];
 
+        public delegate void FileChangedArgs(string modName, string file);
+
+        public event FileChangedArgs FileChanged;
 
         /// <summary>
         /// Uncompress (if needed) and assign a stream to a ModFile.
@@ -34,7 +45,7 @@ namespace HeavenTool.ModManager
         /// <para>• A <see cref="ModFile"/> based on the file type.</para>
         /// <para>• <see cref="GenericFile"/> if file type is <b>not</b> supported.</para>
         /// </returns>
-        public static ModFile LoadModFile(byte[] bytes, string fileName)
+        public ModFile LoadModFile(byte[] bytes, string fileName)
         {
             ArgumentNullException.ThrowIfNull(bytes);
             ArgumentException.ThrowIfNullOrEmpty(fileName);
@@ -55,12 +66,22 @@ namespace HeavenTool.ModManager
             ModFile modFile;
             if (MsbtFileParser.CanParseStatic(stream))
                 modFile = new MSBT(stream, fileName);
-            else if (SarcFileParser.CanParseStatic(stream))
+            else if (!fileName.StartsWith("romfs\\Model\\") && SarcFileParser.CanParseStatic(stream))
                 modFile = new SARC(stream, fileName);
-            else if (BcsvFileParser.CanParseStatic(stream))
+            else if (fileName.EndsWith(".bcsv") && BcsvFileParser.CanParseStatic(stream))
                 modFile = new BCSV(stream, fileName);
             else
-                modFile = new GenericFile(stream, fileName);
+            {
+                ConsoleUtilities.WriteLine($"Moving unsupported file {fileName} to Output", ConsoleColor.Yellow);
+                var outputPath = Path.Combine(OutputDirectory, fileName);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                File.WriteAllBytes(outputPath, bytes);
+
+                return null;
+                // TODO: save it to output folder already to save memory
+                // modFile = new GenericFile(stream, fileName);
+            }
 
             if (modFile != null) 
                 modFile.Compression = compression;
@@ -69,7 +90,7 @@ namespace HeavenTool.ModManager
         }
 
 
-        public static byte[] GetVanillaFile(string fileName)
+        public byte[] GetVanillaFile(string fileName)
         {
             ArgumentException.ThrowIfNullOrEmpty(fileName);
 
@@ -93,7 +114,7 @@ namespace HeavenTool.ModManager
             return null;
         }
 
-        public static ModFile LoadVanillaContent(string fileName) {
+        public ModFile LoadVanillaContent(string fileName) {
             ArgumentException.ThrowIfNullOrEmpty(fileName);
 
             var fileBytes = GetVanillaFile(fileName);
@@ -106,7 +127,7 @@ namespace HeavenTool.ModManager
 
         public void SearchModsContentPaths()
         {
-            var modsFolder = Directory.CreateDirectory(ModFolder);
+            var modsFolder = Directory.CreateDirectory(ModsFolder);
 
             foreach (var item in modsFolder.GetFiles("*.zip", SearchOption.TopDirectoryOnly))
             {
@@ -125,8 +146,7 @@ namespace HeavenTool.ModManager
                 {
                     var path = PathUtilities.GetRelativePathFromTarget(romFile.FullName, "romfs");
 
-                    if (path == null || path.EndsWith(".srsizetable"))
-                        continue;
+                    if (path == null || path.EndsWith(".srsizetable")) continue;
                     
                     if (!ModsUsedPaths.Contains(path))
                         ModsUsedPaths.Add(path);
@@ -135,18 +155,20 @@ namespace HeavenTool.ModManager
             }
         }
 
-        public void PatchAndExport(string outputFolder)
+        public void PatchAndExport()
         {
-            Directory.CreateDirectory(outputFolder);
+            Directory.CreateDirectory(OutputDirectory);
 
             foreach (var file in ModsUsedPaths)
             {
                 ModFile baseFile = LoadVanillaContent(file);
 
-                foreach (var modZip in Directory.GetFiles(ModFolder, "*.zip", SearchOption.TopDirectoryOnly))
+                foreach (var modZip in Directory.GetFiles(ModsFolder, "*.zip", SearchOption.TopDirectoryOnly))
                 {
-                    using var zipFile = ZipFile.OpenRead(modZip);
+                    var zipName = Path.GetFileName(modZip);
 
+                    using var zipFile = ZipFile.OpenRead(modZip);
+                   
                     bool predicate(ZipArchiveEntry entry) {
                         var path = PathUtilities.GetRelativePathFromTarget(entry.FullName, "romfs");
                         if (path == null) return false;
@@ -156,6 +178,8 @@ namespace HeavenTool.ModManager
 
                     if (zipFile.Entries.Any(predicate))
                     {
+                        FileChanged?.Invoke(zipName, file);
+
                         var entry = zipFile.Entries.Single(predicate);
                         using var stream = entry.Open();
 
@@ -163,8 +187,9 @@ namespace HeavenTool.ModManager
                         stream.CopyTo(memoryStream);
 
                         var loadedFile = LoadModFile(memoryStream.ToArray(), file);
-                        if (baseFile != null)
+                        if (baseFile != null)                           
                             baseFile.DoDiff(loadedFile);
+                        
                         else
                             baseFile = loadedFile; // it's a new file, use as base file instead of a vanilla one
                     }
@@ -185,7 +210,7 @@ namespace HeavenTool.ModManager
                             break;
                     }
 
-                    var outputPath = Path.Combine(outputFolder, file);
+                    var outputPath = Path.Combine(OutputDirectory, file);
 
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                     File.WriteAllBytes(outputPath, fileBytes);
@@ -194,9 +219,9 @@ namespace HeavenTool.ModManager
             }
         }
 
-        public void CreateResourceSizeTable(string outputFolder)
+        public void CreateResourceSizeTable()
         {
-            var romfsPath = Path.Combine(outputFolder, "romfs");
+            var romfsPath = Path.Combine(OutputDirectory, "romfs");
             var romfsDirectory = Directory.CreateDirectory(romfsPath);
 
             var outputPath = Path.Combine(romfsPath, "System", "Resource");
@@ -242,7 +267,7 @@ namespace HeavenTool.ModManager
             }
             else
             {
-                ConsoleUtilities.WriteLine("Failed to create RSTB fille: Vanilla ResourceSizeTable was not found in vanilla.zip", ConsoleColor.Red);
+                ConsoleUtilities.WriteLine("Failed to create RSTB file: Vanilla ResourceSizeTable was not found in vanilla.zip", ConsoleColor.Red);
             }
         }
     }

@@ -205,7 +205,7 @@ public partial class BCSVForm : Form, ISearchable
                     return (containsKey ? HashManager.MMH3_Hashes[hashValue] : hashValue.ToString("x"), containsKey);
                 }
 
-            case DataType.U8Array:
+            case DataType.BitField:
                 {
                     if (val is not byte[] bitField) return ("Invalid", false);
 
@@ -414,10 +414,9 @@ public partial class BCSVForm : Form, ISearchable
             {
                 DataType.CRC32 => new CRC32DataGridCell(),
                 DataType.MMH3 => new MMH3DataGridCell(),
-                DataType.U8Array => new BitFieldDataGridCell() { 
+                DataType.BitField => new BitFieldDataGridCell() { 
                     FieldLength = fieldHeader.Size
                 },
-
                 _ => new DataGridViewTextBoxCell(),
             };
 

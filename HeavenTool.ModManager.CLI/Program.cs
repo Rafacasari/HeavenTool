@@ -21,7 +21,8 @@ namespace HeavenTool.ModManager.CLI
                 ConsoleUtilities.WriteLine("Mods folder have been created, please put your mods (as zip files) inside it and run this program again.", ConsoleColor.Green);
                 Console.ReadKey();
                 return;
-            } 
+            }
+
             else if (Directory.GetFiles(modsFolder).Length == 0)
             {
                 ConsoleUtilities.WriteLine("Your mods directory is empty. Please put your mods (.zip files) inside it and run this program again.", ConsoleColor.Cyan);
@@ -42,7 +43,8 @@ namespace HeavenTool.ModManager.CLI
                     ConsoleUtilities.WriteLine("Proceding without deleting output folder. This can cause issues!", ConsoleColor.Red);
             }
 
-            var modMerger = new FileMerger(modsFolder);
+            var modMerger = new FileMerger(modsFolder, outputPath);
+
 
             Console.WriteLine("Loading mods...");
             modMerger.SearchModsContentPaths();
@@ -54,16 +56,21 @@ namespace HeavenTool.ModManager.CLI
             Console.WriteLine("Saving to output folder");
             var outputDirectory = Directory.CreateDirectory(outputPath);
 
-            modMerger.PatchAndExport(outputPath);
-            modMerger.CreateResourceSizeTable(outputPath);
+            modMerger.FileChanged += (string modName, string modFile) =>
+            {
+                ConsoleUtilities.WriteLine($"Merging {modFile} from {modName}", ConsoleColor.Cyan);
+            };
+            modMerger.PatchAndExport();
+            ConsoleUtilities.WriteLine("Files have been patched!", ConsoleColor.Green);
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Merge complete!");
-            Console.WriteLine($"Saved at: {outputDirectory.FullName}");
+            ConsoleUtilities.WriteLine("Generating ResourceSizeTable...", ConsoleColor.Cyan);
+            modMerger.CreateResourceSizeTable();
+
+            ConsoleUtilities.WriteLine("\r\nProcess complete!", ConsoleColor.Green);
+            ConsoleUtilities.WriteLine($"Saved at: {outputDirectory.FullName}", ConsoleColor.Gray);
 
             TryToOpenPath(outputDirectory.FullName);
 
-            Console.ResetColor();
             Console.ReadLine();
         }
 

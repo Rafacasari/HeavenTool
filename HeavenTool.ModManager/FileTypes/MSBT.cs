@@ -16,7 +16,7 @@ public sealed class MSBT : ModFile
         }
     }
 
-    public Dictionary<string, MsbtMessage> AddedEntries { get; set; } = [];
+    //public Dictionary<string, MsbtMessage> AddedEntries { get; set; } = [];
     public Dictionary<string, MsbtMessage> ChangedEntries { get; set; } = [];
     public List<string> RemovedEntries { get; set; } = [];
 
@@ -43,14 +43,10 @@ public sealed class MSBT : ModFile
         // Check for changes or new entries
         foreach (var entry in otherFileEntries)
         {
-            if (currentFileEntries.TryGetValue(entry.Key, out MsbtMessage val) && entry.Value.Text != val.Text)
+            if (!currentFileEntries.ContainsKey(entry.Key) || 
+                (currentFileEntries.TryGetValue(entry.Key, out MsbtMessage val) && entry.Value.Text != val.Text))
             {
                 ChangedEntries[entry.Key] = entry.Value;
-            }
-
-            else if (!currentFileEntries.ContainsKey(entry.Key))
-            {
-                AddedEntries[entry.Key] = entry.Value;
             }
         }
 
@@ -65,27 +61,23 @@ public sealed class MSBT : ModFile
     /// </summary>
     public void BakeFile()
     {
-        if (ChangedEntries.Count > 0 ||  AddedEntries.Count > 0 || RemovedEntries.Count > 0)
-            ConsoleUtilities.WriteLine($"[MSBT] {Name} - {ChangedEntries.Count} changes | {AddedEntries.Count} additions | {RemovedEntries.Count} removed", ConsoleColor.Gray);
+        if (ChangedEntries.Count > 0 ||  RemovedEntries.Count > 0)
+            ConsoleUtilities.WriteLine($"[MSBT] {Name} - {ChangedEntries.Count} changes | {RemovedEntries.Count} removed", ConsoleColor.Gray);
 
         // If some other mod changes a entry that is being removed, then this entry should not be removed
         RemovedEntries.RemoveAll(ChangedEntries.ContainsKey);
-
-        // Added entries
-        foreach (var entry in AddedEntries)
-            MsbtFile.Messages.Add(entry.Value);
 
         // Changed entries
         foreach (var entry in ChangedEntries)
         {
             var entryIndex = MsbtFile.Messages.FindIndex(x => x.Label == entry.Key);
             if (entryIndex >= 0)
-            {
                 // If we found a entry that have this label, we just replace it with the changed entry.
                 MsbtFile.Messages[entryIndex] = entry.Value;
 
-                // We could also remove the old entry and add the changed one, but this would move the entry to the very bottom of the file.
-            }
+            else 
+                // If we don't found a entry with this label, add a new one 
+                MsbtFile.Messages.Add(entry.Value);
         }
 
         // Removed entries

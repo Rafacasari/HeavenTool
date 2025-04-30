@@ -16,6 +16,5 @@ public enum DataType
     MMH3,
 
     String,
-    U8Array,
-    S8Array,
+    BitField,
 }

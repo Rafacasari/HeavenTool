@@ -7,15 +7,12 @@ public class Field
     public int Offset { get; set; }
     public int Size { get; set; }
 
-    public bool TrustedType { get; set; } = false;
-
     public object GetFieldDefaultValue()
     {
         return DataType switch
         {
 
-            DataType.U8Array => new byte[Size],
-            DataType.S8Array => new sbyte[Size],
+            DataType.BitField => new byte[Size],
             DataType.U8 => (byte)0,
             DataType.S8 => (sbyte)0,
             DataType.Int16 => (short)0,

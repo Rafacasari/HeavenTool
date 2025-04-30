@@ -24,4 +24,12 @@
     <ProjectReference Include="..\HeavenTool.ModManager\HeavenTool.ModManager.csproj" />
   </ItemGroup>
 
+  <Target Name="BuildVanillaZip-build" AfterTargets="Build">
+    <ZipDirectory SourceDirectory="$(ProjectDir)Vanilla" DestinationFile="$(OutputPath)vanilla.zip" Overwrite="true" />
+  </Target>
+
+  <Target Name="CopyVanillaZipToPublish" AfterTargets="Publish">
+    <Copy SourceFiles="$(OutputPath)vanilla.zip" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

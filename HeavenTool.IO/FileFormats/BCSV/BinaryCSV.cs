@@ -114,7 +114,7 @@ public class BinaryCSV : IDisposable
         var fieldCount = reader.ReadUInt16();
 
         HasExtendedHeader = reader.ReadByte();
-        UnknownField = reader.ReadByte();
+        UnknownField = reader.ReadByte(); // maybe is japanese flag, for japanese enums
 
         if (HasExtendedHeader == 1)
         {
@@ -193,18 +193,16 @@ public class BinaryCSV : IDisposable
             // Assign "trusted types", by using translated hash
             if (translatedName != null)
             {
-                currentField.TrustedType = true;
                 if (translatedName.EndsWith(" u8") && currentField.Size > 1)
-                    type = DataType.U8Array;
+                    type = DataType.BitField;
                 else if (translatedName.EndsWith(" s8") && currentField.Size > 1)
-                    type = DataType.S8Array;
+                    type = DataType.S8;
+                
             }
 
             if (HashManager.KnownTypes.TryGetValue(currentField.HEX, out DataType value))
-            {
-                currentField.TrustedType = true;
                 type = value;
-            }
+            
 
             currentField.DataType = type;
         }
@@ -227,13 +225,13 @@ public class BinaryCSV : IDisposable
                 object value = 0;
                 switch (currentField.DataType)
                 {
-                    case DataType.U8Array:
+                    case DataType.BitField:
                         value = reader.ReadBytes(currentField.Size);
                         break;
 
-                    case DataType.S8Array:
-                        value = (sbyte[])(Array)reader.ReadBytes(currentField.Size);
-                        break;
+                    //case DataType.S8Array:
+                    //    value = (sbyte[])(Array)reader.ReadBytes(currentField.Size);
+                    //    break;
 
                     case DataType.S8:
                         value = reader.ReadSByte();
@@ -329,8 +327,7 @@ public class BinaryCSV : IDisposable
                 var entryValue = Entries[currentEntry][fieldId];
                 switch (field.DataType)
                 {
-                    case DataType.U8Array:
-                    case DataType.S8Array:
+                    case DataType.BitField:
                         writer.Write((byte[])entryValue);
                         break;
 
